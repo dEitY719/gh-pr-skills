@@ -221,11 +221,10 @@
 
     <div class="callout warn animate delay-2" style="margin-top:26px">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="2.5" width="13" height="15" rx="2"/><path d="M7 7h6M7 10.5h6M7 14h3.5"/></svg>
-      <div><strong>NOTE — 이 문서는 미실행 예시입니다.</strong>
-      gh-pr 의 8개 스킬은 모두 live GitHub repo 에 쓰기를 하고, 이 저장소에는 대상 PR 이 없으며
-      커밋 / push 가 금지된 작업이었으므로 문서화 목적의 실행을 하지 않았습니다.
-      아래 명령과 게이트는 <code>skills/merge-train/SKILL.md</code> 에서 인용한 것이고,
-      결과 절은 실행 시 생성되는 산출물을 기술합니다. <strong>실제 실행 로그가 아닙니다.</strong></div>
+      <div><strong>NOTE — 미실행 예시.</strong>
+      gh-pr 스킬 8개는 모두 live repo 에 쓰므로 문서화 목적으로 실행하지 않았습니다.
+      명령 &middot; 게이트 &middot; 결과는 <code>skills/merge-train/SKILL.md</code> 인용이며
+      <strong>실행 로그가 아닙니다.</strong></div>
     </div>
 
     <div class="flow animate delay-3" style="margin-top:28px" role="img" aria-label="내가 연 열린 PR 목록이 merge-train 을 거쳐 순차로 머지된다">
@@ -240,7 +239,7 @@
   <section class="wrap" data-reveal>
     <div class="sec-head"><span class="num">01</span><h2>실행할 명령</h2></div>
 <pre><code>/gh-pr:merge-train [owner/repo] [remote]        <span class="muted"># 범용 형식</span>
-/gh-pr:merge-train dEitY719/gh-pr-skills        <span class="muted"># 이 repo 대상, host 는 origin 에서</span></code></pre>
+/gh-pr:merge-train dEitY719/gh-pr-skills        <span class="muted"># 이 repo 대상, host 는 origin 에서 (PR 이 하나뿐이면 /gh-pr:merge)</span></code></pre>
     <div class="callout info" style="margin-top:18px">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.6"/><path d="M10 9.2v4.4"/><path d="M10 6.4h.01"/></svg><div>PR 이 하나뿐이면 이 스킬이 아니라 <code>/gh-pr:merge</code> 를 씁니다.</div>
     </div>

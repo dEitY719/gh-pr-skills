@@ -241,10 +241,9 @@
     <div class="wrap">
       <div class="callout warn animate delay-3">
         <h4><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h7l3.5 3.5V17H5z"/><path d="M12 3v4h3.5"/><path d="M7.5 11h5M7.5 14h5"/></svg>NOTE — 이 문서는 미실행 예시입니다</h4>
-        <p>gh-pr 의 8개 스킬은 모두 live GitHub repo 에 쓰기를 하고, 이 저장소에는 대상 PR 이 없으며
-          커밋/push 가 금지된 작업이었으므로 문서화 목적의 실행을 하지 않았습니다.</p>
-        <p>아래 명령과 게이트는 <code>skills/approve/SKILL.md</code> 에서 인용한 것이고,
-          결과 절은 실행 시 생성되는 산출물을 기술합니다. <strong>실제 실행 로그가 아닙니다.</strong></p>
+        <p>gh-pr 스킬 8개는 모두 live repo 에 쓰므로 문서화 목적으로 실행하지 않았습니다.
+          명령&middot;게이트&middot;결과는 <code>skills/approve/SKILL.md</code> 인용이며
+          <strong>실행 로그가 아닙니다.</strong></p>
       </div>
     </div>
   </section>
@@ -265,9 +264,8 @@
       <div class="sec-head"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3"/><path d="M12.5 15H17"/></svg><span class="eyebrow">step 1</span></div>
       <h2>실행할 명령</h2>
       <p class="sec-sub">범용 형식과 이 저장소를 대상으로 한 구체 형식.</p>
-      <pre><code>/gh-pr:approve [&lt;PR#&gt;] [&lt;remote&gt;] [--self-record | --admin-merge [--squash|--rebase|--merge]]</code></pre>
-      <p class="text-secondary" style="margin:18px 0 10px;">이 repo(<code>dEitY719/gh-pr-skills</code>, remote <code>origin</code>) 대상 형식:</p>
-      <pre><code>/gh-pr:approve 12
+      <pre><code>/gh-pr:approve [&lt;PR#&gt;] [&lt;remote&gt;] [--self-record | --admin-merge [--squash|--rebase|--merge]]
+/gh-pr:approve 12                 # 이 repo(dEitY719/gh-pr-skills, remote origin) 대상
 /gh-pr:approve 12 --self-record   # 자기가 작성한 PR 은 승인 대신 이 경로</code></pre>
 
     </div>
@@ -314,11 +312,14 @@ gh api "repos/$TARGET_REPO/pulls/&lt;N&gt;/reviews" --paginate</code></pre>
       <h2>결과 (실행 시)</h2>
       <p class="sec-sub">실행하면 어디에 무엇이 남는가.</p>
       <ul class="clean" style="margin-bottom:22px;">
-        <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span>PR 에 <strong>리뷰 verdict 1개</strong> — blocker 0이면 <code>--approve</code>,
-          1개 이상이면 <code>--request-changes</code>. 승인 본문에는 file:line 또는 short SHA 근거를 댄 구체적 칭찬이 최소 1개 들어간다.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span>PR 에 <strong>리뷰 verdict 1개</strong> — blocker 0 + follow-up 0 이면 <strong>4a</strong> 클린 <code>--approve</code>,
+          blocker 0 + follow-up 1개 이상이면 <strong>4b</strong> 이슈 등록 후 <code>--approve</code>,
+          blocker 1개 이상이면 <strong>4c</strong> <code>--request-changes</code>.
+          승인 본문에는 file:line 또는 short SHA 근거를 댄 구체적 칭찬이 최소 1개 들어간다.</span></li>
         <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><strong>FOLLOW-UP 마다 GitHub 이슈 1개</strong> + 그것들을 링크하는 PR 코멘트 1개(4b 경로).</span></li>
         <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><strong>ai-metrics PR 코멘트 1개</strong>(<code>GH_DISABLE_AI_METRICS=1</code> 이면 생략).</span></li>
-        <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><strong>projectV2 보드 카드 <code>Approved</code> 승격</strong> — 4a / 4b / <code>--self-record</code> 에서만.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><strong>projectV2 보드 카드 <code>Approved</code> 승격</strong> — 4a / 4b / <code>--self-record</code> 에서만.
+          4c &middot; analysis-only &middot; <code>--admin-merge</code> 에서는 승격하지 않는다.</span></li>
       </ul>
       <div class="callout">
         <h4><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="3.2"/></svg>검증 방법</h4>

@@ -135,7 +135,7 @@
 
       <div class="warn">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <span><strong>NOTE: 이 문서는 미실행 예시입니다.</strong> gh-pr 의 8개 스킬은 모두 live GitHub repo 에 쓰기를 하고, 이 저장소에는 대상 PR 이 없으며 커밋/push 가 금지된 작업이었으므로 문서화 목적의 실행을 하지 않았습니다. 아래 명령과 게이트는 <code>skills/review/SKILL.md</code> 에서 인용한 것이고, 결과 절은 실행 시 생성되는 산출물을 기술합니다. 실제 실행 로그가 아닙니다.</span>
+        <span><strong>NOTE: 미실행 예시</strong> &mdash; gh-pr 스킬 8개는 모두 live repo 에 쓰므로 문서화 목적으로 실행하지 않았습니다. 명령&middot;게이트&middot;결과는 <code>skills/review/SKILL.md</code> 인용이며 실행 로그가 아닙니다.</span>
       </div>
 
       <div class="flow">
@@ -149,10 +149,8 @@
 
     <section data-reveal>
       <h2><span class="num">1</span>실행할 명령</h2>
-      <p class="label">범용 형식</p>
-      <pre><code>/gh-pr:review --ai &lt;codex|agy|claude|opencode|hermes&gt; [--review &lt;preset&gt;] [&lt;PR#&gt;] [&lt;remote&gt;]</code></pre>
-      <p class="label">이 repo (dEitY719/gh-pr-skills) 대상</p>
-      <pre><code>/gh-pr:review --ai codex --review thorough 12</code></pre>
+      <pre><code>/gh-pr:review --ai &lt;codex|agy|claude|opencode|hermes&gt; [--review &lt;preset&gt;] [&lt;PR#&gt;] [&lt;remote&gt;]
+/gh-pr:review --ai codex --review thorough 12   <span style="color:var(--text-secondary)"># 이 repo(dEitY719/gh-pr-skills) 대상</span></code></pre>
       <p><code>--ai</code> 없이 호출하면 exit 2 다. <code>--review</code> 는 <code>default</code> / <code>quick</code> / <code>thorough</code> / <code>security</code> / <code>performance</code> 및 그 KR 별칭(<code>보통</code> / <code>간단</code> / <code>꼼꼼</code> / <code>보안</code> / <code>성능</code>)만 받는다.</p>
     </section>
 

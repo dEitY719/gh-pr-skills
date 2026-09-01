@@ -2,11 +2,7 @@
 
 > **한 줄 요약** — PR diff 를 받아 외부 AI CLI 의 2차 의견을 담은 집계 코멘트 1개를 생성합니다.
 
-> NOTE: 이 문서는 **미실행 예시**입니다. gh-pr 의 8개 스킬은 모두 live GitHub
-> repo 에 쓰기를 하고, 이 저장소에는 대상 PR 이 없으며 커밋/push 가 금지된
-> 작업이었으므로 문서화 목적의 실행을 하지 않았습니다. 아래 명령과 게이트는
-> `skills/review/SKILL.md` 에서 인용한 것이고, 결과 절은 실행 시 생성되는
-> 산출물을 기술합니다. 실제 실행 로그가 아닙니다.
+> NOTE: **미실행 예시** — gh-pr 스킬 8개는 모두 live repo 에 쓰므로 문서화 목적으로 실행하지 않았습니다. 명령·게이트·결과는 `skills/review/SKILL.md` 인용이며 실행 로그가 아닙니다.
 
 ```
 PR diff  ──▶  /gh-pr:review  ──▶  집계 코멘트 1개
@@ -14,20 +10,13 @@ PR diff  ──▶  /gh-pr:review  ──▶  집계 코멘트 1개
 
 ## 1. 실행할 명령
 
-범용 형식:
-
 ```
 /gh-pr:review --ai <codex|agy|claude|opencode|hermes> [--review <preset>] [<PR#>] [<remote>]
+/gh-pr:review --ai codex --review thorough 12   # 이 repo(dEitY719/gh-pr-skills) 대상
 ```
 
-이 repo(`dEitY719/gh-pr-skills`) 를 대상으로 했을 때:
-
-```
-/gh-pr:review --ai codex --review thorough 12
-```
-
-`--ai` 없이 호출하면 exit 2. `--review` 는 `default` / `quick` / `thorough` /
-`security` / `performance` 와 KR 별칭(`보통` `간단` `꼼꼼` `보안` `성능`)만 받는다.
+`--ai` 없이 호출하면 exit 2. `--review` 는 `default` / `quick` / `thorough` / `security` /
+`performance` 와 KR 별칭(`보통` `간단` `꼼꼼` `보안` `성능`)만 받는다.
 
 ## 2. 입력
 
