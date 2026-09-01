@@ -1,0 +1,35 @@
+{
+  "name": "gh-pr",
+  "version": "0.1.0",
+  "description": "GitHub commit-to-merge lifecycle: commit, open a PR, second-opinion AI review, per-comment replies, approve, merge, audited emergency override, serial merge train.",
+  "author": {
+    "name": "dEitY719",
+    "url": "https://github.com/dEitY719"
+  },
+  "homepage": "https://github.com/dEitY719/gh-pr-skills",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "plugin",
+    "marketplace",
+    "github",
+    "pull-request",
+    "code-review",
+    "merge",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "skillInstructions": "Kimi Code tool mapping for the gh-pr skills.\n\nThe authoritative mapping is not in this repo. It lives in the sibling repo `dEitY719/harness-skills` at `references/kimi-tools.md` (https://github.com/dEitY719/harness-skills/blob/main/references/kimi-tools.md) and is the single source of truth for every repo in the `dEitY719/*-skills` family; do not copy it here. Summary:\n\n- Read / Write / Edit / Bash / Grep / Glob keep their exposed Kimi names. Search contents with `Grep`; match paths with `Glob`. Every skill here drives the `gh` CLI and `git` -- run them with `Bash` and pass the output through verbatim.\n- \"Dispatch a subagent\" -> `Agent` with `subagent_type: \"coder\"` (implementation) or `\"explore\"` (read-only). Never pass `general-purpose`. `gh-pr:approve` and `gh-pr:review` use one for a large diff; without it, read the diff inline -- a slower route to the same verdict, not a reduced one.\n- Claude Code's `Skill` tool has no Kimi equivalent. `gh-pr:merge-train` chains the other skills through it; without a skill-invocation tool, run the per-PR skills directly -- `gh-resolve:outdated` / `:conflict` / `:ci-fail`, then `gh-pr:merge` -- one PR at a time.\n- All eight need an authenticated `gh` CLI and carry `GH_HOST` plus `--repo` on every call, because `--repo` alone names no server.\n\nSafety contracts. These are part of the skills, not advice:\n\n- `gh-pr:commit` commits only. It never pushes and never opens a PR -- that is `gh-pr:create`.\n- `gh-pr:create` bundles every commit since the branch diverged from base, not just HEAD, and creates the PR only: no review, no merge.\n- `gh-pr:review` never submits `--approve` or `--request-changes` and never replies to individual comments. It posts one aggregate comment.\n- `gh-pr:reply` replies per comment, bots included, rather than summarising. It applies the fixes that hold up and says so on the ones it rejects.\n- `gh-pr:approve` can never approve a PR authored by the same user. Blockers become `request changes`; the rest become follow-up issues.\n- `gh-pr:merge` refuses an un-approved PR, failing CI, a draft, or a conflicted branch, and never swaps merge strategy when the chosen one fails.\n- `gh-pr:merge-emergency` is the only bypass of that approval gate. It requires a written reason and files a follow-up incident issue; CI still gates.\n- `gh-pr:merge-train` handles one PR at a time and never merges a PR the per-PR gates would have refused.\n",
+  "interface": {
+    "displayName": "GH PR",
+    "shortDescription": "GitHub commit-to-merge lifecycle",
+    "longDescription": "gh-pr bundles the eight commit-to-merge skills: commit, create, review, reply, approve, merge, merge-emergency, and merge-train.",
+    "developerName": "dEitY719",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/dEitY719/gh-pr-skills"
+  }
+}

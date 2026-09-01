@@ -1,0 +1,20 @@
+{
+  "name": "gh-pr-skills",
+  "description": "GitHub commit-to-merge skills — commit, open a PR, review, reply, approve, merge, emergency override, merge train",
+  "owner": {
+    "name": "dEitY719",
+    "url": "https://github.com/dEitY719"
+  },
+  "plugins": [
+    {
+      "name": "gh-pr",
+      "description": "Drive one change from a commit to a merged PR: commit it, open the PR, get a second-opinion AI review, reply to every review comment, approve, and merge — with an audited emergency override and a serial merge train",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "dEitY719",
+        "url": "https://github.com/dEitY719"
+      }
+    }
+  ]
+}

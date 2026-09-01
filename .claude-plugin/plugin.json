@@ -1,0 +1,22 @@
+{
+  "name": "gh-pr",
+  "description": "Drive one change from a commit to a merged PR: commit it, open the PR, get a second-opinion AI review, reply to every review comment, approve, and merge — with an audited emergency override and a serial merge train",
+  "version": "0.1.0",
+  "author": {
+    "name": "dEitY719",
+    "url": "https://github.com/dEitY719"
+  },
+  "homepage": "https://github.com/dEitY719/gh-pr-skills",
+  "repository": "https://github.com/dEitY719/gh-pr-skills",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "plugin",
+    "marketplace",
+    "github",
+    "pull-request",
+    "code-review",
+    "merge",
+    "workflow"
+  ]
+}

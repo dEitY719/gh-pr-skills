@@ -1,0 +1,22 @@
+{
+  "name": "gh-pr-skills",
+  "version": "0.1.0",
+  "description": "Skills for the GitHub commit-to-merge lifecycle — commit, open a PR, review, reply, approve, merge, emergency override, merge train",
+  "type": "module",
+  "main": ".opencode/plugins/gh-pr.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dEitY719/gh-pr-skills.git"
+  },
+  "keywords": [
+    "skills",
+    "plugin",
+    "marketplace",
+    "github",
+    "pull-request",
+    "code-review",
+    "merge",
+    "workflow"
+  ]
+}

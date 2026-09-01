@@ -1,0 +1,44 @@
+{
+  "name": "gh-pr",
+  "version": "0.1.0",
+  "description": "GitHub commit-to-merge lifecycle: commit, open a PR, second-opinion AI review, per-comment replies, approve, merge, audited emergency override, serial merge train.",
+  "author": {
+    "name": "dEitY719",
+    "url": "https://github.com/dEitY719"
+  },
+  "homepage": "https://github.com/dEitY719/gh-pr-skills",
+  "repository": "https://github.com/dEitY719/gh-pr-skills",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "plugin",
+    "marketplace",
+    "github",
+    "pull-request",
+    "code-review",
+    "merge",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "hooks": {},
+  "interface": {
+    "displayName": "GH PR",
+    "shortDescription": "GitHub commit-to-merge lifecycle",
+    "longDescription": "gh-pr owns the branch half of the GitHub workflow -- everything from the moment there is something to commit until the PR is merged and its branch is gone. commit writes one commit in the repo's own style and links the issue; it never pushes and never opens a PR. create opens the PR from every commit since the branch diverged from base, not just HEAD. review delegates a second opinion to one external AI CLI (codex, agy, claude, opencode, hermes) and posts a single aggregate comment -- it never submits a verdict. reply answers every review comment individually, bots included, and applies the fixes that hold up. approve is the only skill that submits a verdict, and it can never approve a PR you authored. merge rebases by default and refuses un-approved PRs, red CI, drafts, and conflicts; merge-emergency is the admin override for that refusal and forces an audit trail -- a written reason and a follow-up incident issue -- while CI still gates. merge-train walks your own open PRs one at a time, routing each to the gh-resolve skills before handing it to merge. All eight need an authenticated gh CLI and carry GH_HOST plus --repo on every call, because --repo alone names no server.",
+    "developerName": "dEitY719",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Commit this work and link issue #42.",
+      "Open a PR for this branch.",
+      "Reply to every review comment on PR #99."
+    ],
+    "websiteURL": "https://github.com/dEitY719/gh-pr-skills",
+    "brandColor": "#2563EB",
+    "screenshots": []
+  }
+}

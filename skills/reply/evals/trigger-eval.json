@@ -1,0 +1,84 @@
+[
+  {
+    "query": "PR #1416 에 코덱스가 남긴 지적 7개가 그대로 열려 있어. 하나하나 답 달고 맞는 건 고쳐서 올려줘",
+    "should_trigger": true
+  },
+  {
+    "query": "gemini 봇이 달아준 인라인 코멘트들 아직 아무 답이 없는데 정리해줘",
+    "should_trigger": true
+  },
+  {
+    "query": "there are a dozen unanswered inline comments on my PR — go through each one, fix what's valid, and leave a response on every thread",
+    "should_trigger": true
+  },
+  {
+    "query": "리뷰어가 지적한 것 중 반은 동의가 안 되는데, 동의 안 되는 이유까지 각 스레드에 남겨줘",
+    "should_trigger": true
+  },
+  {
+    "query": "don't post one big summary — i need an answer on each individual thread of PR 1402",
+    "should_trigger": true
+  },
+  {
+    "query": "/gh-pr:reply 1417 upstream",
+    "should_trigger": true,
+    "note": "slash-literal: update if the skill is renamed (#1410)"
+  },
+  {
+    "query": "one of the bots only left a rate-limit notice, the rest are real findings — handle the whole batch on PR 51 and answer every one of them",
+    "should_trigger": true
+  },
+  {
+    "query": "리뷰에서 나온 지적들 다 처리하고 수정 커밋까지 푸시해줘",
+    "should_trigger": true
+  },
+  {
+    "query": "PR 99 on the company remote has reviewer feedback waiting — work through it and answer each reviewer right where they commented",
+    "should_trigger": true
+  },
+  {
+    "query": "/gh-pr:reply 1416 먼저 돌려줘",
+    "should_trigger": true,
+    "note": "slash-literal: update if the skill is renamed (#1410)"
+  },
+  {
+    "query": "PR 1416 코덱스한테 리뷰 한번 시켜서 의견 받아줘",
+    "should_trigger": false
+  },
+  {
+    "query": "PR 1416 에 리뷰어 전부 병렬로 돌려줘",
+    "should_trigger": false
+  },
+  {
+    "query": "PR 99 looks clean to me — approve it",
+    "should_trigger": false
+  },
+  {
+    "query": "approval 받았으니까 PR 1402 리베이스로 머지해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "the checks on PR 1410 are red — read the failing logs and fix the cause",
+    "should_trigger": false
+  },
+  {
+    "query": "PR 에 컨플릭트 떴는데 리베이스로 풀어줘",
+    "should_trigger": false
+  },
+  {
+    "query": "open a PR from this branch with everything i've committed since main",
+    "should_trigger": false
+  },
+  {
+    "query": "지금까지 작업 이슈 번호 연결해서 커밋만 해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "이슈 1417 에 달린 논의 내용 읽고 요약해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "PR 1416 에 전체 요약 코멘트 하나만 달아줘",
+    "should_trigger": false
+  }
+]

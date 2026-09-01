@@ -1,0 +1,83 @@
+[
+  {
+    "query": "지금 작업한 거 커밋 하나로 남겨줘",
+    "should_trigger": true
+  },
+  {
+    "query": "방금 고친 파일들 저장소에 기록으로 남겨줘. 푸시는 하지 말고 이슈 1417 번만 걸어줘.",
+    "should_trigger": true
+  },
+  {
+    "query": "wrap up what's sitting in the working tree as a single commit in this repo's style",
+    "should_trigger": true
+  },
+  {
+    "query": "아까 내가 직접 zsh alias 하나 추가해뒀는데, 네가 만든 변경은 아니지만 그것도 이 레포 메시지 스타일 맞춰서 정리해줘.",
+    "should_trigger": true
+  },
+  {
+    "query": "record this with a closing footer for 1405 so the issue auto-closes when it merges",
+    "should_trigger": true
+  },
+  {
+    "query": "PR 은 내가 나중에 따로 올릴 거니까 지금은 커밋까지만 해줘",
+    "should_trigger": true
+  },
+  {
+    "query": "변경이 두 군데로 나뉘어 있는데 관련 파일만 골라서 하나로 묶어줘. .env 는 절대 스테이징하지 말고.",
+    "should_trigger": true
+  },
+  {
+    "query": "the pre-commit hook rejected me last time — do it properly this time, fix the cause instead of skipping hooks",
+    "should_trigger": true
+  },
+  {
+    "query": "/gh-pr:commit 1417 로 처리해줘",
+    "should_trigger": true,
+    "note": "slash-literal: update if the skill is renamed (#1410)"
+  },
+  {
+    "query": "changes are done, save them with a proper conventional-commit subject and link whatever issue we've been discussing",
+    "should_trigger": true
+  },
+  {
+    "query": "커밋 다 했으니까 이제 PR 올려줘",
+    "should_trigger": false
+  },
+  {
+    "query": "just push the commits i already made up to the remote branch",
+    "should_trigger": false
+  },
+  {
+    "query": "squash my last three commits into one and force push the branch",
+    "should_trigger": false
+  },
+  {
+    "query": "이 대화 내용을 이슈로 등록해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "implement issue 1417 and take it all the way to a reviewed PR",
+    "should_trigger": false
+  },
+  {
+    "query": "이 레포 커밋 메시지 컨벤션 문서 어디 있어?",
+    "should_trigger": false
+  },
+  {
+    "query": "GIT_HOOKS_DEBUG 켜서 pre-commit hook 이 왜 두 번 도는지 좀 봐줘",
+    "should_trigger": false
+  },
+  {
+    "query": "리베이스하다가 충돌 났어. 이거 풀어줘.",
+    "should_trigger": false
+  },
+  {
+    "query": "revert bd91d5dc, it broke the loader on zsh",
+    "should_trigger": false
+  },
+  {
+    "query": "오늘 만든 커밋들 모아서 작업 일지 형식으로 정리해줘",
+    "should_trigger": false
+  }
+]

@@ -1,0 +1,83 @@
+[
+  {
+    "query": "이 브랜치로 pull request 하나 열어줘",
+    "should_trigger": true
+  },
+  {
+    "query": "there are five commits sitting on this branch — get them in front of a reviewer",
+    "should_trigger": true
+  },
+  {
+    "query": "open a pull request for wt/issue-1417/1 and make sure the description covers every commit in the range, not just the last one",
+    "should_trigger": true
+  },
+  {
+    "query": "작업은 끝났고 커밋도 전부 해뒀어. 아직 원격에 브랜치를 안 올렸는데, 푸시까지 같이 해서 리뷰 받을 수 있는 상태로 만들어줘. base 는 main 이야.",
+    "should_trigger": true
+  },
+  {
+    "query": "this branch sits on top of PR 1416 — target that parent branch instead of main",
+    "should_trigger": true
+  },
+  {
+    "query": "base 를 main 말고 develop 으로 잡아서 올려줘",
+    "should_trigger": true
+  },
+  {
+    "query": "커밋은 이미 다 되어 있어. 그것들 묶어서 리뷰 요청 단계까지 진행해줘.",
+    "should_trigger": true
+  },
+  {
+    "query": "i need a link to paste into the issue — bundle up everything since i branched off base",
+    "should_trigger": true
+  },
+  {
+    "query": "/gh-pr:create 1417 --base main",
+    "should_trigger": true,
+    "note": "slash-literal: update if the skill is renamed (#1410)"
+  },
+  {
+    "query": "이 브랜치 작업 리뷰 받고 싶어. 라벨이랑 보드 상태까지 같이 맞춰지면 좋겠어.",
+    "should_trigger": true
+  },
+  {
+    "query": "PR #1416 머지해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "PR 1416 코덱스한테 리뷰 한번 시켜줘",
+    "should_trigger": false
+  },
+  {
+    "query": "go through the review comments on 1416 one by one, reply to each and apply the valid fixes",
+    "should_trigger": false
+  },
+  {
+    "query": "아직 커밋을 안 했어. 지금 변경사항부터 커밋해줘.",
+    "should_trigger": false
+  },
+  {
+    "query": "my PR says it's out of date with the base branch, sync it up",
+    "should_trigger": false
+  },
+  {
+    "query": "PR CI 가 빨간불인데 로그 보고 고쳐줘",
+    "should_trigger": false
+  },
+  {
+    "query": "list the open PRs on this repo with their review status",
+    "should_trigger": false
+  },
+  {
+    "query": "look at PR 1400 and approve it if there's nothing blocking",
+    "should_trigger": false
+  },
+  {
+    "query": "예전 PR 들에 ai-metrics footer 소급해서 붙여줘",
+    "should_trigger": false
+  },
+  {
+    "query": "push 가 막혀서 PR 을 못 올려. origin PR 커밋들을 gist 패치로 upstream 에 넘겨줘.",
+    "should_trigger": false
+  }
+]

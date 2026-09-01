@@ -1,0 +1,44 @@
+name: validate
+
+# This repo owns no CI logic of its own. It calls the reusable workflow owned by
+# `dEitY719/harness-skills` (dotfiles #1410 D-10), so a new check lands here the
+# moment it lands there — no copy to keep in sync.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    uses: dEitY719/harness-skills/.github/workflows/skill-check.yml@main
+    with:
+      plugin-name: gh-pr
+      # MIGRATION DEBT (dotfiles #1410 Phase 3 / #1677). Four of the eight
+      # SKILL.md files arrived from dotfiles already over the 100-line
+      # progressive-disclosure limit: merge 197, merge-train 146, reply 143,
+      # review 110 (commit, create, approve, and merge-emergency are at 100).
+      # Phase 3 is a placement-and-naming migration — #1410's Non-Goals forbid
+      # changing skill behaviour on the way across — so the content was copied
+      # verbatim and the limit raised here instead of the files being cut down.
+      # This number must come back down to 100 in a follow-up that refactors
+      # each SKILL.md into its own references/. Do not raise it further.
+      max-skill-lines: 197
+      # Eight reference files carry the chart / person / robot glyphs of the
+      # dotfiles ai-metrics footer. That footer is the single SSOT-approved
+      # emoji exception upstream (#317 F-2 / PR #320 / #367), and a file that
+      # specifies the output has to show the real glyphs. Nothing else in this
+      # repo may carry one — see CLAUDE.md -> "Emojis".
+      allow-emoji-paths: |
+        skills/approve/references/ai-metrics.md
+        skills/commit/references/ai-metrics-comment.md
+        skills/create/references/ai-metrics-footer.md
+        skills/create/references/constraints.md
+        skills/create/references/help.md
+        skills/merge/references/ai-metrics-comment.sh.md
+        skills/reply/references/ai-metrics-comment.sh.md
+        skills/review/references/post-comment.md
