@@ -1,4 +1,5 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "gh-pr-skills",
   "description": "GitHub commit-to-merge skills — commit, open a PR, review, reply, approve, merge, emergency override, merge train",
   "owner": {
@@ -14,7 +15,8 @@
       "author": {
         "name": "dEitY719",
         "url": "https://github.com/dEitY719"
-      }
+      },
+      "homepage": "https://github.com/dEitY719/gh-pr-skills"
     }
   ]
 }
