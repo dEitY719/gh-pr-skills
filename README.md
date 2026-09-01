@@ -39,6 +39,20 @@ refuses, the second overrides — and pays for the override in writing.
 Unlike `gh-issue-skills`, there is **no read-only skill here**. All eight write
 to a live repo.
 
+### Visual guides and worked examples (GitHub Pages)
+
+- `commit` — [visual guide](https://deity719.github.io/gh-pr-skills/skill-guides/commit.html) · [usage example](https://deity719.github.io/gh-pr-skills/skill-output/commit-usage.html) (working tree changes to one commit)
+- `create` — [visual guide](https://deity719.github.io/gh-pr-skills/skill-guides/create.html) · [usage example](https://deity719.github.io/gh-pr-skills/skill-output/create-usage.html) (branch commits to a Pull Request)
+- `review` — [visual guide](https://deity719.github.io/gh-pr-skills/skill-guides/review.html) · [usage example](https://deity719.github.io/gh-pr-skills/skill-output/review-usage.html) (PR diff to one aggregate comment)
+- `reply` — [visual guide](https://deity719.github.io/gh-pr-skills/skill-guides/reply.html) · [usage example](https://deity719.github.io/gh-pr-skills/skill-output/reply-usage.html) (review comments to per-comment replies and fixes)
+- `approve` — [visual guide](https://deity719.github.io/gh-pr-skills/skill-guides/approve.html) · [usage example](https://deity719.github.io/gh-pr-skills/skill-output/approve-usage.html) (PR diff to a review verdict and follow-up issues)
+- `merge` — [visual guide](https://deity719.github.io/gh-pr-skills/skill-guides/merge.html) · [usage example](https://deity719.github.io/gh-pr-skills/skill-output/merge-usage.html) (approved PR to a merged PR)
+- `merge-emergency` — [visual guide](https://deity719.github.io/gh-pr-skills/skill-guides/merge-emergency.html) · [usage example](https://deity719.github.io/gh-pr-skills/skill-output/merge-emergency-usage.html) (unapproved PR to a merged PR plus an incident issue)
+- `merge-train` — [visual guide](https://deity719.github.io/gh-pr-skills/skill-guides/merge-train.html) · [usage example](https://deity719.github.io/gh-pr-skills/skill-output/merge-train-usage.html) (open PR list to serially merged PRs)
+
+Each page is generated from a Markdown source under
+[`docs/skill-guides/`](docs/skill-guides) and [`docs/skill-output/`](docs/skill-output).
+
 ## Requirements
 
 | Skill | Needs |

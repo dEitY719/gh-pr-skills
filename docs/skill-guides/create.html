@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ko" class="theme-dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gh-pr:create — 스킬 가이드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { interpolate-size: allow-keywords; }
+
+    html.theme-dark {
+      --bg: #0A0A0A; --surface: #141414; --surface-hover: #1C1C1C;
+      --border: rgba(255,255,255,0.08);
+      --text: #EDEDED; --text-secondary: #888;
+      --accent: #3b82f6; --accent-secondary: #8b5cf6;
+      --positive: #10b981; --negative: #f43f5e; --warning: #f59e0b;
+      --code-bg: rgba(255,255,255,0.05);
+    }
+    html.theme-light {
+      --bg: #FAFAF9; --surface: #FFFFFF; --surface-hover: #F5F5F4;
+      --border: rgba(0,0,0,0.09);
+      --text: #0f172a; --text-secondary: #64748b;
+      --accent: #2563eb; --accent-secondary: #7c3aed;
+      --positive: #059669; --negative: #e11d48; --warning: #d97706;
+      --code-bg: rgba(0,0,0,0.045);
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.72; -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.01em;
+      transition: background 0.3s, color 0.3s;
+      scrollbar-gutter: stable;
+    }
+    h1,h2,h3,h4 { color: var(--text); letter-spacing: -0.03em; line-height: 1.2; text-wrap: balance; }
+    h1 { font-weight: 800; }
+    h2 { font-weight: 700; }
+    h3 { font-weight: 600; }
+    p,li,td,th,span,label { color: var(--text); font-weight: 400; }
+    .text-secondary { color: var(--text-secondary); }
+    code, .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; }
+    :not(pre) > code { background: var(--code-bg); padding: 0.12em 0.4em; border-radius: 4px; letter-spacing: 0; }
+    pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; overflow-x: auto; line-height: 1.65; }
+    pre code { background: none; padding: 0; }
+    a { color: var(--accent); }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px;
+      transition: box-shadow 0.2s ease;
+    }
+    .card:hover { box-shadow: 0 0 0 1px var(--border), 0 8px 20px rgba(0,0,0,0.10); }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { animation: fadeInUp 0.6s ease-out both; }
+    .animate.delay-1 { animation-delay: 0.08s; }
+    .animate.delay-2 { animation-delay: 0.16s; }
+    .animate.delay-3 { animation-delay: 0.24s; }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    @media print {
+      body { background: white !important; color: black !important; }
+      .viz-menu, .toc { display: none !important; }
+      .reveal { opacity: 1 !important; transform: none !important; }
+      .card, .step { break-inside: avoid; border: 1px solid #ddd; box-shadow: none; }
+      .wrap { max-width: none; padding: 0; }
+      * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+    @page { margin: 1in; }
+
+    .viz-menu { position: fixed; top: 16px; right: 16px; z-index: 9999; }
+    .viz-menu-toggle {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(12px); transition: all 0.2s;
+    }
+    .viz-menu-toggle:hover { background: var(--surface-hover); }
+    .viz-menu-dropdown {
+      position: absolute; top: 52px; right: 0; min-width: 200px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 8px;
+      opacity: 0; visibility: hidden; transform: translateY(-8px);
+      transition: all 0.2s; backdrop-filter: blur(16px);
+    }
+    .viz-menu-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
+    .viz-menu-dropdown button {
+      width: 100%; padding: 10px 14px; border: none; border-radius: 8px;
+      background: transparent; color: var(--text); font-size: 14px;
+      font-family: inherit; cursor: pointer; text-align: left;
+      display: flex; align-items: center; gap: 10px; transition: background 0.15s;
+    }
+    .viz-menu-dropdown button:hover { background: var(--surface-hover); }
+    .viz-menu-dropdown svg { flex: 0 0 auto; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px 96px; }
+
+    header.hero { padding: 72px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 44px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 18px; }
+    .eyebrow svg { color: var(--accent); }
+    h1 { font-size: clamp(38px, 6vw, 62px); }
+    h1 .ns { color: var(--text-secondary); font-weight: 500; }
+    .lede { font-size: clamp(16px, 2.1vw, 19px); color: var(--text-secondary); max-width: 68ch; margin-top: 20px; line-height: 1.7; }
+
+    .flowline { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 30px;
+      padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+    .flowline .node { font-size: 14px; font-weight: 600; }
+    .flowline .node.cmd { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+    .flowline .arrow { color: var(--text-secondary); font-size: 13px; letter-spacing: 0.1em; }
+
+    section { margin-bottom: 60px; scroll-margin-top: 24px; }
+    h2 { font-size: clamp(23px, 3vw, 30px); margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+    h2 .num { font-size: 13px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace;
+      border: 1px solid var(--border); background: var(--surface); border-radius: 7px; padding: 3px 9px; letter-spacing: 0; }
+    .sub { color: var(--text-secondary); font-size: 15px; margin-bottom: 26px; }
+
+    .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 18px; }
+
+    .card h3 { font-size: 17px; margin-bottom: 12px; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .card ul { margin: 0; padding-left: 20px; }
+    .card li { margin-bottom: 9px; font-size: 14.5px; }
+    .card li:last-child { margin-bottom: 0; }
+    .card p { font-size: 14.5px; }
+
+    .card.use { border-left: 3px solid var(--positive); }
+    .card.avoid { border-left: 3px solid var(--warning); }
+    .card.never { border-left: 3px solid var(--negative); }
+    .ic-pos { color: var(--positive); } .ic-warn { color: var(--warning); } .ic-neg { color: var(--negative); }
+    .ic-acc { color: var(--accent); }
+
+    .callout { border-radius: 12px; padding: 20px 22px; border: 1px solid var(--border);
+      background: var(--surface); display: flex; gap: 14px; align-items: flex-start; }
+    .callout.key { border-left: 3px solid var(--accent-secondary); }
+    .callout svg { flex: 0 0 auto; margin-top: 3px; }
+    .callout p { font-size: 15px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+    .tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    th, td { text-align: left; padding: 13px 18px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-secondary); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--surface-hover); }
+    td:first-child { white-space: nowrap; }
+
+    .steps { position: relative; padding-left: 40px; }
+    .steps::before { content: ''; position: absolute; left: 15px; top: 10px; bottom: 10px; width: 2px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-secondary)); opacity: 0.35; }
+    .step { position: relative; margin-bottom: 20px; }
+    .step:last-child { margin-bottom: 0; }
+    .step .dot { position: absolute; left: -40px; top: 20px; width: 32px; height: 32px; border-radius: 50%;
+      background: var(--surface); border: 2px solid var(--accent); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; }
+    .step .body { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; }
+    .step h3 { font-size: 16.5px; margin-bottom: 9px; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .step p { font-size: 14.5px; }
+    .step p + p { margin-top: 9px; }
+    .marker { display: inline-block; margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: var(--positive); background: var(--code-bg); border: 1px dashed var(--border);
+      border-radius: 6px; padding: 4px 9px; letter-spacing: 0; }
+
+    .pill { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+      border: 1px solid var(--border); color: var(--text-secondary); letter-spacing: 0.02em; }
+    .pill.gate { color: var(--warning); border-color: color-mix(in srgb, var(--warning) 40%, transparent); }
+    .pill.stop { color: var(--negative); border-color: color-mix(in srgb, var(--negative) 40%, transparent); }
+
+    .rc { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 4px; }
+    .rc-item { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--negative);
+      border-radius: 10px; padding: 13px 15px; }
+    .rc-item .code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; color: var(--negative); }
+    .rc-item .desc { font-size: 13.5px; color: var(--text-secondary); display: block; margin-top: 4px; line-height: 1.55; }
+
+    footer { border-top: 1px solid var(--border); padding-top: 26px; color: var(--text-secondary); font-size: 13.5px; }
+
+    .toc { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 86%, transparent);
+      backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+    .toc-inner { max-width: 1080px; margin: 0 auto; padding: 11px 28px; display: flex; gap: 20px; overflow-x: auto; }
+    .toc a { color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; white-space: nowrap; transition: color 0.15s; }
+    .toc a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">본문으로 건너뛰기</a>
+
+  <div class="viz-menu">
+    <button class="viz-menu-toggle" onclick="toggleMenu()" aria-label="메뉴">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+      </svg>
+    </button>
+    <div class="viz-menu-dropdown" id="vizMenuDropdown">
+      <button onclick="cycleTheme()"><span id="themeIcon"></span><span id="themeLabel">Dark</span></button>
+      <button onclick="downloadImage()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download PNG</span>
+      </button>
+      <button onclick="window.print()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <span>Print / PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <nav class="toc">
+    <div class="toc-inner">
+      <a href="#boundary">언제 쓰고 언제 안 쓰는가</a>
+      <a href="#invoke">호출 형식</a>
+      <a href="#steps">동작 단계</a>
+      <a href="#constraints">주의사항과 제약</a>
+    </div>
+  </nav>
+
+  <main id="main-content" role="main">
+  <div class="wrap">
+
+    <header class="hero">
+      <div class="eyebrow animate">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>
+        gh-pr plugin · skill guide
+      </div>
+      <h1 class="animate delay-1"><span class="ns">gh-pr:</span>create</h1>
+      <p class="lede animate delay-2">
+        현재 브랜치가 base 에서 분기한 이후의 <strong>모든 커밋</strong>을 하나의 Pull Request 로 묶어 연다.
+        필요하면 push 까지 하고, 출력은 PR URL 하나다.
+      </p>
+      <div class="flowline animate delay-3">
+        <span class="node">base 분기 이후의 모든 커밋</span>
+        <span class="arrow">──▶</span>
+        <span class="node cmd">/gh-pr:create</span>
+        <span class="arrow">──▶</span>
+        <span class="node">Pull Request</span>
+      </div>
+    </header>
+
+    <section id="boundary" data-reveal>
+      <h2><span class="num">01</span>언제 쓰고 언제 안 쓰는가</h2>
+      <p class="sub">이 스킬은 커밋을 만들지 않고, 리뷰도 머지도 하지 않는다.</p>
+
+      <div class="grid2" style="margin-bottom:18px;">
+        <div class="card use">
+          <h3><svg class="ic-pos" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>쓸 때</h3>
+          <ul>
+            <li>피처 브랜치에 커밋이 쌓였고 이제 PR 로 올릴 때.</li>
+            <li>커밋이 5개면 PR 본문이 5개를 <strong>전부</strong> 다룬다.</li>
+            <li>push 가 안 돼 있으면 이 스킬이 push 한다.</li>
+          </ul>
+        </div>
+        <div class="card avoid">
+          <h3><svg class="ic-warn" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8L22 12L18 16"/><path d="M2 12h20"/></svg>형제 스킬로 가야 할 때</h3>
+          <ul>
+            <li>아직 커밋할 게 남았다면 먼저 <code>/gh-pr:commit</code> — 그쪽은 커밋만 하고 절대 push 하지 않으며 PR 도 열지 않는다.</li>
+            <li>2차 의견은 <code>/gh-pr:review</code>, 리뷰 코멘트 개별 답글과 수정은 <code>/gh-pr:reply</code>, 승인 판정은 <code>/gh-pr:approve</code>, 머지는 <code>/gh-pr:merge</code>.</li>
+            <li>PR 이 아니라 이슈를 만들려는 것이면 <code>gh-issue:create</code>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout key">
+        <svg class="ic-acc" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <p><strong>분리선.</strong> <code>commit</code> / <code>create</code> 의 분리는 의도된 것이다 —
+        사람이 diff 를 검토하고 커밋 스타일을 고를 수 있도록 쪼갠 것이다.
+        <strong>push 와 PR 생성은 이 <code>create</code> 의 일이고, <code>create</code> 는 HEAD 하나가 아니라
+        base 에서 분기한 이후의 모든 커밋을 묶는다.</strong></p>
+      </div>
+    </section>
+
+    <section id="invoke" data-reveal>
+      <h2><span class="num">02</span>호출 형식</h2>
+      <p class="sub">1차 근거는 <code>skills/create/references/help.md</code> 와 <code>options.md</code>.</p>
+
+      <pre><code>/gh-pr:create [issue-number] [remote] [--no-stack | --base &lt;branch&gt;]
+/gh-pr:create -h | --help | help</code></pre>
+
+      <div class="callout" style="margin:18px 0;">
+        <svg class="ic-acc" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <p><strong>위치 인자 파싱 규칙 (#1405)</strong> — <code>commit</code> 과 같다.
+        숫자로만 된 위치 인자는 이슈 번호, 그 외는 remote 이름이고 순서는 무관하다.</p>
+      </div>
+
+      <div class="tablewrap" style="margin-bottom:18px;">
+        <table>
+          <thead><tr><th>인자 / 옵션</th><th>기본값</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><code>[N]</code></td><td>자동 탐지</td><td>본문에 <code>Closes #N</code>(버그면 <code>Fixes #N</code>)으로 연결할 이슈</td></tr>
+            <tr><td><code>[remote]</code></td><td><code>origin</code></td><td>push 대상이자 PR 을 여는 remote. <code>gh</code> 타깃(host + <code>--repo</code>)과 git plumbing(<code>git fetch</code>, <code>&lt;remote&gt;/&lt;base&gt;</code> range, <code>git push -u</code>) 양쪽을 좌우한다</td></tr>
+            <tr><td><code>--no-stack</code></td><td>off</td><td>stacked 신호가 있어도 base 를 repo 기본 브랜치로 강제</td></tr>
+            <tr><td><code>--base &lt;branch&gt;</code></td><td>repo 기본</td><td>base 브랜치 명시. stacked 자동 탐지를 우회</td></tr>
+            <tr><td><code>GH_DISABLE_AI_METRICS=1</code></td><td>off</td><td>Step 4 의 ai-metrics 푸터 생략</td></tr>
+            <tr><td><code>GH_PR_LINT_BYPASS=1</code></td><td>off</td><td>Step 4.5 lint 게이트 생략</td></tr>
+            <tr><td><code>-h</code> / <code>--help</code> / <code>help</code></td><td>—</td><td>help 를 그대로 출력하고 중단. API 호출 없음</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid2">
+        <div class="card never">
+          <h3><svg class="ic-neg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg>상호 배타</h3>
+          <p><code>--no-stack</code> 과 <code>--base</code> 는 함께 쓸 수 없다.
+          같이 주면 <strong>push 전에</strong> <code>rc=2</code> 로 중단한다.</p>
+        </div>
+        <div class="card">
+          <h3><svg class="ic-acc" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>stacked 자동 탐지 발동 조건</h3>
+          <ul>
+            <li>저장소가 stacked PR 을 opt-in 했고 — <code>.github/workflows/stacked-closes-rollup.yml</code>,
+            <code>CLAUDE.md</code>/<code>AGENTS.md</code>/<code>.claude/github-integration.md</code> 안의
+            <code>claude-enter-issue</code> / <code>stacked PR</code> / <code>Depends on #</code> 키워드,
+            또는 <code>agent-toolbox/</code> 디렉터리.</li>
+            <li><strong>그리고</strong> HEAD 의 조상이면서 기본 브랜치보다 더 최근의 merge-base 를 주는 열린 PR 이 정확히 하나 있을 때.</li>
+            <li>그 외에는 base 가 repo 기본 브랜치로 떨어진다 — solo / 비-stacked 저장소는 동작 변화가 없다.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="steps" data-reveal>
+      <h2><span class="num">03</span>동작 단계</h2>
+      <p class="sub">게이트는 대부분 push 앞에 있다. 각 단계는 step-skip guard 가 확인하는 완료 마커를 남긴다.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="dot">1</div>
+          <div class="body">
+            <h3>인자 파싱, base 결정, 상태 수집 <span class="pill gate">push 전 전량 게이트</span></h3>
+            <p><strong>1a-0</strong> — 어떤 <code>gh</code> 호출보다 먼저
+            <code>references/github-target.md</code> 스니펫으로
+            <code>GH_HOST</code> / <code>GH_REPO</code> / <code>TARGET_HOST</code> / <code>REMOTE</code> 를 export 한다.</p>
+            <p><strong>1a</strong> — <code>references/stacked-pr.md</code> 의 함수와 dispatch 블록으로
+            <code>BASE_BRANCH</code> / <code>PARENT_PR</code> / <code>ISSUE_NUMBER</code> 를 바인딩한다.
+            잘못된 입력이면 <strong>push 없이</strong> 중단한다.</p>
+            <div class="rc">
+              <div class="rc-item"><span class="code">rc=2</span><span class="desc">상호 배타 플래그</span></div>
+              <div class="rc-item"><span class="code">rc=3</span><span class="desc">잘못된 <code>--base</code></span></div>
+              <div class="rc-item"><span class="code">rc=4</span><span class="desc">부모 PR 후보 다수</span></div>
+              <div class="rc-item"><span class="code">rc=5</span><span class="desc">부모 PR 이 OPEN 아님</span></div>
+              <div class="rc-item"><span class="code">rc=6</span><span class="desc">부모가 이미 stacked</span></div>
+            </div>
+            <p style="margin-top:12px;"><strong>1b</strong> — <code>references/branch-state.md</code> 로 커밋 range 와 push 상태를 조사한다.
+            결과는 <code>not-on-base</code>(정상 진행) / <code>nothing-to-pr</code>(중단) /
+            <code>auto-branch-and-rewind</code> / <code>auto-branch-warn-only</code> 중 하나다.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="dot">2</div>
+          <div class="body">
+            <h3>모든 커밋 분석 + 이슈 결정</h3>
+            <p><code>git log &lt;base&gt;..HEAD</code> 를 읽어 주제별로 묶는다.
+            <strong>PR 본문은 최신 커밋 하나가 아니라 range 전체를 반영해야 한다.</strong></p>
+            <p>이슈 우선순위는 <code>gh-pr:commit</code> 과 동일: 명시 인자
+            <span class="text-secondary">──▶</span> 최근 대화의 <code>#N</code>
+            <span class="text-secondary">──▶</span> range 안 커밋 푸터
+            <span class="text-secondary">──▶</span> 없으면 링크 생략.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="dot">3</div>
+          <div class="body">
+            <h3>본문 초안, 그다음 lint 게이트 <span class="pill">Step 4 + 4.5</span></h3>
+            <p><code>references/pr-body-template.md</code> 의 제목 규칙(70자 미만, 명령형)과 본문 마크다운
+            (<code>## Summary</code> / <code>## Changes</code> / <code>## Test plan</code> / <code>## Related</code>)을 따르고,
+            기존 커밋이 쓰는 언어에 맞춘다. <code>references/ai-metrics-footer.md</code> 로 푸터를 덧붙인다(soft-fail).</p>
+            <p><strong>Step 4.5 는 push 전에</strong> <code>references/lint-guard.md</code> 의
+            <code>_gh_pr_lint_run "$BASE_BRANCH"</code> 를 실행해 lint 에러면 hard-fail 한다 —
+            도구 없음 / 변경 없음 / <code>GH_PR_LINT_BYPASS=1</code> 이면 자동 skip.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="dot">4</div>
+          <div class="body">
+            <h3>push 후 생성 <span class="pill stop">diverge 시 중단</span></h3>
+            <p>upstream 상태별 push 정책: upstream 없음 또는 mispair
+            (<code>@{u}</code> != <code>&lt;remote&gt;/&lt;current-branch&gt;</code>) →
+            <code>git push -u "$REMOTE" HEAD</code>; upstream 있고 앞서 있으면 <code>git push</code>;
+            <strong>diverge 했으면 중단하고 사용자에게 묻는다.</strong></p>
+            <p>이어서 <code>mktemp</code> 본문 파일로
+            <code>GH_HOST="$TARGET_HOST" gh pr create --repo "$GH_REPO" --base "$BASE_BRANCH" --title ... --body-file ... --assignee @me</code>
+            를 실행한다.</p>
+            <span class="marker">[step:gh-pr-create/push-and-create] OK</span>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="dot">5</div>
+          <div class="body">
+            <h3>라벨 적용</h3>
+            <p><code>git log &lt;base&gt;..HEAD</code> 의 conventional-commit 타입과 PR 범위에서 후보 라벨을 뽑되,
+            <strong>이미 존재하는 라벨만</strong> 적용한다 (<code>gh label list</code> 로 대조).
+            새 라벨은 절대 만들지 않는다.</p>
+            <span class="marker">[step:gh-pr-create/labels] OK</span>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="dot">6</div>
+          <div class="body">
+            <h3>프로젝트 보드 sync</h3>
+            <p>새 PR 카드를 <code>In review</code> 로 올리고, GitHub builtin 이 잘못 옮긴 연결 Issue 카드를 되돌린다 —
+            Issue 는 <code>In progress</code> 가 제자리다.</p>
+            <span class="marker">[step:gh-pr-create/board-sync] OK</span>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="dot">7</div>
+          <div class="body">
+            <h3>보고</h3>
+            <p><code>[OK] PR: &lt;url&gt;</code> 과 방어적 <code>[OK] Board sync:</code> 행,
+            <code>Next: /gh-pr:reply (after CI green)</code>.
+            요약은 덧붙이지 않는다 — 사용자는 URL 을 연다.</p>
+            <span class="marker">[step:gh-pr-create/report] OK</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="constraints" data-reveal>
+      <h2><span class="num">04</span>주의사항과 제약</h2>
+      <p class="sub">아래는 조언이 아니라 dotfiles 에서 넘어온 인수 조건이다.</p>
+
+      <div class="callout key" style="margin-bottom:18px;">
+        <svg class="ic-acc" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <p><strong>안전 계약 — range 가 곧 계약이다.</strong> base 분기 이후의 커밋을 "사소하다"는 이유로
+        Summary 에서 빠뜨리지 않는다. 5커밋 PR 은 5개 관심사를 전부 언급한다.
+        진짜 사소하면 묶되 언급은 한다. <strong>앞선 커밋을 조용히 떨어뜨리는 PR 이 이 규칙이 막는 버그다.</strong></p>
+      </div>
+
+      <div class="card never" style="margin-bottom:18px;">
+        <h3><svg class="ic-neg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg>절대 하지 않는 것</h3>
+        <ul>
+          <li>사용자의 명시적 승인 없이 <strong>force-push 하지 않는다</strong>. upstream 이 diverge 하면 발산 사실을 알리고
+          "force push" 인지 "rebase first" 인지 사용자가 말할 때까지 기다린다 — 대신 골라주지 않는다.</li>
+          <li>stacked 신호가 없는 저장소에서 auto-stack 탐지를 돌리지 않는다.</li>
+          <li>사용자가 <code>--base</code> 를 명시했는데 조용히 기본 브랜치로 강등하지 않는다.</li>
+          <li>부모 PR 의 본문을 수정하지 않는다 — cross-PR rollup 은 downstream 저장소의 일이다.</li>
+          <li>저장소가 이미 그 관례를 쓰지 않는 한 "Generated with Claude Code" 류의 AI 푸터를 넣지 않는다 (최근 머지된 PR 5건으로 확인).</li>
+          <li>새 라벨을 만들지 않는다.</li>
+          <li><code>--draft</code> 나 <code>--reviewer</code> 를 사용자가 명시하지 않는 한 설정하지 않는다.</li>
+          <li><code>[remote]</code> 가 없을 때 <code>origin</code> 으로 조용히 폴백하지 않는다.</li>
+          <li><strong>리뷰도 머지도 하지 않는다.</strong> 출력은 PR URL 뿐이다.</li>
+        </ul>
+      </div>
+
+      <div class="grid2">
+        <div class="card avoid">
+          <h3><svg class="ic-warn" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>거부 조건</h3>
+          <ul>
+            <li>base 브랜치 위에 있으면 — "먼저 피처 브랜치를 만드세요".</li>
+            <li><code>&lt;base&gt;..HEAD</code> range 가 비어 있으면 — "nothing to PR".</li>
+            <li><code>--no-stack</code> 과 <code>--base</code> 를 같이 주면 <code>rc=2</code>.</li>
+            <li>자동 탐지된 부모 PR 이 <code>OPEN</code> 이 아니면 <code>rc=5</code>.</li>
+            <li>Step 4.5 lint 가 실패하면.</li>
+          </ul>
+          <p style="margin-top:12px;">모두 <strong>push 전에</strong> <code>[FAIL] &lt;이유&gt;</code> + <code>Next: &lt;복구&gt;</code> 로 중단한다.</p>
+        </div>
+
+        <div class="card">
+          <h3><svg class="ic-acc" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>host / repo 타게팅 (#1403 / #1405)</h3>
+          <p>모든 <code>gh</code> 호출은 <code>GH_HOST="$TARGET_HOST"</code> 와 <code>--repo "$GH_REPO"</code> 를 함께 싣고,
+          둘은 <strong>같은</strong> <code>git remote get-url "$REMOTE"</code> URL 하나에서 나온다.
+          push 대상 remote 와 PR 대상 서버가 반드시 일치해야 한다.</p>
+          <p style="margin-top:9px;">bare <code>gh</code> 는 gh CLI 자신의 <code>gh repo set-default</code> 를 따르므로,
+          github.com 과 GHES 양쪽 로그인 상태에서 엉뚱한 서버에 <strong>에러 없이 성공한다</strong>.
+          놀라운 <code>gh</code> 결과를 재시도나 타깃 완화로 "고치지" 말고 host 부터 확인한다.</p>
+        </div>
+
+        <div class="card avoid">
+          <h3><svg class="ic-warn" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>알려진 마이그레이션 부채</h3>
+          <p>Step 4.5 는 dotfiles 의 <code>shell-common/functions/gh_pr_lint.sh</code> 를,
+          Step 6 의 라벨 적용은 <code>gh_pr_edit_safe.sh</code> 를 source 한다.
+          dotfiles 체크아웃이 없는 머신에서는 해당 단계가 degrade 된다.</p>
+          <p style="margin-top:9px;">라벨 wrapper 는 classic project board 가 붙은 저장소에서
+          <code>gh pr edit --add-label</code> 이 GraphQL 경고와 함께 exit 1 로 라벨을 통째로 흘리는 문제(#326)를
+          REST 폴백으로 우회하는 것이므로, 없으면 라벨이 조용히 안 붙을 수 있다.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      근거: <code>skills/create/SKILL.md</code> ·
+      <code>skills/create/references/{help,options,constraints,branch-state,push-and-create,pr-body-template,stacked-pr,lint-guard,report-template}.md</code>
+      &nbsp;|&nbsp; 플러그인 <code>gh-pr</code> — 호출 형식은 항상 네임스페이스 형태 <code>/gh-pr:&lt;skill&gt;</code>.
+    </footer>
+
+  </div>
+  </main>
+
+  <script>
+    function toggleMenu() {
+      var d = document.getElementById('vizMenuDropdown');
+      if (d) d.classList.toggle('open');
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.viz-menu')) {
+        var d = document.getElementById('vizMenuDropdown');
+        if (d) d.classList.remove('open');
+      }
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var d = document.getElementById('vizMenuDropdown');
+        if (d) d.classList.remove('open');
+      }
+    });
+
+    var SVG_MOON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    var SVG_SUN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="1.5" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22.5"/><line x1="3.2" y1="3.2" x2="5" y2="5"/><line x1="19" y1="19" x2="20.8" y2="20.8"/><line x1="1.5" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22.5" y2="12"/><line x1="3.2" y1="20.8" x2="5" y2="19"/><line x1="19" y1="5" x2="20.8" y2="3.2"/></svg>';
+
+    var savedTheme = localStorage.getItem('viz-theme');
+    var currentTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    function applyTheme(t) {
+      document.documentElement.className = 'theme-' + t;
+      document.getElementById('themeIcon').innerHTML = t === 'dark' ? SVG_MOON : SVG_SUN;
+      document.getElementById('themeLabel').textContent = t === 'dark' ? 'Dark' : 'Light';
+      localStorage.setItem('viz-theme', t);
+      currentTheme = t;
+    }
+    function cycleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+    applyTheme(currentTheme);
+
+    document.querySelectorAll('[data-reveal]').forEach(function(el) { el.classList.add('reveal'); });
+    var revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+    }, { threshold: 0.06 });
+    document.querySelectorAll('.reveal').forEach(function(el) { revealObserver.observe(el); });
+
+    async function downloadImage() {
+      var menu = document.querySelector('.viz-menu');
+      menu.style.display = 'none';
+      try {
+        var url = await htmlToImage.toPng(document.body, { quality: 1, pixelRatio: 2, filter: function(n) { return !n.classList || !n.classList.contains('viz-menu'); } });
+        var a = document.createElement('a'); a.href = url;
+        a.download = 'gh-pr-create-guide.png'; a.click();
+      } catch (e) { console.error('Download failed:', e); }
+      menu.style.display = '';
+    }
+  </script>
+</body>
+</html>

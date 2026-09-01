@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko" class="theme-dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>approve 사용 결과 — gh-pr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { interpolate-size: allow-keywords; }
+
+    html.theme-dark {
+      --bg: #0A0A0A; --surface: #141414; --surface-hover: #1C1C1C;
+      --border: rgba(255,255,255,0.08);
+      --text: #EDEDED; --text-secondary: #8b8b8b;
+      --accent: #3b82f6; --accent-secondary: #8b5cf6;
+      --positive: #10b981; --negative: #f43f5e; --warning: #f59e0b;
+      --code-bg: #0f0f0f;
+    }
+    html.theme-light {
+      --bg: #FAFAF9; --surface: #FFFFFF; --surface-hover: #F5F5F4;
+      --border: rgba(0,0,0,0.09);
+      --text: #0f172a; --text-secondary: #5b6472;
+      --accent: #2563eb; --accent-secondary: #7c3aed;
+      --positive: #059669; --negative: #e11d48; --warning: #b45309;
+      --code-bg: #f4f4f2;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.7; -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.01em;
+      transition: background 0.3s, color 0.3s;
+      scrollbar-gutter: stable;
+      font-size: 16px;
+    }
+    h1,h2,h3,h4 { color: var(--text); letter-spacing: -0.03em; line-height: 1.15; text-wrap: balance; }
+    h1 { font-weight: 800; font-size: clamp(2.6rem, 6vw, 3.6rem); }
+    h2 { font-weight: 700; font-size: clamp(1.7rem, 3.4vw, 2.1rem); }
+    h3 { font-weight: 650; font-size: 1.5rem; }
+    h4 { font-weight: 600; font-size: 1.05rem; }
+    p, li, td, th, span, label { color: var(--text); font-weight: 400; }
+    .text-secondary { color: var(--text-secondary); }
+    code, pre, .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+    code { background: var(--code-bg); border: 1px solid var(--border); border-radius: 5px;
+           padding: 1px 6px; font-size: 0.86em; word-break: break-word; }
+    pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+          padding: 18px 20px; overflow-x: auto; font-size: 0.9rem; line-height: 1.7; }
+    pre code { background: none; border: none; padding: 0; font-size: 1em; }
+    a { color: var(--accent); }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 48px 0; border-top: 1px solid var(--border); }
+    section:first-of-type { border-top: none; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px;
+      transition: box-shadow 0.2s ease;
+    }
+    .card:hover { box-shadow: 0 0 0 1px var(--border), 0 8px 20px rgba(0,0,0,0.10); }
+    .grid { display: grid; gap: 18px; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+    .eyebrow { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.16em;
+               text-transform: uppercase; color: var(--accent); }
+    .sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .sec-head svg { flex: none; color: var(--accent); }
+    .sec-sub { color: var(--text-secondary); margin-bottom: 28px; max-width: 72ch; }
+
+    .chip { display: inline-flex; align-items: center; gap: 7px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 999px; padding: 6px 14px; font-size: 0.83rem;
+      color: var(--text-secondary); font-weight: 500; }
+    .chip svg { color: var(--accent); flex: none; }
+    .chip.warn { color: var(--warning); } .chip.warn svg { color: var(--warning); }
+    .chip.ok { color: var(--positive); } .chip.ok svg { color: var(--positive); }
+    .chip.stop { color: var(--negative); } .chip.stop svg { color: var(--negative); }
+
+    header.hero { padding: 72px 0 44px; }
+    .hero-kicker { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .lede { font-size: 1.22rem; color: var(--text-secondary); max-width: 74ch; margin-top: 18px; line-height: 1.65; }
+    .hero-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
+    .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    thead th { font-size: 0.76rem; letter-spacing: 0.1em; text-transform: uppercase;
+               color: var(--text-secondary); font-weight: 700; background: var(--surface-hover); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    ul.clean { list-style: none; display: grid; gap: 12px; }
+    ul.clean li { display: flex; gap: 11px; align-items: flex-start; }
+    ul.clean li svg { flex: none; margin-top: 5px; color: var(--accent); }
+    ul.bul { padding-left: 1.15rem; display: grid; gap: 8px; }
+
+    .steps { display: grid; gap: 16px; counter-reset: st; }
+    .step { display: grid; grid-template-columns: 52px 1fr; gap: 18px; align-items: start;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 22px 24px; transition: box-shadow 0.2s ease; }
+    .step:hover { box-shadow: 0 0 0 1px var(--border), 0 8px 20px rgba(0,0,0,0.10); }
+    .step-n { width: 44px; height: 44px; border-radius: 11px; display: grid; place-items: center;
+      background: linear-gradient(140deg, var(--accent), var(--accent-secondary));
+      color: #fff; font-weight: 800; font-size: 0.95rem; letter-spacing: -0.02em; }
+    .step h4 { margin-bottom: 7px; }
+    .step p { color: var(--text-secondary); font-size: 0.95rem; }
+    .step p + p { margin-top: 9px; }
+    .step strong { color: var(--text); font-weight: 650; }
+
+    .flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 14px; }
+    .flow-node { flex: 1 1 220px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 22px; }
+    .flow-node.mid { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .flow-node .lbl { font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-secondary); font-weight: 700; margin-bottom: 8px; }
+    .flow-node .val { font-size: 1.02rem; font-weight: 600; }
+    .flow-arrow { align-self: center; color: var(--accent); font-size: 1.4rem; font-weight: 700; }
+
+    .callout { border-left: 3px solid var(--accent); background: var(--surface);
+      border-radius: 0 12px 12px 0; padding: 20px 24px; }
+    .callout.warn { border-left-color: var(--warning); }
+    .callout.stop { border-left-color: var(--negative); }
+    .callout h4 { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+    .callout p { color: var(--text-secondary); font-size: 0.95rem; }
+    .callout p + p { margin-top: 8px; }
+
+    .k { color: var(--negative); font-weight: 650; }
+    .kk { color: var(--positive); font-weight: 650; }
+
+    footer.foot { padding: 40px 0 64px; border-top: 1px solid var(--border);
+      color: var(--text-secondary); font-size: 0.88rem; }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { animation: fadeInUp 0.6s ease-out both; }
+    .animate.delay-1 { animation-delay: 0.08s; }
+    .animate.delay-2 { animation-delay: 0.16s; }
+    .animate.delay-3 { animation-delay: 0.24s; }
+    .animate.delay-4 { animation-delay: 0.32s; }
+    .animate.delay-5 { animation-delay: 0.40s; }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    @media print {
+      body { background: white !important; color: black !important; }
+      .viz-menu { display: none !important; }
+      .reveal { display: revert; opacity: 1 !important; transform: none !important; }
+      .card, .step { break-inside: avoid; border: 1px solid #ddd; box-shadow: none; }
+      * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+    @page { margin: 1in; }
+
+    .viz-menu { position: fixed; top: 16px; right: 16px; z-index: 9999; }
+    .viz-menu-toggle { width: 44px; height: 44px; border-radius: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(12px); transition: all 0.2s; }
+    .viz-menu-toggle:hover { background: var(--surface-hover); }
+    .viz-menu-dropdown { position: absolute; top: 52px; right: 0; min-width: 210px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 8px;
+      opacity: 0; visibility: hidden; transform: translateY(-8px);
+      transition: all 0.2s; backdrop-filter: blur(16px); }
+    .viz-menu-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
+    .viz-menu-dropdown button { width: 100%; padding: 10px 14px; border: none; border-radius: 8px;
+      background: transparent; color: var(--text); font-size: 14px;
+      font-family: inherit; cursor: pointer; text-align: left;
+      display: flex; align-items: center; gap: 10px; transition: background 0.15s; }
+    .viz-menu-dropdown button:hover { background: var(--surface-hover); }
+    .viz-menu-dropdown button svg { flex: none; color: var(--text-secondary); }
+
+    .skip-to-content { position: absolute; top: -60px; left: 6px; background: var(--accent);
+      color: white; padding: 8px 14px; text-decoration: none; border-radius: 6px;
+      opacity: 0; pointer-events: none; transition: all 0.2s; z-index: 10000; }
+    .skip-to-content:focus { top: 6px; opacity: 1; pointer-events: auto; }
+
+    details { overflow: hidden; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 12px; }
+    details summary { cursor: pointer; list-style: none; padding: 18px 22px;
+      font-weight: 600; display: flex; align-items: center; gap: 12px; }
+    details summary::-webkit-details-marker { display: none; }
+    details summary:hover { background: var(--surface-hover); }
+    details summary .caret { margin-left: auto; transition: transform 0.25s; color: var(--text-secondary); }
+    details[open] summary .caret { transform: rotate(90deg); }
+    .details-body { padding: 0 22px 20px; color: var(--text-secondary); }
+    .details-body p + p, .details-body p + pre, .details-body pre + p { margin-top: 12px; }
+    ::details-content { transition: block-size 0.3s ease, opacity 0.3s ease; block-size: 0; opacity: 0; overflow: hidden; }
+    details[open]::details-content { block-size: auto; opacity: 1; }
+
+    @media (max-width: 560px) {
+      .step { grid-template-columns: 1fr; }
+      header.hero { padding: 56px 0 32px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-to-content">Skip to content</a>
+
+  <div class="viz-menu">
+    <button class="viz-menu-toggle" onclick="toggleMenu()" aria-label="메뉴 열기" aria-haspopup="true">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+      </svg>
+    </button>
+    <div class="viz-menu-dropdown" id="vizMenuDropdown" role="menu">
+      <button onclick="cycleTheme()" role="menuitem" aria-label="테마 전환"><span id="themeIcon" aria-hidden="true"></span><span id="themeLabel">Dark</span></button>
+      <button onclick="downloadImage()" role="menuitem" aria-label="PNG 내려받기">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9"/><path d="M6.5 8.5 10 12l3.5-3.5"/><path d="M3.5 14v2.5h13V14"/></svg>
+        <span>Download PNG</span>
+      </button>
+      <button onclick="window.print()" role="menuitem" aria-label="인쇄 또는 PDF 저장">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7V3h8v4"/><rect x="3" y="7" width="14" height="7" rx="2"/><path d="M6 12h8v5H6z"/></svg>
+        <span>Print / PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <main id="main-content" role="main">
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-kicker animate">
+        <span class="chip">gh-pr plugin</span>
+        <span class="chip">사용 예시</span>
+      </div>
+      <h1 class="animate delay-1">approve 사용 결과</h1>
+      <p class="lede animate delay-2"><strong>한 줄 요약</strong> — PR diff 와 리뷰 기준을 받아
+        리뷰 verdict 와 후속 이슈를 생성합니다.</p>
+    </div>
+  </header>
+
+  <section data-reveal style="padding-top:0;border-top:none;">
+    <div class="wrap">
+      <div class="callout warn animate delay-3">
+        <h4><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h7l3.5 3.5V17H5z"/><path d="M12 3v4h3.5"/><path d="M7.5 11h5M7.5 14h5"/></svg>NOTE — 이 문서는 미실행 예시입니다</h4>
+        <p>gh-pr 의 8개 스킬은 모두 live GitHub repo 에 쓰기를 하고, 이 저장소에는 대상 PR 이 없으며
+          커밋/push 가 금지된 작업이었으므로 문서화 목적의 실행을 하지 않았습니다.</p>
+        <p>아래 명령과 게이트는 <code>skills/approve/SKILL.md</code> 에서 인용한 것이고,
+          결과 절은 실행 시 생성되는 산출물을 기술합니다. <strong>실제 실행 로그가 아닙니다.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <section data-reveal style="border-top:none;padding-top:16px;">
+    <div class="wrap">
+      <div class="flow">
+        <div class="flow-node"><div class="lbl">입력</div><div class="val">PR diff + 리뷰 기준</div></div>
+        <div class="flow-arrow" aria-hidden="true">&#9656;</div>
+        <div class="flow-node mid"><div class="lbl">스킬</div><div class="val mono">/gh-pr:approve</div></div>
+        <div class="flow-arrow" aria-hidden="true">&#9656;</div>
+        <div class="flow-node"><div class="lbl">산출물</div><div class="val">리뷰 verdict + 후속 이슈</div></div>
+      </div>
+    </div>
+  </section>
+  <section data-reveal>
+    <div class="wrap">
+      <div class="sec-head"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3"/><path d="M12.5 15H17"/></svg><span class="eyebrow">step 1</span></div>
+      <h2>실행할 명령</h2>
+      <p class="sec-sub">범용 형식과 이 저장소를 대상으로 한 구체 형식.</p>
+      <pre><code>/gh-pr:approve [&lt;PR#&gt;] [&lt;remote&gt;] [--self-record | --admin-merge [--squash|--rebase|--merge]]</code></pre>
+      <p class="text-secondary" style="margin:18px 0 10px;">이 repo(<code>dEitY719/gh-pr-skills</code>, remote <code>origin</code>) 대상 형식:</p>
+      <pre><code>/gh-pr:approve 12
+/gh-pr:approve 12 --self-record   # 자기가 작성한 PR 은 승인 대신 이 경로</code></pre>
+
+    </div>
+  </section>
+  <section data-reveal>
+    <div class="wrap">
+      <div class="sec-head"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h11"/><path d="m10 8 4 4-4 4"/><path d="M17 4h4v16h-4"/></svg><span class="eyebrow">step 2</span></div>
+      <h2>입력</h2>
+      <p class="sec-sub">무엇이 입력이고, 실행 전 어떤 선행 조건이 충족돼야 하는가.</p>
+      <p style="margin-bottom:20px;">대상 PR 의 diff, 커밋, 그리고 <strong>세 개의 코멘트 엔드포인트</strong>(inline / issue / review) 전부와,
+        <code>skills/approve/references/review-criteria.md</code> 의 체크리스트.</p>
+      <details style="margin-bottom:22px;">
+        <summary><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="3.2"/></svg>세 개의 코멘트 엔드포인트를 전부 읽는다 &mdash; 펼쳐보기<svg class="caret" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5l5 5-5 5"/></svg></summary>
+        <div class="details-body">
+          <p>봇과 사람이 피드백을 세 개의 API 에 흩뿌린다. 하나라도 빠뜨리면 코멘트를 놓친다.</p>
+          <pre><code># inline code review comments (line-anchored)
+gh api "repos/$TARGET_REPO/pulls/&lt;N&gt;/comments" --paginate
+
+# top-level issue-style comments
+gh api "repos/$TARGET_REPO/issues/&lt;N&gt;/comments" --paginate
+
+# review summaries (봇이 자주 쓰는 자리)
+gh api "repos/$TARGET_REPO/pulls/&lt;N&gt;/reviews" --paginate</code></pre>
+          <p>모든 호출에 <code>GH_HOST="$TARGET_HOST"</code> 접두가 붙는다.</p>
+        </div>
+      </details>
+      <div class="grid grid-3">
+        <div class="card"><h4><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M3 10h14"/></svg> 정지 게이트</h4>
+          <p class="text-secondary" style="margin-top:10px;font-size:0.94rem;">PR 이 <code>OPEN</code> 이고 draft 가 아니며
+            required check 가 실패가 아닐 것. 하나라도 걸리면 <strong class="k">정지</strong>한다.</p></div>
+        <div class="card"><h4><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5 18 17H2z"/><path d="M10 8.5v3.5"/><path d="M10 14.6h.01"/></svg> 경고 게이트</h4>
+          <p class="text-secondary" style="margin-top:10px;font-size:0.94rem;"><code>mergeable: CONFLICTING</code> /
+            <code>rebaseable: false</code> 는 정지가 아니라 경고이며, 경고 블록이 리뷰 본문과 최종 보고에 붙는다.</p></div>
+        <div class="card"><h4><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5 18 17H2z"/><path d="M10 8.5v3.5"/><path d="M10 14.6h.01"/></svg> self-PR 게이트</h4>
+          <p class="text-secondary" style="margin-top:10px;font-size:0.94rem;"><code>author.login == ME</code> 이면 승인 경로가
+            열리지 않는다. GitHub 이 self-approval 을 서버 측에서 거부하므로 <strong>스킬이 API 호출 전에 막는다</strong>.</p></div>
+      </div>
+
+    </div>
+  </section>
+  <section data-reveal>
+    <div class="wrap">
+      <div class="sec-head"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="eyebrow">step 3</span></div>
+      <h2>결과 (실행 시)</h2>
+      <p class="sec-sub">실행하면 어디에 무엇이 남는가.</p>
+      <ul class="clean" style="margin-bottom:22px;">
+        <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span>PR 에 <strong>리뷰 verdict 1개</strong> — blocker 0이면 <code>--approve</code>,
+          1개 이상이면 <code>--request-changes</code>. 승인 본문에는 file:line 또는 short SHA 근거를 댄 구체적 칭찬이 최소 1개 들어간다.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><strong>FOLLOW-UP 마다 GitHub 이슈 1개</strong> + 그것들을 링크하는 PR 코멘트 1개(4b 경로).</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><strong>ai-metrics PR 코멘트 1개</strong>(<code>GH_DISABLE_AI_METRICS=1</code> 이면 생략).</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><strong>projectV2 보드 카드 <code>Approved</code> 승격</strong> — 4a / 4b / <code>--self-record</code> 에서만.</span></li>
+      </ul>
+      <div class="callout">
+        <h4><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="3.2"/></svg>검증 방법</h4>
+        <p>최종 보고에 <code>reviewDecision</code>, <code>mergeStateStatus</code>, blocker/follow-up 개수, 이슈 링크, PR URL 이 출력된다.
+          검증은 PR 페이지의 review 상태와 새로 생긴 이슈 번호로 한다.</p>
+      </div>
+
+    </div>
+  </section>
+  <footer class="foot">
+    <div class="wrap">
+      <p>근거 문서: <code>skills/approve/SKILL.md</code> 및 <code>skills/approve/references/</code></p>
+      <p style="margin-top:8px;">생성 원본: <code>docs/skill-output/approve-usage.md</code></p>
+    </div>
+  </footer>
+  </main>
+  <script>
+    function toggleMenu() {
+      var dropdown = document.getElementById('vizMenuDropdown');
+      if (dropdown) dropdown.classList.toggle('open');
+    }
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.viz-menu')) {
+        var d = document.getElementById('vizMenuDropdown');
+        if (d) d.classList.remove('open');
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        var d = document.getElementById('vizMenuDropdown');
+        if (d) d.classList.remove('open');
+      }
+    });
+
+    var ICON_MOON = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 11.5A6.5 6.5 0 0 1 8.5 4a6.5 6.5 0 1 0 7.5 7.5z"/></svg>';
+    var ICON_SUN = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="3.6"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.4 4.4l1.4 1.4M14.2 14.2l1.4 1.4M15.6 4.4l-1.4 1.4M5.8 14.2l-1.4 1.4"/></svg>';
+
+    var savedTheme = localStorage.getItem('viz-theme');
+    var currentTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    function applyTheme(t) {
+      document.documentElement.className = 'theme-' + t;
+      document.getElementById('themeIcon').innerHTML = t === 'dark' ? ICON_MOON : ICON_SUN;
+      document.getElementById('themeLabel').textContent = t === 'dark' ? 'Dark' : 'Light';
+      localStorage.setItem('viz-theme', t);
+      currentTheme = t;
+    }
+    function cycleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+    applyTheme(currentTheme);
+
+    document.querySelectorAll('[data-reveal]').forEach(function (el) { el.classList.add('reveal'); });
+    var revealObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(function (el) { revealObserver.observe(el); });
+
+    function animateCounters() {
+      document.querySelectorAll('[data-count]').forEach(function (el) {
+        if (el.dataset.counted) return;
+        el.dataset.counted = '1';
+        var target = parseFloat(el.dataset.count), prefix = el.dataset.prefix || '', suffix = el.dataset.suffix || '';
+        var start = performance.now(), duration = 1100;
+        (function tick(now) {
+          var p = Math.min((now - start) / duration, 1), eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = prefix + Math.round(target * eased).toLocaleString() + suffix;
+          if (p < 1) requestAnimationFrame(tick);
+        })(start);
+      });
+    }
+    var counterEl = document.querySelector('[data-count]');
+    if (counterEl) {
+      var cObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { animateCounters(); cObs.disconnect(); } });
+      }, { threshold: 0.3 });
+      cObs.observe(counterEl);
+    }
+
+    async function downloadImage() {
+      var menu = document.querySelector('.viz-menu');
+      menu.style.display = 'none';
+      try {
+        var url = await htmlToImage.toPng(document.body, {
+          quality: 1, pixelRatio: 2,
+          backgroundColor: getComputedStyle(document.body).backgroundColor,
+          filter: function (n) { return !n.classList || !n.classList.contains('viz-menu'); }
+        });
+        var a = document.createElement('a'); a.href = url;
+        a.download = document.title.replace(/\s+/g, '-').toLowerCase() + '.png'; a.click();
+      } catch (e) { console.error('Download failed:', e); }
+      menu.style.display = '';
+    }
+  </script>
+</body>
+</html>
