@@ -33,8 +33,7 @@ Do NOT silently switch strategies.
 
 ```bash
 GH_HOST="$TARGET_HOST" gh pr view <N> --repo "$TARGET_REPO" --json \
-  number,state,isDraft,mergeable,mergeStateStatus,reviewDecision,\
-  baseRefName,headRefName,url
+  number,state,isDraft,mergeable,mergeStateStatus,reviewDecision,baseRefName,headRefName,url
 ```
 
 ## Hard-stop decisions
