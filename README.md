@@ -114,29 +114,11 @@ Antigravity (`agy`) shares `~/.gemini`, so it inherits the install.
 These are `gh` CLI calls, `git` calls, and file writes, so they port cleanly
 with two exceptions — `merge-train` chains the other skills through Claude
 Code's `Skill()` tool, and `approve` / `review` hand a large diff to a subagent.
-Every gap and its workaround is documented per harness in
+The per-skill matrix and what each degraded cell means are in
+[`docs/harness-support.md`](docs/harness-support.md). Every gap and its
+workaround is documented per harness in
 [`harness-skills/references/`](https://github.com/dEitY719/harness-skills/tree/main/references);
 read the one file for the harness you are on.
-
-| Skill | Claude Code | Codex | Kimi | Gemini / Antigravity | Hermes | OpenCode |
-|-------|:-----------:|:-----:|:----:|:--------------------:|:------:|:--------:|
-| `commit` | full | full | full | full | full | full |
-| `create` | full | full | full | full | full | full |
-| `review` | full | inline diff | full | inline diff | inline diff | inline diff |
-| `reply` | full | full | full | full | full | full |
-| `approve` | full | inline diff | full | inline diff | inline diff | inline diff |
-| `merge` | full | full | full | full | full | full |
-| `merge-emergency` | full | full | full | full | full | full |
-| `merge-train` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
-
-*inline diff* — `approve` and `review` dispatch a large diff to a subagent on
-Claude Code and Kimi (`Agent`). Elsewhere they read it inline. Same verdict,
-more tokens in one context.
-
-*manual chain* — `merge-train`'s loop calls the per-PR skills through `Skill()`.
-Without a skill-invocation tool, run them yourself, one PR at a time:
-`gh-resolve:outdated` / `:conflict` / `:ci-fail`, then `gh-pr:merge`. The gates
-are per-PR, so nothing is skipped by driving them by hand — only the walking is.
 
 ## Shared assets
 
@@ -198,33 +180,9 @@ a migration later.
 
 Like `gh-issue-skills` and unlike the Phase 2 repos, this one was migrated
 **after** the Phase 3 names were fixed, so every reference to a sibling repo is
-written in its final form (#1677 §2):
-
-| Old | New | Lives in |
-|-----|-----|----------|
-| `gh:commit` | `gh-pr:commit` | this repo |
-| `gh:pr` | `gh-pr:create` | this repo |
-| `gh:pr-review` / `-reply` / `-approve` | `gh-pr:review` / `:reply` / `:approve` | this repo |
-| `gh:pr-merge` / `-merge-emergency` / `-merge-train` | `gh-pr:merge` / `:merge-emergency` / `:merge-train` | this repo |
-| `devx:pr-review-all` | `gh-verify:review-all` | `gh-verify-skills` |
-| `gh:pr-post-merge-verify` | `gh-verify:post-merge-verify` | `gh-verify-skills` |
-| `gh:pr-resolve-ci-fail` / `-conflict` / `-outdated` | `gh-resolve:ci-fail` / `:conflict` / `:outdated` | `gh-resolve-skills` |
-| `gh:label-bootstrap` | `gh-setup:label-bootstrap` | `gh-setup-skills` |
-| `gh:issue-create` | `gh-issue:create` | `gh-issue-skills` |
-| `gh:issue-flow` | `gh-flow:issue` | `gh-flow-skills` |
-| `ai-worktree:teardown` | `session:worktree-teardown` | `session-skills` |
-
-The last two rows are references to repos that did not exist when this migration
-ran. Writing them in final form now is cheaper than a second pass later, and
-`gh-flow-skills` reads `gh-pr:create` / `gh-pr:commit` straight out of this
-repo's decision.
-
-Unlike `gh-issue-skills`, the step-marker wire format **did** move here. `create`
-prints `[step:gh-pr-create/<id>] OK` and `commit` prints
-`[step:gh-pr-commit/<id>] OK`; dotfiles #1677 F-8 added matching
-`skill_step_catalog.yml` keys alongside the old `gh-pr` / `gh-commit` ones,
-which stay to guard the un-deleted dotfiles originals until Phase 4. The step
-IDs inside the markers are unchanged.
+written in its final form (#1677 §2), and the step-marker wire format moved here
+with it. The full old-to-new mapping and the marker details are in
+[`docs/cross-repo-names.md`](docs/cross-repo-names.md).
 
 ## CI
 
@@ -261,22 +219,11 @@ carry an emoji.
 
 ## Provenance
 
-These skills were extracted from
-[`dEitY719/dotfiles`](https://github.com/dEitY719/dotfiles)
-(`claude/skills/{gh-commit,gh-pr,gh-pr-review,gh-pr-reply,gh-pr-approve,gh-pr-merge,gh-pr-merge-emergency,gh-pr-merge-train}`)
-as a content snapshot — no history rewriting. The dotfiles copies remain in
-place; they are removed in Phase 4 of that repo's migration (#1410 NF-1 / NF-3).
-Behaviour is unchanged from the snapshot; only the namespace moved, from `gh:` to
-`gh-pr:`, and the directory names lost their now-redundant prefixes.
-
-Because behaviour was held fixed, some coupling to the dotfiles checkout came
-across with it — several skills source `shell-common/functions/*.sh`, and
-`merge` reads a dispatch block from a dotfiles path. Both are enumerated in
-[`CLAUDE.md`](CLAUDE.md) → "Known migration debt" and are Phase 4 work.
-
-This is Phase 3 of the dotfiles #1410 migration, shared with `gh-issue-skills`
-and `gh-flow-skills`. `packaging-skills` was Phase 0, and `harness-skills` was
-Phase 1 and is the sibling that owns the shared assets this repo links to.
+Extracted from [`dEitY719/dotfiles`](https://github.com/dEitY719/dotfiles) as a
+content snapshot in Phase 3 of the #1410 migration. Behaviour is unchanged; only
+the namespace moved, from `gh:` to `gh-pr:`. The snapshot sources, the coupling
+that came across with it, and the phase map are in
+[`docs/provenance.md`](docs/provenance.md).
 
 ## License
 
