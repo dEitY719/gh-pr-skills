@@ -40,7 +40,7 @@ the same remote URL (#1403/#1407). An explicit `owner/repo` positional pins
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
-[ -f "$_SC/functions/gh_pr_merge_train.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_pr_merge_train.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
 . "$_SC/functions/gh_pr_merge_train.sh"
 GH_HOST="$TARGET_HOST" gh pr list --repo "$TARGET_REPO" --author @me --state open \
   --limit 50 --json number,updatedAt,isDraft,mergeable,mergeStateStatus,baseRefName,title,labels \

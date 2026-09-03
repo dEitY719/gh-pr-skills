@@ -23,7 +23,7 @@ Bind host and repo from **one and the same** remote URL, before any `gh` call:
 
 ```bash
 _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
-[ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_host.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
 . "$_SC/functions/gh_host.sh"
 REMOTE_URL=$(git remote get-url "${REMOTE:-origin}") || exit 1
 TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL") || exit 1

@@ -155,7 +155,7 @@ even on the REST fallback path: it re-checks `gh label list` before POST.
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
-[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
 . "$_SC/functions/gh_pr_edit_safe.sh"
 
 EXISTING=$(GH_HOST="$TARGET_HOST" gh label list --repo "$GH_REPO" \

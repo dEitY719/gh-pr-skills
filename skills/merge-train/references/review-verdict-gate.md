@@ -31,10 +31,10 @@ every tick.
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
-[ -f "$_SC/functions/gh_pr_merge_train.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_pr_merge_train.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
 . "$_SC/functions/gh_pr_merge_train.sh"
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
-[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
 . "$_SC/functions/gh_pr_edit_safe.sh"
 
 # The one identity this whole pipeline authenticates as — the same login

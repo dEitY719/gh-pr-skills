@@ -21,7 +21,7 @@ detection logic in `SKILL.md`.
 
 ```bash
 _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
-[ -f "$_SC/functions/gh_pr_lint.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_pr_lint.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
 . "$_SC/functions/gh_pr_lint.sh"
 _gh_pr_lint_run "$BASE_BRANCH" || {
     printf 'gh-pr:create stopped at Step 4.5 (lint guard).\n' >&2
