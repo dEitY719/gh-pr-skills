@@ -40,7 +40,7 @@ Step 3 에서 코멘트 하나를 분류할 때마다 출처를 함께 남긴다
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
-[ -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
 . "$_SC/functions/gh_pr_reply_targeted_review.sh"
 
 ORIGINS=$(
