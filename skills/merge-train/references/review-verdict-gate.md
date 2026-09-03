@@ -30,8 +30,12 @@ every tick.
 | `review-passed` only, freshness lookup itself failed (#1601) | `[SKIPPED] review-passed freshness unknown — marker lookup failed, treating as unverified` (label left untouched) |
 
 ```bash
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_pr_merge_train.sh"
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_pr_edit_safe.sh"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+[ -f "$_SC/functions/gh_pr_merge_train.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_pr_merge_train.sh"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_pr_edit_safe.sh"
 
 # The one identity this whole pipeline authenticates as — the same login
 # that ran devx_pr_review_all_apply_label when it posted the marker. Hoisted

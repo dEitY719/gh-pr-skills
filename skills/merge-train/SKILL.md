@@ -39,7 +39,9 @@ the same remote URL (#1403/#1407). An explicit `owner/repo` positional pins
 ## Step 2: Collect and order the queue
 
 ```bash
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_pr_merge_train.sh"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+[ -f "$_SC/functions/gh_pr_merge_train.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_pr_merge_train.sh"
 GH_HOST="$TARGET_HOST" gh pr list --repo "$TARGET_REPO" --author @me --state open \
   --limit 50 --json number,updatedAt,isDraft,mergeable,mergeStateStatus,baseRefName,title,labels \
   | _gh_pr_merge_train_filter_targets --now "$(date +%s)"

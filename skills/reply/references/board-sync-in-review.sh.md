@@ -20,6 +20,7 @@ if [ "${PUSHED_FIXES:-0}" -gt 0 ]; then
     # helper-fallback NF-1 (#644): silent-skip when helper missing.
     # Defense-in-depth (#724): also detect "sourced but function undefined".
     _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
+    [ -f "$_HELPER" ] || _HELPER="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common/functions/gh_project_status.sh"
     if [ -r "$_HELPER" ]; then
         . "$_HELPER"
         if ! command -v _gh_project_status_sync >/dev/null 2>&1; then

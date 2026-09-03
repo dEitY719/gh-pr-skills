@@ -23,7 +23,9 @@ hand-inlined REST call (#1563, and #326 Bug B for the add side).
 re-resolve them.
 
 ```bash
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_pr_edit_safe.sh"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_pr_edit_safe.sh"
 
 if _rpc_err=$(_gh_pr_drop_label "$PR_NUMBER" review-passed \
         "$TARGET_REPO" "$TARGET_HOST" 2>&1); then

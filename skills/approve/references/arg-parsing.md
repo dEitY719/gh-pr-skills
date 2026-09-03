@@ -22,7 +22,9 @@ Reject unknown flags, `--self-record` with `--admin-merge`, and legacy
 Bind host and repo from **one and the same** remote URL, before any `gh` call:
 
 ```bash
-. "${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/functions/gh_host.sh"
+_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
+[ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_host.sh"
 REMOTE_URL=$(git remote get-url "${REMOTE:-origin}") || exit 1
 TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL") || exit 1
 TARGET_HOST=$(_gh_host_from_url "$REMOTE_URL") || TARGET_HOST=$(_gh_resolve_host)
