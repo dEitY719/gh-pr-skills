@@ -68,6 +68,7 @@ card came from.
 # to `gh repo view`, which answers `gh repo set-default`, not this skill's
 # resolved remote.
 _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
+[ -f "$_HELPER" ] || _HELPER="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common/functions/gh_project_status.sh"
 if [ -r "$_HELPER" ]; then
     . "$_HELPER"
     if ! command -v _gh_project_status_sync >/dev/null 2>&1; then

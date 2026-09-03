@@ -33,6 +33,7 @@ if [ "$hook_skip" -eq 0 ]; then
     # `|| true` would otherwise absorb `command not found` (rc 127) and the
     # entire reconciliation would silently no-op — the failure mode from #724.
     _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
+    [ -f "$_HELPER" ] || _HELPER="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common/functions/gh_project_status.sh"
     if [ -r "$_HELPER" ]; then
         . "$_HELPER"
         if ! command -v _gh_project_status_sync >/dev/null 2>&1; then
@@ -50,7 +51,9 @@ if [ "$hook_skip" -eq 0 ]; then
                 # by default (#1405). Source gh_host.sh explicitly:
                 # gh_project_status.sh only sources it on the GH_HOST-unset
                 # path, which Step 1a-0's export already bypassed.
-                . "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_host.sh"
+                _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+                [ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+                . "$_SC/functions/gh_host.sh"
                 GH_REPO=$(_gh_parse_owner_repo_url "$(git remote get-url "${REMOTE:-origin}")" 2>/dev/null || true)
             fi
             _gh_project_status_sync pr "$PR_NUMBER" "In review" --repo "$GH_REPO" || true

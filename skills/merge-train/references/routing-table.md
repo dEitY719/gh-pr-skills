@@ -46,7 +46,9 @@ Four conditions **short-circuit the table** — check all four before reading
 | `review-passed` present, freshness lookup itself failed (#1601) | `[SKIPPED] review-passed freshness unknown — marker lookup failed, treating as unverified` (label untouched) |
 
 ```bash
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_pr_edit_safe.sh"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_pr_edit_safe.sh"
 
 # One if/elif chain, not a leading `... && echo` followed by a separate
 # if-block — the two used to be independent statements with no exit between

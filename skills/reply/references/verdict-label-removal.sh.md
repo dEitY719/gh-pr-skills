@@ -53,8 +53,12 @@ DECLINE 된 BLOCKER 도 라벨을 풀어 줬다는 뜻이다. #1636 은 이를 �
 stderr 로 넘어온다.
 
 ```bash
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_pr_edit_safe.sh"
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_pr_reply_targeted_review.sh"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_pr_edit_safe.sh"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+[ -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_pr_reply_targeted_review.sh"
 
 if [ "$PUSHED_FIXES" -gt 0 ]; then
     if _vl_err=$(_gh_pr_drop_label "$PR_NUMBER" review-passed \

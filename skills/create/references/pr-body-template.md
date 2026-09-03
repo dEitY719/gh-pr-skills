@@ -154,7 +154,9 @@ never create new labels. The `_gh_pr_edit_safe_label` wrapper enforces this
 even on the REST fallback path: it re-checks `gh label list` before POST.
 
 ```bash
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_pr_edit_safe.sh"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_pr_edit_safe.sh"
 
 EXISTING=$(GH_HOST="$TARGET_HOST" gh label list --repo "$GH_REPO" \
     --limit 200 --json name -q '.[].name')
