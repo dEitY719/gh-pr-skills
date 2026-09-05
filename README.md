@@ -152,6 +152,7 @@ Manifests live at the repo root and all point at one flat `skills/` directory:
 ├── .opencode/plugins/gh-pr.js + INSTALL.md      OpenCode
 ├── .agents/plugins/marketplace.json             Antigravity
 ├── gemini-extension.json + GEMINI.md            Gemini CLI
+├── tests/pmv-dispatch-resolves.sh               Regression guard (run by hand)
 ├── package.json
 ├── CLAUDE.md · AGENTS.md -> CLAUDE.md
 └── LICENSE
