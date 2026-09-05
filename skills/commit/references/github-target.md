@@ -22,7 +22,13 @@ the wrong repo (same Failure rule as
 ```bash
 REMOTE="${REMOTE:-origin}"
 _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
-[ -f "$_SC/functions/gh_host.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
+[ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_host.sh" ] || {
+    printf '[gh-pr:commit] shell-common not found under %s. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+        "$_SC" >&2
+    return 1 2>/dev/null || exit 1
+}
+export SHELL_COMMON="$_SC"
 . "$_SC/functions/gh_host.sh"
 REMOTE_URL=$(git remote get-url "$REMOTE")
 TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")
