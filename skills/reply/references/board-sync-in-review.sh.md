@@ -4,7 +4,7 @@ Called from `SKILL.md` Step 6.5. If Step 6 actually pushed at least one
 fix commit (i.e. `PUSHED_FIXES > 0`, new SHAs created on the remote
 branch), push the PR card back to `In review` so reviewers see it in
 their queue. Mirrors the `/gh-resolve:conflict` Step 5 pattern
-(issue #591) so both flows share one board-recovery surface.
+(issue dEitY719/dotfiles#591) so both flows share one board-recovery surface.
 
 Skips when `PUSHED_FIXES == 0` (all comments DECLINE / QUESTION — no
 push happened, so the card lifecycle has not changed and there is
@@ -17,8 +17,8 @@ Soft-fail — warn on any error, never block the Step 7 report.
 
 ```bash
 if [ "${PUSHED_FIXES:-0}" -gt 0 ]; then
-    # helper-fallback NF-1 (#644): silent-skip when helper missing.
-    # Defense-in-depth (#724): also detect "sourced but function undefined".
+    # helper-fallback NF-1 (dEitY719/dotfiles#644): silent-skip when helper missing.
+    # Defense-in-depth (dEitY719/dotfiles#724): also detect "sourced but function undefined".
     _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
     [ -f "$_HELPER" ] || _HELPER="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common/functions/gh_project_status.sh"
     if [ -r "$_HELPER" ]; then
@@ -39,7 +39,7 @@ if [ "${PUSHED_FIXES:-0}" -gt 0 ]; then
 fi
 ```
 
-`--repo "$TARGET_REPO"` 는 Step 1 이 해소한 remote 를 명시로 넘긴다 (#1405) —
+`--repo "$TARGET_REPO"` 는 Step 1 이 해소한 remote 를 명시로 넘긴다 (dEitY719/dotfiles#1405) —
 빼면 헬퍼가 `gh repo view` 로 폴백하는데, 이는 git origin 이 아니라
 `gh repo set-default` 가 고른 레포를 답한다.
 

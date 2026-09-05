@@ -10,7 +10,7 @@ appends the ai-metrics footer to the PR body temp file `$BODY`.
   range (used for `HUMAN_H` baseline lookup).
 - For `feat`, the **number of files changed** in `$BASE_BRANCH..HEAD`
   (used to infer size — small/medium/large).
-- `GH_DISABLE_AI_METRICS` env (issue #399) — when set to `1`, the
+- `GH_DISABLE_AI_METRICS` env (issue dEitY719/dotfiles#399) — when set to `1`, the
   footer is skipped entirely. The linked issue body is untouched.
 
 ## Procedure
@@ -21,8 +21,8 @@ appends the ai-metrics footer to the PR body temp file `$BODY`.
 3. Read `references/metrics-helper.md` and paste the `compute_pr_tokens`
    snippet **verbatim**. Inputs: `(linked-issue body) + (commit log
    over $BASE_BRANCH..HEAD)` — **never** count `$BODY` (the drafted PR
-   body) as the input. That regression produced PR #325's
-   `~1000 tokens` footer (issue #326).
+   body) as the input. That regression produced PR dEitY719/dotfiles#325's
+   `~1000 tokens` footer (issue dEitY719/dotfiles#326).
 4. Append the footer:
 
    ```bash

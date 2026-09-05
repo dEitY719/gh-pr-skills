@@ -1,7 +1,7 @@
-# `review-passed` 게이트 — Step 6 (이슈 #1636, #1616 승계)
+# `review-passed` 게이트 — Step 6 (이슈 dEitY719/dotfiles#1636, dEitY719/dotfiles#1616 승계)
 
 `gh-pr:reply` 는 BLOCKER 를 실제로 고친다. 그러니 "고쳐졌다"를 아는 스킬도
-이 스킬이다. #1636 부터 `review-passed` 라벨은 **이 스킬이 직접** 붙인다 —
+이 스킬이다. dEitY719/dotfiles#1636 부터 `review-passed` 라벨은 **이 스킬이 직접** 붙인다 —
 외부 AI CLI 재호출 없이, 자기 판단만으로.
 
 이 문서가 그 절차의 SSOT 다. 구현체는
@@ -9,15 +9,15 @@
 
 ## 여기까지 온 경로
 
-- **#1616 이전** — 해제 규칙은 `ACCEPTED_COUNT > 0 && DECLINED_COUNT == 0`
+- **dEitY719/dotfiles#1616 이전** — 해제 규칙은 `ACCEPTED_COUNT > 0 && DECLINED_COUNT == 0`
   이라는 **전역 카운터 한 쌍**이었다. 같은 pass 안에서 *다른* 리뷰어의
   비블로킹 제안을 정당하게 DECLINE 하기만 해도 `review-blocked` 가 그대로
-  눌러앉았다. 실제 사례 PR #1609 — codex 가 BLOCKER 2건(둘 다 수정), agy 가
+  눌러앉았다. 실제 사례 PR dEitY719/dotfiles#1609 — codex 가 BLOCKER 2건(둘 다 수정), agy 가
   별도로 비블로킹 FOLLOW-UP 3건(전부 타당하게 거절). 라벨 하나 떼려고 5-lane
   `gh-verify:review-all` 전체 재실행이 필요했다.
-- **#1616** — 질문을 리뷰어별·심각도별로 좁히고, 통과 판정은 여전히 외부
+- **dEitY719/dotfiles#1616** — 질문을 리뷰어별·심각도별로 좁히고, 통과 판정은 여전히 외부
   `gh-pr:review --paths` 재호출에 맡겼다(NF-2, 자가 인증 금지).
-- **#1636** — 그 재호출을 제거했다. 재호출 자체가 비용·지연·실패 지점이었고,
+- **dEitY719/dotfiles#1636** — 그 재호출을 제거했다. 재호출 자체가 비용·지연·실패 지점이었고,
   `review-passed` 를 재획득하는 **유일한** 경로였기 때문에 실패할 때마다
   `gh-pr:merge-train` 이 반복적으로 막혔다.
 
@@ -26,7 +26,7 @@
 - **심각도로 묻는다.** "이 pass 에 DECLINE 이 있었나"가 아니라 "**BLOCKER
   심각도 항목**이 하나라도 미해결로 남았나"를 묻는다. 비블로킹 FOLLOW-UP 의
   거절은 이 질문과 무관하다.
-- **NF-2 는 이 경로에 한해 완화됐다(#1636).** 위 질문에 no 면 이 스킬이
+- **NF-2 는 이 경로에 한해 완화됐다(dEitY719/dotfiles#1636).** 위 질문에 no 면 이 스킬이
   `review-passed` 를 **스스로** 붙인다. 남는 검증 연결고리는 분업이다 —
   **발견은 외부 AI**(`gh-verify:review-all` 이 여전히 매 PR 마다 fan-out 하고
   `review-blocked` 를 소유), **해소 확인은 `gh-pr:reply`**. fail-closed 방향은
@@ -34,7 +34,7 @@
   사용자의 명시적 트레이드오프 결정이며, `references/constraints.md` 가
   그 근거를 함께 적어 둔다.
 
-## Step 3 — origin 토큰 기록 (F-1, #1616 그대로)
+## Step 3 — origin 토큰 기록 (F-1, dEitY719/dotfiles#1616 그대로)
 
 Step 3 에서 코멘트 하나를 분류할 때마다 출처를 함께 남긴다:
 
@@ -59,7 +59,7 @@ ORIGINS=$(
 - `<reviewer>` — 코멘트 작성자. 두 집합 중 하나여야 하고, 그 외는 exit 2.
   - **AI CLI** — `gh-pr:review` 의 `--ai` 값 그대로:
     `agy` / `codex` / `claude` / `opencode` / `hermes`.
-  - **봇 로그인** (PR #1637 리뷰, codex BLOCKER) — `gemini-code-assist` /
+  - **봇 로그인** (PR dEitY719/dotfiles#1637 리뷰, codex BLOCKER) — `gemini-code-assist` /
     `sourcery-ai` / `copilot`. Step 3 의 분류 규칙은 봇 코멘트를 AI CLI
     코멘트와 **똑같이** 다루는데 리뷰어 필드가 `--ai` enum 하나로 닫혀 있어서,
     봇이 올린 BLOCKER 는 exit 2 로 튕겨 나가 `ORIGINS` 에 아예 못 들어갔다 —
@@ -84,7 +84,7 @@ Step 7 의 리뷰어별 표는 이 스트림을 `_gh_pr_reply_origin_tally` 로 
 BLOCKER 가 미해결로 남았나"를 묻는 것이므로, 아직 답하지 않은 코멘트가 있으면
 물을 수 없다.
 
-### 실행 순서 (PR #1637 리뷰 이후)
+### 실행 순서 (PR dEitY719/dotfiles#1637 리뷰 이후)
 
 순서가 전부 load-bearing 이다. 그대로 지킨다:
 
@@ -93,7 +93,7 @@ BLOCKER 가 미해결로 남았나"를 묻는 것이므로, 아직 답하지 않
    뒤로 가면 방금 붙인 라벨을 지운다.
 2. **history + evidence** — Step 2 에서 이미 받아 둔 PR 코멘트를 재사용해
    (API 추가 호출 없음) 과거 pass 들의 origin 이력과 외부 리뷰 근거를 구한다.
-   #1639 이후 두 리더는 **본문 텍스트가 아니라 원본 코멘트 JSON 배열**
+   dEitY719/dotfiles#1639 이후 두 리더는 **본문 텍스트가 아니라 원본 코멘트 JSON 배열**
    (`gh api repos/<repo>/issues/<pr>/comments` 응답 그대로, `.user.login` 보존)
    을 stdin 으로 받고, `<expected-login>` 인자를 **필수**로 요구한다.
    `--jq '.[].body'` 로 미리 본문만 뽑아 두면 작성자가 사라져 위조 마커가
@@ -111,7 +111,7 @@ BLOCKER 가 미해결로 남았나"를 묻는 것이므로, 아직 답하지 않
 ME="${GH_PR_REPLY_TRUSTED_LOGIN:-${ME:-$(GH_HOST="$TARGET_HOST" gh api user -q .login)}}"
 
 # $COMMENT_JSON 은 Step 2 가 받아 둔 /issues/<N>/comments 응답 **원본 배열**
-# 이다 (본문만 뽑아 둔 텍스트가 아니다 — #1639).
+# 이다 (본문만 뽑아 둔 텍스트가 아니다 — dEitY719/dotfiles#1639).
 HISTORY=$(_gh_pr_reply_history_origins "$ME" <"$COMMENT_JSON")
 if _gh_pr_reply_history_has_review "$ME" <"$COMMENT_JSON"; then
     EVIDENCE=yes
@@ -127,7 +127,7 @@ printf '%s\n' "$MERGED" |
 DECISION=$(printf '%s\n' "$MERGED" | _gh_pr_reply_review_passed_gate "$EVIDENCE")
 ```
 
-### origin 원장 — pass 사이의 기억 (PR #1637 리뷰, codex BLOCKER)
+### origin 원장 — pass 사이의 기억 (PR dEitY719/dotfiles#1637 리뷰, codex BLOCKER)
 
 게이트는 원래 **이번 pass 의 `ORIGINS` 만** 봤다. 그런데 Step 2 의 "이미
 답변함" 중복 제거가 앞선 pass 의 스레드를 이후 모든 pass 에서 걸러낸다. 그래서
@@ -162,7 +162,7 @@ agy:FOLLOW-UP:ACCEPT
   출력한다.
 - `_gh_pr_reply_post_origins_ledger <pr> <repo> [host] [head-sha]` — 병합 결과를
   PR 코멘트로 게시한다. soft-fail(항상 rc 0), host 는 서브셸 안에서 핀 고정
-  (#1403 / #1407).
+  (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
 **리뷰어 단위 supersede 와 탈출구.** 덮어쓰기는 줄 단위가 아니라 **리뷰어**
 단위다. supersede 가 없으면 한 번 DECLINE 된 BLOCKER 가 `review-passed` 를
@@ -171,11 +171,11 @@ agy:FOLLOW-UP:ACCEPT
 재분류하면 새 판정이 낡은 판정을 대체한다. 이번 pass 에 아무 말도 하지 않은
 리뷰어는 이력을 그대로 유지하므로, **침묵이 BLOCKER 를 지우지는 못한다.**
 
-### 외부 리뷰 근거 (PR #1637 리뷰, agy BLOCKER)
+### 외부 리뷰 근거 (PR dEitY719/dotfiles#1637 리뷰, agy BLOCKER)
 
 `ORIGINS` 가 비어 있으면(외부 리뷰가 아예 돈 적 없음 — CLI 미설치,
 `gh-verify:review-all` 미실행) 게이트는 `pass=no-blocker` 를 읽고 스스로
-`review-passed` 를 붙였다. #1636 이 NF-2 를 완화한 근거는 분업 — **발견은
+`review-passed` 를 붙였다. dEitY719/dotfiles#1636 이 NF-2 를 완화한 근거는 분업 — **발견은
 외부 AI, 해소 확인은 `gh-pr:reply`** — 인데, 발견자가 없으면 확인할 대상도
 없다.
 
@@ -186,15 +186,15 @@ agy:FOLLOW-UP:ACCEPT
 조회하지 않은 호출자가 인증을 얻어 가서는 안 되기 때문이다.
 
 알려진 한계(의도적 수용): `gh-pr:review` 의 large-diff 위임 경로는 마커를 찍지
-않고(별건 버그, #1636 범위 밖), 봇 전용 리뷰도 `ai-review` 마커를 남기지 않는다.
+않고(별건 버그, dEitY719/dotfiles#1636 범위 밖), 봇 전용 리뷰도 `ai-review` 마커를 남기지 않는다.
 두 경우 모두 "근거 없음"으로 읽혀 PR 은 **무라벨**로 남는다 — 무라벨은 하류에서
 "미검증"이므로 fail-closed 방향이다.
 
-### 마커 작성자 (#1639)
+### 마커 작성자 (dEitY719/dotfiles#1639)
 
 원장 블록도 `ai-review` 마커도 **평범한 PR 코멘트 안의 그냥 텍스트**다. 대부분의
 저장소에서 PR 을 볼 수 있는 사람은 코멘트를 달 수 있고, 이는 `review-passed`
-라벨을 직접 붙이는 데 필요한 label-write 권한보다 훨씬 낮은 문턱이다. #1639
+라벨을 직접 붙이는 데 필요한 label-write 권한보다 훨씬 낮은 문턱이다. dEitY719/dotfiles#1639
 이전에는 두 리더 모두 작성자가 이미 버려진 본문 텍스트만 받았으므로, **아무나**
 다음 둘 중 하나로 게이트를 열 수 있었다:
 
@@ -210,7 +210,7 @@ agy:FOLLOW-UP:ACCEPT
 없거나 유효하지 않으면 **아무것도 찾지 못한 것**으로 처리한다 — "모두를 신뢰"
 로의 폴백은 없다.
 
-PR #1608 이 `_gh_pr_merge_train_review_passed_marker_sha` 에 적용한 것과 같은
+PR dEitY719/dotfiles#1608 이 `_gh_pr_merge_train_review_passed_marker_sha` 에 적용한 것과 같은
 수정·검증기·논거다. 전체 논증은
 `../../merge-train/references/review-verdict-gate.md` →
 "Marker authorship" 에 있고, 두 후속 논점은 그대로 적용된다:
@@ -250,7 +250,7 @@ PR #1608 이 `_gh_pr_merge_train_review_passed_marker_sha` 에 적용한 것과 
 
 BLOCKER 판정은 `_gh_pr_reply_severity_is_blocking` 을 쓰므로 `BLOCKER` /
 `BLOCKING` / `블로커` 가 모두 블로킹으로 센다. `ACCEPT-PARTIAL` 은 해소로
-친다(#1616 과 동일) — 부분 수용도 "고쳤다"는 답변이고, 남은 부분은 별도
+친다(dEitY719/dotfiles#1616 과 동일) — 부분 수용도 "고쳤다"는 답변이고, 남은 부분은 별도
 FOLLOW-UP 으로 다시 제기되는 것이 이 저장소의 흐름이다.
 
 `hold` 은 **첫 번째** 미해결 BLOCKER 에서 즉시 결정되고 그 리뷰어를 이름으로
@@ -273,11 +273,11 @@ printf '%s\n' "$MERGED" |
 `devx_pr_review_all_write_label` 로 간다 — `gh-verify:review-all` 이 쓰는 것과
 **같은 경로**다:
 
-- 반대 라벨 `review-blocked` 를 **먼저 무조건 삭제**한다. #1616 의 "해제"가
+- 반대 라벨 `review-blocked` 를 **먼저 무조건 삭제**한다. dEitY719/dotfiles#1616 의 "해제"가
   여기서 함께 일어난다.
 - add 는 `_gh_pr_edit_safe_label` 로만 한다 — bare `gh pr edit --add-label` 은
-  classic Projects 가 붙은 저장소에서 조용히 exit 1 한다(#326).
-- `HEAD_SHA` 4번째 인자는 `review-passed` 에 신선도 마커를 남긴다(#1601).
+  classic Projects 가 붙은 저장소에서 조용히 exit 1 한다(dEitY719/dotfiles#326).
+- `HEAD_SHA` 4번째 인자는 `review-passed` 에 신선도 마커를 남긴다(dEitY719/dotfiles#1601).
   **push 이후의 head** 여야 한다(NF-1) — 그래야 `gh-pr:merge-train` 의
   `_gh_pr_merge_train_review_passed_stale` 이 현재 head 와 대조해 통과시킨다.
 - soft-fail: 라벨 실패는 WARN 한 줄이고 PR 은 무라벨로 남는다. 무라벨은
@@ -285,7 +285,7 @@ printf '%s\n' "$MERGED" |
 
 **`devx_pr_review_all_apply_label` 을 쓰지 않는다.** 그 함수는 리뷰어 판정
 토큰 스트림을 받는다. 가짜 `lgtm` 줄을 만들어 먹이면 이 스킬의 자체 판단이
-리뷰어 CLI 의 의견인 것처럼 코드에 기록된다 — #1636 이 명시적으로 배제한
+리뷰어 CLI 의 의견인 것처럼 코드에 기록된다 — dEitY719/dotfiles#1636 이 명시적으로 배제한
 단 하나의 선택지다. 완화는 코드에서 **보여야** 하고, 위장되면 안 된다.
 
 ### Step 7 문구
@@ -295,18 +295,18 @@ printf '%s\n' "$MERGED" |
 
 | 상황 | 문구 |
 |---|---|
-| BLOCKER 없음 | `[OK] 미해결 BLOCKER 없음(BLOCKER 항목 자체가 없음) — review-passed 적용 (외부 재검토 없음, #1636)` |
-| BLOCKER 전부 해소 | `[OK] BLOCKER <n>건 전부 해소 — review-blocked 해제, review-passed 적용 (외부 재검토 없음, #1636)` |
+| BLOCKER 없음 | `[OK] 미해결 BLOCKER 없음(BLOCKER 항목 자체가 없음) — review-passed 적용 (외부 재검토 없음, dEitY719/dotfiles#1636)` |
+| BLOCKER 전부 해소 | `[OK] BLOCKER <n>건 전부 해소 — review-blocked 해제, review-passed 적용 (외부 재검토 없음, dEitY719/dotfiles#1636)` |
 | BLOCKER 미해결 | `[BLOCKED] <r> 의 블로커가 미해결 — review-passed 미부여, review-blocked 유지` |
-| 외부 리뷰 근거 없음 | `[BLOCKED] 외부 리뷰 근거(ai-review 마커) 없음 — review-passed 미부여 (#1636 의 분업 전제 미충족)` |
+| 외부 리뷰 근거 없음 | `[BLOCKED] 외부 리뷰 근거(ai-review 마커) 없음 — review-passed 미부여 (dEitY719/dotfiles#1636 의 분업 전제 미충족)` |
 | 원장 기록됨 | `[OK] origin 원장 기록됨 — 다음 pass 가 이 pass 의 판정을 본다` |
 | 원장 기록 실패 | `[WARN] origin 원장 기록 실패 — 다음 pass 가 이번 판정을 못 본다(BLOCKER 재분류 필요)` |
 | 라벨 미프로비저닝 | `[WARN] label \`review-passed\` missing in <repo> — provision it first (gh-setup:label-bootstrap)` |
 | 그 외 쓰기 실패 | `[WARN] PR #<n> review-passed 적용 실패 — 미검증으로 취급` |
 
-## #1637 리뷰가 막은 구멍
+## dEitY719/dotfiles#1637 리뷰가 막은 구멍
 
-#1636 의 완화는 두 군데가 새고 있었고, 둘 다 "분업이 실제로 성립한 PR" 이
+dEitY719/dotfiles#1636 의 완화는 두 군데가 새고 있었고, 둘 다 "분업이 실제로 성립한 PR" 이
 아닌데도 인증이 나가는 경로였다.
 
 - **codex BLOCKER — pass 사이의 기억이 없었다.** Step 2 의 중복 제거가 앞선
@@ -322,7 +322,7 @@ printf '%s\n' "$MERGED" |
 `drop=ok|absent|failed` 를 내고, 진짜 실패일 때만 WARN 한다 — 404("애초에 없음")
 는 정상 다수 경로라 조용히 지나간다.
 
-## 제거된 것 (#1636)
+## 제거된 것 (dEitY719/dotfiles#1636)
 
 - `Skill(gh-pr:review, "--ai <r> --paths <files> <PR> <remote>")` 재호출과
   그 `BASE_SHA..HEAD` 파일 스코프 계산 — 통과 판정에 더 이상 필요 없다.

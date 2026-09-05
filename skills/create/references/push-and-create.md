@@ -3,7 +3,7 @@
 Used in Step 5 of the `gh-pr:create` skill, after the body is drafted.
 
 `<remote>` below is `$REMOTE` — the `[remote]` positional bound in Step 1a-0,
-defaulting to `origin` (#1405). The push target and the `gh pr create` target
+defaulting to `origin` (dEitY719/dotfiles#1405). The push target and the `gh pr create` target
 must be the same remote.
 
 ## Push policy
@@ -50,7 +50,7 @@ Executable SSOT for the rows above (`gh_pr_push_action`,
 1:1 by `tests/bats/skills/_fixtures/gh_pr_push_policy.sh`. Both take the target
 remote as a trailing optional argument that defaults to `origin`, so
 `gh_pr_push_action "$CUR" "$UPSTREAM" "$DIVERGED" "$REMOTE"` is the Step 5
-call (#1405).
+call (dEitY719/dotfiles#1405).
 
 ## PR creation command
 
@@ -60,7 +60,7 @@ labels applied after creation). That command carries
 `GH_HOST="$TARGET_HOST"` and `--repo "$GH_REPO"` from Step 1a-0 — both derived
 from `$REMOTE`'s URL, the same remote just pushed to. The push target and the
 PR target must be the same server, and only the explicit pair guarantees it
-(#1403 / #1405).
+(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1405).
 
 The base branch passed to `gh pr create --base` is `$BASE_BRANCH` from
 Step 1a — that variable is set by the stacked-PR detection block (see

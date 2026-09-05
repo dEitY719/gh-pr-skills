@@ -4,13 +4,13 @@
 > Step 7 points here and the model pastes the snippet verbatim. This file
 > is both the source of the bash and its narrative companion — rationale,
 > edge cases, and pointers. (Relocated from inline Step 7 for progressive
-> disclosure; the issue #747 visual-checklist guarantees are preserved by
+> disclosure; the issue dEitY719/dotfiles#747 visual-checklist guarantees are preserved by
 > the Step 8 report row, not by inlining the bash.)
 
 ## Executable snippet (paste verbatim into Step 7)
 
 First, detect a PostToolUse hook that already handles this sync — when
-present, skip the inline call to avoid triple-syncing (issue #390):
+present, skip the inline call to avoid triple-syncing (issue dEitY719/dotfiles#390):
 
 ```bash
 hook_skip=0
@@ -27,11 +27,11 @@ do
 done
 
 if [ "$hook_skip" -eq 0 ]; then
-    # helper-fallback NF-1 (#644): silent-skip when helper missing.
-    # Defense-in-depth (#724): also detect "[ -r ] passes but function never
+    # helper-fallback NF-1 (dEitY719/dotfiles#644): silent-skip when helper missing.
+    # Defense-in-depth (dEitY719/dotfiles#724): also detect "[ -r ] passes but function never
     # defined" (interactive-guard regression, partial sourcing, future rename).
     # `|| true` would otherwise absorb `command not found` (rc 127) and the
-    # entire reconciliation would silently no-op — the failure mode from #724.
+    # entire reconciliation would silently no-op — the failure mode from dEitY719/dotfiles#724.
     _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
     [ -f "$_HELPER" ] || _HELPER="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common/functions/gh_project_status.sh"
     if [ -r "$_HELPER" ]; then
@@ -43,13 +43,13 @@ if [ "$hook_skip" -eq 0 ]; then
         else
             # Auto-resolve GH_REPO when unset/empty so neither the PR sync
             # below nor the linked-issues loop is left to the helper's
-            # `gh repo view` auto-detect (PR #780 review, #1405).
+            # `gh repo view` auto-detect (PR dEitY719/dotfiles#780 review, dEitY719/dotfiles#1405).
             if [ -z "${GH_REPO:-}" ]; then
                 # Re-resolve from git's remote, never from `gh repo view`
                 # (which answers gh CLI's default repo — wrong host on a
-                # dual-host login, #1403). The remote is parameterized: it is
+                # dual-host login, dEitY719/dotfiles#1403). The remote is parameterized: it is
                 # $REMOTE, the [remote] positional bound in Step 1a-0, `origin`
-                # by default (#1405). Source gh_host.sh explicitly:
+                # by default (dEitY719/dotfiles#1405). Source gh_host.sh explicitly:
                 # gh_project_status.sh only sources it on the GH_HOST-unset
                 # path, which Step 1a-0's export already bypassed.
                 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
@@ -75,14 +75,14 @@ fi
 
 `GH_REPO` should be `owner/repo` (e.g. `dEitY719/dotfiles`) — normally bound
 in Step 1a-0. The block re-resolves it from `$REMOTE`'s URL (`origin` by
-default, #1405) when unset/empty, ahead of both syncs, so neither the PR
+default, dEitY719/dotfiles#1405) when unset/empty, ahead of both syncs, so neither the PR
 card's `--repo` nor the linked-issues loop is left holding an empty value.
 It deliberately does **not** fall back to `gh repo view --json
 nameWithOwner`: that reads gh CLI's own default repo, which on a dual-host
-login names a repo on the other server (#1403). `_gh_project_status_sync`
+login names a repo on the other server (dEitY719/dotfiles#1403). `_gh_project_status_sync`
 takes no host argument: its `_gh_project_status_ensure_host` keeps an already-
 exported `GH_HOST` and otherwise falls back to `_gh_resolve_host` (the
-setup-mode mapping, issue #804). Step 1a-0's `export GH_HOST` is what makes it
+setup-mode mapping, issue dEitY719/dotfiles#804). Step 1a-0's `export GH_HOST` is what makes it
 take the *remote's* host rather than the PC's default — the two differ
 whenever the PR targets a remote that isn't the setup-mode's usual server.
 
@@ -109,7 +109,7 @@ need to move:
   body) → `In progress`, correcting the GitHub builtin's mis-move to
   `In review`.
 
-## Hook auto-skip (issue #390)
+## Hook auto-skip (issue dEitY719/dotfiles#390)
 
 If a PostToolUse hook is going to do this work, the skill must NOT run the
 inline sync — triple-syncing (skill + hook + GitHub builtin) wastes tokens
@@ -124,7 +124,7 @@ across three paths:
 When **any** path exists, the inline snippet is skipped and the hook (or
 AgentToolbox hook) handles it. When none exist, the inline snippet runs
 as a fallback, preserving behavior for environments without hook support.
-Idempotence of `_gh_project_status_sync` (verify pair, issue #393) absorbs
+Idempotence of `_gh_project_status_sync` (verify pair, issue dEitY719/dotfiles#393) absorbs
 the case where both a dotfiles hook and an AgentToolbox hook fire.
 
 ## Why "In review" with no guard (PR card)
@@ -138,30 +138,30 @@ is no prior status that should block the move.
 The GitHub builtin "Pull request linked to issue" (project workflow #3) moves
 Issue cards to "In review" when a PR is opened with `Closes #N`. However, the
 intended Issue lifecycle is `Backlog → In progress → Done` — Issues must never
-visit "In review" or "Approved" (issue #289).
+visit "In review" or "Approved" (issue dEitY719/dotfiles#289).
 
 Calling `_gh_project_status_sync issue … "In progress"` immediately after the
 PR is created corrects the builtin's transition. The
 `--only-from "Backlog,Ready,In review"` guard explicitly includes `In review`
 so we can undo the builtin's mis-move even when it fires before our sync, while
-still refusing to drag `Done` Issues backwards if a closed PR is re-opened (#309).
+still refusing to drag `Done` Issues backwards if a closed PR is re-opened (dEitY719/dotfiles#309).
 
 ## `GH_REPO` requirement
 
 The closing-issues helper (`_gh_pr_closing_issue_numbers`) needs the repo
 slug as `owner/repo` (e.g. `dEitY719/dotfiles`). The Step 7 snippet
 auto-resolves `GH_REPO` inline when it is unset/empty — added in response to
-the PR #780 review: an unset `GH_REPO` would otherwise pass an empty string to
+the PR dEitY719/dotfiles#780 review: an unset `GH_REPO` would otherwise pass an empty string to
 `_gh_pr_closing_issue_numbers`, the helper would return immediately, and the
 linked-issues sync loop would silently no-op.
 
 That fallback originally used `gh repo view --json nameWithOwner --jq
-.nameWithOwner`. Issue #1403 replaced it with `_gh_parse_owner_repo_url` over
+.nameWithOwner`. Issue dEitY719/dotfiles#1403 replaced it with `_gh_parse_owner_repo_url` over
 `git remote get-url "${REMOTE:-origin}"`: `gh repo view` without `--repo`
 answers "what is gh CLI's default repo", not "what is git's remote", and on a
 PC logged into both github.com and GHES those two disagree silently. Reading
 the slug from the remote URL keeps it consistent with the `GH_HOST` bound from
-that same URL. Issue #1405 then parameterized *which* remote that is —
+that same URL. Issue dEitY719/dotfiles#1405 then parameterized *which* remote that is —
 `$REMOTE`, the `[remote]` positional, `origin` by default — so a PR opened on
 `upstream` syncs `upstream`'s board rather than `origin`'s. Still a thin
 wrapper — no auth state changes, no API mutation.
@@ -175,7 +175,7 @@ wrapper — no auth state changes, no API mutation.
 - **Opt-out per invocation** — set `GH_PROJECT_STATUS_SYNC=0` in the
   environment to skip both syncs entirely.
 - **Helper unavailable** — when `_HELPER` is unreadable, the inline block
-  silently skips (NF-1 fallback, #644). When the file sources but the
+  silently skips (NF-1 fallback, dEitY719/dotfiles#644). When the file sources but the
   function is undefined (interactive-guard regression, partial sourcing,
   future rename), an explicit `#724` warning is printed and the sync is
   skipped — preventing the silent `rc 127` swallow.

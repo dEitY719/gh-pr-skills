@@ -41,7 +41,7 @@ Closes #<N>
   must never generate these. `Refs` / `See` / `References` do not trigger
   GitHub auto-close, and `Resolves` violates the AgentToolbox policy. To
   express partial progress, omit the footer and mention `(part of #N)`
-  inline in the body instead (issue #392).
+  inline in the body instead (issue dEitY719/dotfiles#392).
 - Omit the `## Related` section entirely only when no issue number
   is known.
 
@@ -91,10 +91,10 @@ GH_HOST="$TARGET_HOST" gh pr create \
 ```
 
 `GH_HOST` + `--repo` are the pair Step 1a-0 bound from `$REMOTE`'s URL
-(`origin` by default, #1405). Both
+(`origin` by default, dEitY719/dotfiles#1405). Both
 are mandatory — a bare `gh pr create` follows gh CLI's own
 `gh repo set-default`, which on a dual-host login opens the PR against the
-wrong GitHub server (#1403).
+wrong GitHub server (dEitY719/dotfiles#1403).
 
 `$BASE_BRANCH` is bound by Step 1a (`references/stacked-pr.md`); it is
 either the repo default branch or — when stacking — a parent PR's
@@ -116,7 +116,7 @@ Labels are applied **after** `gh pr create` via the
    is being deprecated` GraphQL warning on repos that still have a classic
    project board attached, silently dropping every label. The wrapper
    detects that warning and falls back to the REST endpoint, which is
-   GraphQL-free. See issue #326.
+   GraphQL-free. See issue dEitY719/dotfiles#326.
 
 ### Mapping from Conventional Commits
 
@@ -176,10 +176,10 @@ done
 ```
 
 `GH_REPO` is `owner/repo` (e.g. `dEitY719/dotfiles`), bound in Step 1a-0 from
-`$REMOTE`'s URL (`origin` by default, #1405) together with `TARGET_HOST`. If it is somehow unset,
+`$REMOTE`'s URL (`origin` by default, dEitY719/dotfiles#1405) together with `TARGET_HOST`. If it is somehow unset,
 re-resolve it from that same URL via `_gh_parse_owner_repo_url` — not via a
 bare `gh repo view --json nameWithOwner`, which reads gh CLI's default repo
-and can name a different host's repo entirely (#1403). `_gh_pr_edit_safe_label`
+and can name a different host's repo entirely (dEitY719/dotfiles#1403). `_gh_pr_edit_safe_label`
 calls `gh` internally and inherits the exported `GH_HOST`.
 
 Report the applied labels (and skipped ones, if any) alongside the PR URL

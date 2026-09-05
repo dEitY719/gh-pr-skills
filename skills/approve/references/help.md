@@ -42,7 +42,7 @@
      stay on the PR so the author's next push triggers natural re-review.
 6. Promotes the project-board card to `Approved` (from any pre-merge column) — but only on the
    approve paths and on `--self-record`. This skill is the sole owner of the
-   `Approved` column (#1350); `gh-pr:reply` no longer auto-promotes.
+   `Approved` column (dEitY719/dotfiles#1350); `gh-pr:reply` no longer auto-promotes.
 7. Re-fetches `reviewDecision` + `mergeStateStatus` and reports a compact summary
    (plus diagnosis if merge is still blocked for reasons outside your review).
 

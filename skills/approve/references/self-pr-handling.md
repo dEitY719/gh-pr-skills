@@ -69,7 +69,7 @@ admin merge is still required when branch protection applies.
 ### Board promotion (-> `Approved`)
 
 `--self-record` is the explicit human action that promotes the card for
-self-authored PRs (issue #1350). Run `references/board-approved-sync.sh.md`
+self-authored PRs (issue dEitY719/dotfiles#1350). Run `references/board-approved-sync.sh.md`
 with `BOARD_BYPASS=1`; that file holds the per-path table (the other two
 self-PR modes never promote) and the rationale for the `#393` bypass and
 its POSIX prefix form.

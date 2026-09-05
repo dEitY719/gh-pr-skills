@@ -14,7 +14,7 @@ runs unchanged.
 
 The number is a starting point. Tune it in this file when PR-size
 distribution data justifies it. Do **not** hardcode the threshold
-anywhere else (issue #403 acceptance criterion: single source of
+anywhere else (issue dEitY719/dotfiles#403 acceptance criterion: single source of
 truth in references/).
 
 ## When to delegate

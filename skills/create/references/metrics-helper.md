@@ -7,7 +7,7 @@ not the drafted PR body itself.
 
 ## Why a code-ified helper
 
-Issue #326 traced PR #325's `~1000 tokens` footer to a Step 4 execution
+Issue dEitY719/dotfiles#326 traced PR dEitY719/dotfiles#325's `~1000 tokens` footer to a Step 4 execution
 that counted `wc -m < "$BODY"` (the PR-body temp file) instead of the
 issue-body + commit-log pair. The natural-language spec ("character count
 of (issue body + commit log) ÷ 4") didn't bind tightly to a variable name
@@ -33,7 +33,7 @@ compute_pr_tokens() {
 
 ISSUE_BODY=""
 if [ -n "${ISSUE_NUMBER-}" ]; then
-    # Host + repo are both explicit (#1403). The old `--repo`-less fallback
+    # Host + repo are both explicit (dEitY719/dotfiles#1403). The old `--repo`-less fallback
     # branch was removed: a bare `gh issue view <N>` resolves against gh
     # CLI's own `gh repo set-default`, so on a dual-host login it reads a
     # different server's issue #N — or reports "not found" for an issue that
@@ -56,17 +56,17 @@ tolerated outcome here (the commit log alone usually clears the 1000 floor),
 which is exactly why the host must be pinned: a wrong-host read fails softly
 and looks identical to "the issue has no body".
 
-## Regression case — PR #325
+## Regression case — PR dEitY719/dotfiles#325
 
 | Input | Char count |
 |---|---|
-| Issue #324 body                                   | ~13 800 |
+| Issue dEitY719/dotfiles#324 body                                   | ~13 800 |
 | `git log main..HEAD --format=%B` + `git diff`     | ~13 200 |
 | **Total**                                         | ~27 000 |
 | `total / 4`                                       | ~6 750  |
 | Rounded to nearest 500                            | **7 000** |
 
-A re-run of the helper on PR #325's range must yield 7 000 (±500 for diff
+A re-run of the helper on PR dEitY719/dotfiles#325's range must yield 7 000 (±500 for diff
 drift on the same commit set), never 1 000.
 
 ## Boundary fixtures

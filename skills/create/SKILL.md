@@ -29,8 +29,8 @@ Record `START_TS=$(date +%s)` immediately for Step 4 elapsed-time tracking.
 
 **1a-0 — parse positionals and bind the GitHub target, before any `gh` call:**
 read `references/github-target.md` and paste its snippet verbatim. It parses
-`[N] [remote] [--no-stack] [--base <branch>]` (#1405) and exports `GH_HOST` /
-`GH_REPO` / `TARGET_HOST` / `REMOTE` (#1403). `$REMOTE` drives every `gh` call
+`[N] [remote] [--no-stack] [--base <branch>]` (dEitY719/dotfiles#1405) and exports `GH_HOST` /
+`GH_REPO` / `TARGET_HOST` / `REMOTE` (dEitY719/dotfiles#1403). `$REMOTE` drives every `gh` call
 **and** every git plumbing call below.
 
 **1a — base via stacked-PR detection:** read `references/stacked-pr.md` and
@@ -58,7 +58,7 @@ conversation `#N`, (3) range commit footers, (4) none → omit the link.
 Read `references/pr-body-template.md` for title rules and body markdown; match
 the language of existing commits. Then follow `references/ai-metrics-footer.md`
 verbatim to compute `TOKENS`/`HUMAN_H`/`ELAPSED` and append the footer to `$BODY`
-(soft-fail; honours `GH_DISABLE_AI_METRICS=1`, #399). Step 4.5: paste the
+(soft-fail; honours `GH_DISABLE_AI_METRICS=1`, dEitY719/dotfiles#399). Step 4.5: paste the
 "Helper" snippet from `references/lint-guard.md` verbatim — runs against
 `$BASE_BRANCH` **before** the Step 5 push, hard-fails on lint errors, auto-skips
 on no-tools / empty change set / `GH_PR_LINT_BYPASS=1`.
@@ -68,7 +68,7 @@ on no-tools / empty change set / `GH_PR_LINT_BYPASS=1`.
 Read `references/push-and-create.md` for the upstream-state push policy and the
 `gh pr create` command (`mktemp` body file, `--assignee @me`, `--base
 "$BASE_BRANCH"`). After the URL returns, emit
-`printf '[step:gh-pr-create/push-and-create] OK\n'` (step-skip guard, #753).
+`printf '[step:gh-pr-create/push-and-create] OK\n'` (step-skip guard, dEitY719/dotfiles#753).
 
 ## Step 6: Apply Labels
 
@@ -88,7 +88,7 @@ auto-skip narrative, `GH_REPO` requirement, Step 8 report-row mapping, and the
 ## Step 8: Report
 
 Read `references/report-template.md` for the success/failure report blocks (the
-defense-in-depth `Board sync:` row, #747, included) and the closing `[step:gh-pr-create/report] OK` marker. No extra summary — the user opens the URL.
+defense-in-depth `Board sync:` row, dEitY719/dotfiles#747, included) and the closing `[step:gh-pr-create/report] OK` marker. No extra summary — the user opens the URL.
 
 ## Constraints
 

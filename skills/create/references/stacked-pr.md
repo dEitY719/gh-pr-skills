@@ -105,7 +105,7 @@ none of these is treated as solo / non-stacked.
 #   STACK_BASE     — branch name when STACK_MODE=base
 #   ISSUE_NUMBER   — first positional integer (legacy "/gh-pr:create 123" link)
 # Non-integer positionals are deliberately ignored here: that is the [remote]
-# positional, already consumed by Step 1a-0 into $REMOTE (#1405).
+# positional, already consumed by Step 1a-0 into $REMOTE (dEitY719/dotfiles#1405).
 # Returns 0 on success, 2 on mutually-exclusive violation, 3 on bad value.
 parse_stacked_args() {
     STACK_MODE=auto
@@ -202,7 +202,7 @@ _gh_pr_default_default_tip_diff_check() {
 
 find_parent_pr_candidates() {
     local _default_branch="$1"
-    # $REMOTE is the [remote] positional bound in Step 1a-0 (#1405).
+    # $REMOTE is the [remote] positional bound in Step 1a-0 (dEitY719/dotfiles#1405).
     local _remote="${REMOTE:-origin}"
     local _default_tip="$_remote/$_default_branch"
     local _line _pr _head _candidates
@@ -234,12 +234,12 @@ EOF
 hazards remain:
 
 - **TOCTOU on state** — between Stage 2 and `gh pr create` (Step 5) the
-  parent can be merged or closed (#614 / F-4).
+  parent can be merged or closed (dEitY719/dotfiles#614 / F-4).
 - **Multi-stack drift** — if the auto-detected parent is itself stacked
   on another PR (its body carries a `Depends on #N` line), accepting it
   silently produces a 2+-deep stack. agent-toolbox declares 1-stack-only
   as an invariant (`scripts/stacked_closes_rollup.py` defers the rollup
-  on multi-stack); dotfiles must match (#616 / F-6).
+  on multi-stack); dotfiles must match (dEitY719/dotfiles#616 / F-6).
 
 The two guards below re-read the parent's state **and** body right
 before the base branch decision is committed and abort with:
@@ -335,8 +335,8 @@ Step 1a-0 when this block runs — every `gh` call below (and in the helpers
 above) pins both. Without them `gh` resolves against its own
 `gh repo set-default`, so on a dual-host login `DEFAULT_BRANCH` and the
 candidate PR list come from a different GitHub server than the target remote
-(#1403). That remote is `$REMOTE` — the `[remote]` positional, `origin` by
-default (#1405); the ref probes above fetch and compare against it, never a
+(dEitY719/dotfiles#1403). That remote is `$REMOTE` — the `[remote]` positional, `origin` by
+default (dEitY719/dotfiles#1405); the ref probes above fetch and compare against it, never a
 hard-coded `origin`.
 
 ```sh

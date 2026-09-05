@@ -36,7 +36,7 @@ Read `references/target-resolution.md` and follow it: positional args
 `<pr-number> [remote]`, PR-number precedence (never guess "the latest PR"), the
 `TARGET_REPO` + `TARGET_HOST` binding (both from the `[remote]`'s URL, never
 `gh`'s default-repo heuristic), the fork tradeoff. Every later `gh` call runs as
-`GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"` (#1403, #1407).
+`GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"` (dEitY719/dotfiles#1403, dEitY719/dotfiles#1407).
 
 ## Step 2: Fetch All Review Comments
 
@@ -62,7 +62,7 @@ rules; see `references/reply-templates.md` for the full rubric.
 Record each item's origin as `<reviewer>:<severity>:<verdict>` into `ORIGINS`
 via `_gh_pr_reply_origin_line` (`references/review-passed-gate.md` § Step 3) —
 Steps 6 and 7 both read that stream, because a flat accepted/declined count
-cannot tell an unresolved BLOCKER from a declined suggestion (#1616).
+cannot tell an unresolved BLOCKER from a declined suggestion (dEitY719/dotfiles#1616).
 
 ## Step 4: Apply Fixes (ACCEPT / ACCEPT-PARTIAL only)
 
@@ -100,7 +100,7 @@ output, so `.user.login` survives) with
 `_gh_pr_reply_history_origins "$ME"` / `_gh_pr_reply_history_has_review "$ME"`,
 where `ME` is the login this pipeline authenticates as
 (`ME="${GH_PR_REPLY_TRUSTED_LOGIN:-${ME:-$(GH_HOST="$TARGET_HOST" gh api user -q .login)}}"`)
-— a marker from any other commenter is forged and ignored (#1639);
+— a marker from any other commenter is forged and ignored (dEitY719/dotfiles#1639);
 merge `ORIGINS` over that history (`_gh_pr_reply_origins_merge`) and post the
 merged stream back as the ledger comment (`_gh_pr_reply_post_origins_ledger`,
 before the gate and whatever it decides); a PR with no external-review
@@ -109,7 +109,7 @@ evidence is left unlabelled. Then pipe the merged stream into
 "$HEAD_SHA" "$EVIDENCE"`. It applies `review-passed` — freshness marker
 included — when no BLOCKER-severity item is left unresolved, and applies
 nothing when one is.
-Since #1636 this skill decides that **on its own judgment, with no external AI
+Since dEitY719/dotfiles#1636 this skill decides that **on its own judgment, with no external AI
 CLI re-call**; `gh-verify:review-all` owns `review-blocked` and never writes
 `review-passed`. Never hand-write either label: the gate helper is the only
 path (see `references/constraints.md` for the NF-2 relaxation and its
@@ -119,7 +119,7 @@ Then **unconditionally** run the same removal block Step 2.5 does —
 `references/reply-pending-label-removal.sh.md`. Between the two call sites the
 label is cleared on every exit short of a crash, which is the point:
 `gh-verify:review-all`'s `defer` branch adds it and `gh-pr:merge-train` skips any
-PR carrying it, so a label left on wedges the PR out of the train (#1524).
+PR carrying it, so a label left on wedges the PR out of the train (dEitY719/dotfiles#1524).
 
 ## Step 7: Report
 
@@ -133,7 +133,7 @@ gate outcome line, commit SHAs, skipped comments, and the lingering
 
 Read `references/constraints.md`. Non-negotiables: never skip a reply (bot
 comments included), never promote the card to `Approved` (owned by
-`gh-pr:approve`, #1350), never resolve threads programmatically, never
+`gh-pr:approve`, dEitY719/dotfiles#1350), never resolve threads programmatically, never
 `--amend` / `--no-verify` / force-push, and route label/body edits through
 `_gh_pr_edit_safe_*`.
 

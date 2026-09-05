@@ -182,6 +182,6 @@ Scan the PR body + most recent 3 human comments. Reply in the dominant language.
 
 ## Don'ts
 
-- **Never** attach `--label`/`--milestone` to follow-up issues unless verified via `gh label list` / `gh api` that they exist — silent failures or surprise taxonomy damage is worse than terse issues. `--assignee @me` is exempt from this rule (issue #1523): the authenticated user always exists, so there is nothing to verify and no taxonomy risk — it is added unconditionally.
+- **Never** attach `--label`/`--milestone` to follow-up issues unless verified via `gh label list` / `gh api` that they exist — silent failures or surprise taxonomy damage is worse than terse issues. `--assignee @me` is exempt from this rule (issue dEitY719/dotfiles#1523): the authenticated user always exists, so there is nothing to verify and no taxonomy risk — it is added unconditionally.
 - **Never** submit a `--comment` review as a substitute for `--approve`, except the explicit `--self-record` path. Comment reviews do not satisfy branch protection.
 - **Never** re-submit a review if one already exists — GitHub dismisses stale ones; check `reviewDecision` first.

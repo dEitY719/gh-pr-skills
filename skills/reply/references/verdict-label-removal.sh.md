@@ -6,12 +6,12 @@
 쓰기(반대 라벨 삭제 포함)는 `devx_pr_review_all_write_label` 이 한다.
 
 규칙의 SSOT 는 `shell-common/functions/gh_pr_edit_safe.sh` 헤더의
-"Verdict-label invalidation — SSOT for issue #1563" 절이다. 여기서는 되풀이하지
+"Verdict-label invalidation — SSOT for issue dEitY719/dotfiles#1563" 절이다. 여기서는 되풀이하지
 않는다. 요약만: 두 라벨은 **특정 head 커밋 하나**에 대한 주장이므로 head 를
 전진시킨 스킬이 스스로 무효화해야 한다.
 
 Caller contract: `PR_NUMBER`, `TARGET_REPO`, `TARGET_HOST` 는 Step 1 이
-`references/target-resolution.md` 대로 이미 export 한 상태여야 한다 (#1403).
+`references/target-resolution.md` 대로 이미 export 한 상태여야 한다 (dEitY719/dotfiles#1403).
 `ORIGINS` 는 Step 3 이 `references/review-passed-gate.md` 대로 기록한
 `<reviewer>:<severity>:<verdict>` 스트림이다.
 
@@ -27,19 +27,19 @@ Caller contract: `PR_NUMBER`, `TARGET_REPO`, `TARGET_HOST` 는 Step 1 이
   `devx_pr_review_all_write_label` 이 한다(게이트가 통과하면 그 함수가
   반대 라벨인 `review-blocked` 를 먼저 지운다). 게이트가 미해결 BLOCKER를
   이유로 hold 하면 `review-blocked` 는 손대지 않고 그대로 남는다 —
-  DECLINE/QUESTION 으로 남은 BLOCKER 는 "해소"로 치지 않는다(#1636 fail-closed
-  방향, "역사적 참고" 아래 #1634 와의 차이 설명).
+  DECLINE/QUESTION 으로 남은 BLOCKER 는 "해소"로 치지 않는다(dEitY719/dotfiles#1636 fail-closed
+  방향, "역사적 참고" 아래 dEitY719/dotfiles#1634 와의 차이 설명).
 
-  #1616 이전에는 여기서 전역 카운터(`ACCEPTED_COUNT` / `DECLINED_COUNT`)로
+  dEitY719/dotfiles#1616 이전에는 여기서 전역 카운터(`ACCEPTED_COUNT` / `DECLINED_COUNT`)로
   판단했다. 그 규칙은 *다른* 리뷰어의 비블로킹 제안을 정당하게 거절한 것만으로
-  라벨을 붙잡아 뒀다 — PR #1609 가 그 사례다. 심각도 기반 게이트가
+  라벨을 붙잡아 뒀다 — PR dEitY719/dotfiles#1609 가 그 사례다. 심각도 기반 게이트가
   그 자리를 대신한다.
 
-### 역사적 참고 — #1634 는 #1636 으로 대체됐다
+### 역사적 참고 — dEitY719/dotfiles#1634 는 dEitY719/dotfiles#1636 으로 대체됐다
 
-#1634 는 한때 "Step 5 완주(코멘트 전원 답변) 자체가 조건"으로 `review-blocked`
+dEitY719/dotfiles#1634 는 한때 "Step 5 완주(코멘트 전원 답변) 자체가 조건"으로 `review-blocked`
 를 **무조건**(ACCEPT/DECLINE 비율과 무관하게) 해제했다 — 정당한 사유로
-DECLINE 된 BLOCKER 도 라벨을 풀어 줬다는 뜻이다. #1636 은 이를 더 엄격한
+DECLINE 된 BLOCKER 도 라벨을 풀어 줬다는 뜻이다. dEitY719/dotfiles#1636 은 이를 더 엄격한
 규칙으로 대체한다: BLOCKER 심각도 항목이 하나라도 미해결(DECLINE/QUESTION)로
 남으면 `review-passed` 는 절대 부여되지 않고, 그 결과 `review-blocked` 도
 그대로 남는다 — "발견은 외부 AI, 해소 확인은 gh-pr:reply" 라는 분업에서
@@ -94,7 +94,7 @@ fi
 
 이 스킬은 두 라벨 중 어느 것도 **손으로 add 하지 않는다**. `review-passed` 는
 `_gh_pr_reply_apply_review_passed`(→ `devx_pr_review_all_write_label`) 만이,
-`review-blocked` 는 `gh-verify:review-all` 만이 쓴다. #1636 이후 이 스킬은
+`review-blocked` 는 `gh-verify:review-all` 만이 쓴다. dEitY719/dotfiles#1636 이후 이 스킬은
 외부 재검토 없이 스스로 `review-passed` 를 부여할 수 **있지만**, 그 판단조차
 게이트 함수를 통해서만 이루어진다 — 인라인 라벨 명령은 여전히 금지다.
 완화의 범위와 근거는 `references/constraints.md` 가 SSOT 다.
@@ -103,5 +103,5 @@ fi
 
 네 번째 인자 `TARGET_HOST` 가 `GH_HOST` 를 고정한다. 넘기지 않으면 dual-host
 로그인에서 `gh` 가 `gh repo set-default` 로 폴백해 **에러 없이 엉뚱한 서버의
-라벨을 지운다** (#1403 / #1407). `gh api` 는 `--repo` 플래그를 받지 않으므로
-repo 는 경로에 들어간다 (#658) — 헬퍼가 대신 처리한다.
+라벨을 지운다** (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). `gh api` 는 `--repo` 플래그를 받지 않으므로
+repo 는 경로에 들어간다 (dEitY719/dotfiles#658) — 헬퍼가 대신 처리한다.

@@ -9,7 +9,7 @@ Next: /gh-pr:reply (after CI green) — replies to review comments
 ```
 
 The `Board sync:` row is a defense-in-depth visual checklist (issue
-#747) — its absence in conversation transcripts is a regression signal
+dEitY719/dotfiles#747) — its absence in conversation transcripts is a regression signal
 that Step 7 was silently skipped.
 
 After printing the report block, emit the report step-completion
