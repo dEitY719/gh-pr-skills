@@ -162,16 +162,16 @@ if [ -n "$VERIFY_SKILL" ]; then
         awk -v f="$PMV_FENCE" \
             '$0 == f "bash" && !b { b = 1; next } $0 == f && b { exit } b' \
             "$PMV_BLOCK" >"$PMV_SH"
-        # An empty extraction is this same bug in another mask (right file,
-        # wrong fence); sourcing it is silent, so treat it as never staged.
+        # An empty extraction is the same bug masked (right file, wrong fence)
+        # and an unparseable body a third — PMV_OK is earned, never assumed.
         # shellcheck source=/dev/null
-        if [ -s "$PMV_SH" ]; then PMV_OK=1; . "$PMV_SH"; fi
+        if [ -s "$PMV_SH" ]; then . "$PMV_SH" && PMV_OK=1; fi
         rm -f "$PMV_SH"
         trap - EXIT INT TERM
     fi
-    # A registered repo that cannot stage the dispatch is a broken install, not
-    # an opt-out: loud, and never confusable with the silent unregistered skip.
-    [ -n "$PMV_OK" ] || printf '[FAIL] gh-pr:merge: post-merge verification did NOT run for %s (registered) — %s is unreadable or has no bash fence. Broken install, not an opt-out: repair the gh-pr plugin or point GH_VERIFY_ROOT at a gh-verify checkout, then run /gh-verify:post-merge-verify %s by hand.\n' \
+    # A registered repo that cannot stage or run the dispatch is a broken
+    # install, not an opt-out: loud, never the silent unregistered skip.
+    [ -n "$PMV_OK" ] || printf '[FAIL] gh-pr:merge: post-merge verification did NOT run for %s (registered) — %s did not stage or would not source. Broken install, not an opt-out: repair the gh-pr plugin or point GH_VERIFY_ROOT at a gh-verify checkout, then run /gh-verify:post-merge-verify %s by hand.\n' \
         "$TARGET_REPO" "$PMV_BLOCK" "$PR_NUMBER"
 fi
 ```
