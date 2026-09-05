@@ -174,5 +174,20 @@ unaddressed comment falls into exactly one.
 - **QUESTION** — reviewer asked for clarification rather than a change;
   answer the question directly.
 
+There is no fifth class. A BLOCKER you decline **because it belongs
+somewhere else** is still a `DECLINE` — you file it where it belongs and
+record the tracking issue in the ledger's optional 4th field:
+
+```bash
+_gh_pr_reply_origin_line agy '[BLOCKER]' DECLINE dEitY719/harness-skills#22
+```
+
+The reply itself must still say why it is declined here and name the issue it
+went to, exactly like any other decline. Escalating does **not** clear the
+gate: `review-passed` is still withheld and `review-blocked` still stands —
+the item genuinely is unresolved in this PR. All the 4th field buys is that
+the next reader can follow it. SSOT: `references/review-passed-gate.md`
+-> "추적된 DECLINE 은 여전히 hold 다".
+
 Bot comments (gemini-code-assist, sourcery-ai, copilot) follow the same
 rules — a bot nit is still a legitimate comment that deserves a reply.

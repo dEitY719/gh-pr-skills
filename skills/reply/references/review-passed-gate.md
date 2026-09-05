@@ -53,6 +53,8 @@ ORIGINS=$(
     _gh_pr_reply_origin_line codex '[BLOCKER]'   ACCEPT
     _gh_pr_reply_origin_line codex '[BLOCKER]'   ACCEPT
     _gh_pr_reply_origin_line agy   '[FOLLOW-UP]' DECLINE
+    # 선택적 4번째 인자 — 이 BLOCKER 를 어디로 에스컬레이션했는지 (아래 참조)
+    _gh_pr_reply_origin_line agy   '[BLOCKER]'   DECLINE dEitY719/harness-skills#22
 )
 ```
 
@@ -74,6 +76,22 @@ ORIGINS=$(
 - `<severity>` — 리뷰어가 본문에 단 태그(`[BLOCKER]` / `[FOLLOW-UP]` /
   `[Suggestion]` …). 대괄호는 렌더링이라 헬퍼가 벗겨낸다.
 - `<verdict>` — `ACCEPT` / `ACCEPT-PARTIAL` / `DECLINE` / `QUESTION`.
+- `<tracking-ref>` — **선택**. 이 항목을 에스컬레이션한 이슈를
+  `owner/repo#N` 으로 적는다 (dEitY719/dotfiles#1762). 없으면 필드 자체가
+  없고, 그러면 줄은 이 필드가 생기기 전과 **바이트 단위로 동일**하다.
+  - **왜 5번째 verdict 토큰이 아니라 4번째 필드인가.** 원장은 이미 살아 있는
+    PR 에 올라가 있는 영속 상태라, 마이그레이션이 아니라 순수 상위집합이어야
+    한다. verdict enum 을 늘리면 그 enum 을 읽는 모든 곳
+    (`_gh_pr_reply_origin_tally` 의 awk `$3` 비교 포함)이 새 토큰을 알아야
+    하지만, 필드를 늘리면 아무도 몰라도 된다. 그리고 ref 는 판정이 아니라
+    **출처**다 — verdict 자리에 두면 "추적된 DECLINE 은 다르게 취급해야 하나"를
+    묻고 싶어지는데, 답은 **아니오**이고 필드 분리가 그 답을 구조로 못 박는다.
+  - 검증은 `_gh_pr_reply_tracking_ref_is_valid <ref>` (rc 0 = 유효). 화이트리스트
+    문자류라 ref 가 원장 구분자 `:` 를 몰래 넣을 수 없고, 두 번째 `/`·`#`
+    (`a/b/c#1`, `a/b#1#2`)은 조용히 재해석되는 대신 거부된다. 오타는
+    **쓰기 경계**에서 exit 2 — 아무도 따라갈 수 없는 ref 가 원장에 남지 않는다.
+  - `owner/repo` 는 GitHub 에서 대소문자를 구분하므로, reviewer/verdict 에
+    적용되는 대소문자 정규화가 이 필드에는 적용되지 않는다.
 
 Step 7 의 리뷰어별 표는 이 스트림을 `_gh_pr_reply_origin_tally` 로 집계한다.
 스트림은 **하나**다 — Step 6 과 Step 7 이 같은 `ORIGINS` 를 읽는다.
@@ -143,8 +161,15 @@ PR 에 `review-passed` 를 붙였다**.
 <!-- pr-reply-origins:<head-sha> -->
 codex:BLOCKER:DECLINE
 agy:FOLLOW-UP:ACCEPT
+agy:BLOCKER:DECLINE:dEitY719/harness-skills#22
 <!-- /pr-reply-origins:<head-sha> -->
 ```
+
+세 번째 줄이 선택적 4번째 필드다 — 같은 `DECLINE` 이지만 **어디로 갔는지**를
+말한다. `_gh_pr_reply_origin_tally` / `_gh_pr_reply_origins_block` /
+`_gh_pr_reply_history_origins` / `_gh_pr_reply_origins_merge` 는 전부 `*:*:*`
+글롭이나 `${line%%:*}` 만 보므로 이 필드에 무관심하다. 읽어서 쓰는 곳은
+게이트 하나뿐이다.
 
 - `_gh_pr_reply_origins_block <head-sha>` — origin 스트림을 위 블록으로 감싼다.
   빈 스트림이면 아무것도 출력하지 않는다(기억할 게 없다). `<head-sha>` 가
@@ -242,6 +267,7 @@ PR dEitY719/dotfiles#1608 이 `_gh_pr_merge_train_review_passed_marker_sha` 에 
 | `pass=no-blocker` | BLOCKER 심각도 항목이 애초에 없었음 | `review-passed` 적용 |
 | `pass=blockers-resolved:<n>` | BLOCKER `<n>` 건이 전부 ACCEPT / ACCEPT-PARTIAL | `review-passed` 적용 |
 | `hold=unresolved-blocker:<r>` | `<r>` 의 BLOCKER 가 DECLINE/QUESTION 으로 남음 | 미적용, `review-blocked` 유지, **쓰기 0회** |
+| `hold=unresolved-blocker-tracked:<r>:<ref>` | 같은 상태지만 그 항목이 `<ref>` 로 에스컬레이션됨 | **동일** — 미적용, `review-blocked` 유지, **쓰기 0회** |
 | `hold=no-external-review` | 이 PR 을 본 외부 리뷰어가 없음 (`ai-review` 마커 부재) | 미적용, 무라벨(=미검증), **쓰기 0회** |
 
 평가 순서: **BLOCKER 루프가 먼저**다. 미해결 BLOCKER 와 근거 부재가 동시에
@@ -255,6 +281,47 @@ FOLLOW-UP 으로 다시 제기되는 것이 이 저장소의 흐름이다.
 
 `hold` 은 **첫 번째** 미해결 BLOCKER 에서 즉시 결정되고 그 리뷰어를 이름으로
 남긴다. 하나로 충분하다 — NF-2 의 fail-closed 절반은 완화 대상이 아니다.
+추적 여부는 순서에 영향을 주지 않는다 — 추적된 줄이라고 뒤로 밀리거나
+우대받지 않는다.
+
+### 추적된 DECLINE 은 여전히 hold 다 (dEitY719/dotfiles#1762)
+
+**에스컬레이션은 해소가 아니다.** 4번째 필드가 붙은 미해결 BLOCKER 는
+`hold=unresolved-blocker-tracked:<r>:<ref>` 를 내고, 이것도 `hold=*` 이므로
+`_gh_pr_reply_apply_review_passed` 는 다른 hold 와 **완전히 같은 경로**를 탄다:
+보고하고, 아무 라벨도 쓰지 않고, `review-blocked` 를 지우지도 않고, rc 0.
+그 항목은 이 PR 안에서 실제로 미해결이고, 게이트가 hold 하는 것이 옳다.
+
+달라지는 것은 **리포트 한 줄**뿐이다. Step 7 이 내는 줄이
+
+```
+[BLOCKED] agy 의 블로커가 미해결 — dEitY719/harness-skills#22 로 에스컬레이션(추적 중, 해소 아님), review-passed 미부여, review-blocked 유지
+```
+
+가 되어, 읽는 쪽(사람이든 다음 pass 든)이 그 항목을 따라갈 수 있다.
+
+**왜 필요했나.** 2026-09-05 롤아웃 PR 5건(`dEitY719/gh-flow-skills#10`,
+`dEitY719/gh-issue-skills#14`, `dEitY719/gh-pr-skills#20`,
+`dEitY719/gh-resolve-skills#12`, `dEitY719/gh-verify-skills#15`)이 전부 같은
+`$PWD` BLOCKER 를 `dEitY719/harness-skills#22` 로 넘기며 `review-blocked` 를
+유지했다. 다섯 건 모두 판정은 옳다. 결함은 판정이 아니라 **가독성**이었다 —
+`review-blocked` 가 저장소 패밀리 전반에서 두 가지 뜻을 갖게 됐는데 구분할
+방법이 없었다:
+
+- 아무도 조치하지 않은 BLOCKER, 그리고
+- 분류해서 이 PR 범위 밖으로 판단하고 있어야 할 곳에 등록한 BLOCKER.
+
+**원장에서 되읽은 ref 가 깨져 있으면** 하드 실패 대신 3필드
+토큰(`hold=unresolved-blocker:<r>`)으로 degrade 한다.
+`_gh_pr_reply_history_origins` 가 이미 같은 이유로 파싱 불가 라인을 조용히
+버린다 — 원장은 평범한 PR 코멘트라, 사람이 그 안에 답글을 달았다고 다음 pass 의
+게이트가 죽어서는 안 된다. 따라갈 수 없는 ref 를 보고하느니 안 하는 편이 낫고,
+hold 여부는 어느 쪽이든 동일하다. 오타를 이름 있는 실패로 만드는 일은
+**쓰기 경계**(`_gh_pr_reply_origin_line`)가 맡는다.
+
+이 결함은 `dEitY719/gh-verify-skills#14` 와 같은 부류의 형제다: 게이트가
+표현할 수 없는 상태를 갖고 있던 문제. 거기서는 "리뷰어 레인이 돌지 못했다"가
+"레인 건너뜀"으로 보고됐다.
 
 ### 적용 (F-3 / F-4)
 
