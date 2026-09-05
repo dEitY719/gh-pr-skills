@@ -1,7 +1,7 @@
 #!/bin/sh
 # VENDORED — do not edit here.
 # SSOT: dEitY719/dotfiles shell-common/functions/gh_pr_reply_targeted_review.sh
-# Synced 2026-09-05T10:16Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# Synced 2026-09-05T14:06Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
 # shell-common/functions/gh_pr_reply_targeted_review.sh
 # gh:pr-reply's severity gate: the per-item origin tokens (#1616) and the
@@ -102,13 +102,93 @@ _gh_pr_reply_reviewer_is_bot() {
     return 1
 }
 
+# The optional 4th ledger field: where a declined BLOCKER was escalated to
+# (#1762, upstream half of dEitY719/gh-pr-skills#21).
+#
+# ADVISORY PROVENANCE, not a verdict — and the writer therefore accepts it on
+# ANY severity/verdict, not only `BLOCKER`+`DECLINE` (PR #1764 review, codex
+# FOLLOW-UP: the prose used to imply an invariant the code does not enforce).
+# The narrowing is on the READ side, where it is enforceable: only
+# `_gh_pr_reply_review_passed_gate`'s blocking-and-held branch ever looks at
+# the field, so a ref on an ACCEPT or a FOLLOW-UP line changes no decision and
+# reaches no report — see the "4th field on a NON-blocking line" and "tracked
+# ACCEPT is still a pass" cases in the bats file. Constraining the writer would
+# buy nothing real either: the ledger is a plain PR comment any collaborator
+# can hand-edit, so the readers must stay tolerant of an off-contract line no
+# matter what the builder allows.
+#
+# rc 0 when <ref> is exactly one `owner/repo#N`. Every field is checked against
+# a positive character class rather than a blacklist, which buys three things
+# at once: the ref can never smuggle in the `:` that delimits the ledger line,
+# a second `/` or `#` (`a/b/c#1`, `a/b#1#2`) is rejected rather than silently
+# reinterpreted, and a typo is caught at the WRITE boundary where a caller can
+# still be told about it.
+#
+# Deliberately NOT case-normalized by its caller. Resolution is not the reason
+# either way: GitHub looks `owner/repo` up case-INSENSITIVELY and redirects to
+# the one canonical casing, so folding would still find the repo (PR #1764
+# review, agy FOLLOW-UP — the point being that each repo has exactly one
+# canonical casing, which is what makes folding lossy rather than unresolvable).
+# The reason is legibility: this field is reproduced verbatim in a report a
+# human reads, and echoing back what the author actually typed is what makes it
+# recognisable. Reviewer and verdict are folded because they are compared
+# against closed enums; this field is compared against nothing.
+_gh_pr_reply_tracking_ref_is_valid() {
+    local _ref="${1-}" _owner _rest _repo _num
+
+    case "$_ref" in
+    */*"#"*) ;;
+    *) return 1 ;;
+    esac
+
+    _owner="${_ref%%/*}"
+    _rest="${_ref#*/}"
+    _repo="${_rest%%#*}"
+    _num="${_rest#*#}"
+
+    case "$_owner" in "" | *[!A-Za-z0-9._-]*) return 1 ;; esac
+    case "$_repo" in "" | *[!A-Za-z0-9._-]*) return 1 ;; esac
+    # `0*` rejects `#0` and any zero-padded number (`#022`): GitHub issue
+    # numbers start at 1 and are never padded, so both name a target no reader
+    # can open — exactly the failure this validator exists to prevent
+    # (PR #1764 review, codex BLOCKER).
+    case "$_num" in "" | *[!0-9]* | 0*) return 1 ;; esac
+    return 0
+}
+
+# The optional 4th field of an origin line, or "" when the line has only three
+# (#1762).
+#
+# Guarded on the 4-field shape, because the same expansion applied to a 3-field
+# line hands back the VERDICT. That trap is why the readers below go through
+# here instead of each re-deriving it inline (PR #1764 review, codex BLOCKER).
+_gh_pr_reply_origin_ref() {
+    local _line="${1-}" _ref
+    case "$_line" in
+    *:*:*:*) ;;
+    *) return 0 ;;
+    esac
+    _ref="${_line#*:}"
+    _ref="${_ref#*:}"
+    printf '%s' "${_ref#*:}"
+}
+
+# One stderr line for every reader that rejects a ledger line without the
+# minimum three fields. Callers still `return 2` themselves.
+_gh_pr_reply_malformed_origin_line() {
+    printf '[gh-pr-reply] malformed origin line (want <reviewer>:<severity>:<verdict>[:<owner>/<repo>#<N>]): %s\n' \
+        "${1-}" >&2
+}
+
 _gh_pr_reply_origin_line() {
-    local _reviewer _severity _verdict
+    local _reviewer _severity _verdict _ref
     _reviewer=$(printf '%s' "${1-}" | tr '[:upper:]' '[:lower:]')
     # Reviewers tag findings as `[BLOCKER]` / `[FOLLOW-UP]`; the brackets are
     # rendering, not data.
     _severity=$(printf '%s' "${2-}" | tr -d '[]' | tr '[:lower:]' '[:upper:]')
     _verdict=$(printf '%s' "${3-}" | tr '[:lower:]' '[:upper:]')
+    # Case preserved on purpose — see _gh_pr_reply_tracking_ref_is_valid.
+    _ref="${4-}"
 
     # Either set is accepted; anything in neither is still exit 2, and the
     # message names both so a caller can tell which list it missed.
@@ -143,7 +223,18 @@ _gh_pr_reply_origin_line() {
         ;;
     esac
 
-    printf '%s:%s:%s\n' "$_reviewer" "$_severity" "$_verdict"
+    # The 4th field is OPTIONAL and its absence is the pre-#1762 line, byte for
+    # byte: the ledger is durable state already posted on live PRs, so this is
+    # a strict superset, never a migration. `${_ref:+:$_ref}` is empty when
+    # `_ref` is, so one printf covers both shapes.
+    if [ -n "$_ref" ] &&
+        ! _gh_pr_reply_tracking_ref_is_valid "$_ref"; then
+        printf '[gh-pr-reply] malformed tracking ref: %s (want <owner>/<repo>#<N>, e.g. dEitY719/harness-skills#22)\n' \
+            "$_ref" >&2
+        return 2
+    fi
+
+    printf '%s:%s:%s%s\n' "$_reviewer" "$_severity" "$_verdict" "${_ref:+:$_ref}"
 }
 
 # Blocking severity = the tag that made `review-blocked` happen. Everything
@@ -204,7 +295,19 @@ _gh_pr_reply_origin_tally() {
 #   <!-- pr-reply-origins:<head-sha> -->
 #   codex:BLOCKER:DECLINE
 #   agy:FOLLOW-UP:ACCEPT
+#   agy:BLOCKER:DECLINE:dEitY719/harness-skills#22
 #   <!-- /pr-reply-origins:<head-sha> -->
+#
+# The 4th field is optional (#1762): it names the issue a declined BLOCKER was
+# escalated to, so `review-blocked` stops meaning two different things at once
+# ("nobody acted on it" vs "triaged, out of scope here, filed where it
+# belongs"). It changes nothing about the DECISION — the gate still holds — only
+# about what the report can say, and it is accepted on any line (advisory
+# provenance; see `_gh_pr_reply_tracking_ref_is_valid`'s header for why the
+# narrowing lives on the read side). Written by `_gh_pr_reply_origin_line`,
+# validated by `_gh_pr_reply_tracking_ref_is_valid`, and read back by the gate;
+# every other reader here globs on `*:*:*` or takes `${line%%:*}` and is
+# indifferent to it.
 
 # Origin lines on stdin -> the wrapped ledger block on stdout.
 #
@@ -217,7 +320,7 @@ _gh_pr_reply_origin_tally() {
 # <head-sha> may be empty, in which case the unsuffixed marker form is emitted
 # — the same fallback `_gh_pr_review_build_comment_body`'s 8th argument makes.
 _gh_pr_reply_origins_block() {
-    local _sha="${1-}" _marker _origins _line _out=""
+    local _sha="${1-}" _marker _origins _line _ref _out=""
 
     _origins=$(cat)
     _marker="pr-reply-origins"
@@ -228,11 +331,23 @@ _gh_pr_reply_origins_block() {
         case "$_line" in
         *:*:*) ;;
         *)
-            printf '[gh-pr-reply] malformed origin line (want <reviewer>:<severity>:<verdict>): %s\n' \
-                "$_line" >&2
+            _gh_pr_reply_malformed_origin_line "$_line"
             return 2
             ;;
         esac
+        # The 4th field is re-checked HERE, not only in
+        # `_gh_pr_reply_origin_line` (PR #1764 review, codex BLOCKER). This
+        # function is THE ledger write, and the contract in its header is that
+        # garbage never gets persisted in the first place. A caller that hand-
+        # builds a line, bypassing the builder, must not be able to leave a ref
+        # in the ledger that every later reader silently drops.
+        _ref=$(_gh_pr_reply_origin_ref "$_line")
+        if [ -n "$_ref" ] &&
+            ! _gh_pr_reply_tracking_ref_is_valid "$_ref"; then
+            printf '[gh-pr-reply] malformed tracking ref in origin line (want <owner>/<repo>#<N>): %s\n' \
+                "$_line" >&2
+            return 2
+        fi
         _out="${_out}${_line}
 "
     done <<EOF
@@ -316,7 +431,7 @@ _gh_pr_reply_login_bodies() {
 # comment, and a human replying inside it (or GitHub reflowing it) must not be
 # able to turn the next pass's gate into a hard error.
 _gh_pr_reply_history_origins() {
-    local _line
+    local _line _ref _rest _tail
     _gh_pr_reply_login_bodies "${1-}" |
     awk '
         # "\001" is the "marker absent on this line" sentinel: unlike
@@ -371,8 +486,27 @@ _gh_pr_reply_history_origins() {
         END { printf "%s", last }
     ' | while IFS= read -r _line || [ -n "$_line" ]; do
         case "$_line" in
-        *:*:*) printf '%s\n' "$_line" ;;
+        *:*:*) ;;
+        *) continue ;;
         esac
+        # An unusable 4th field is STRIPPED, never dropped with its line
+        # (PR #1764 review, codex BLOCKER). Dropping would take the BLOCKER's
+        # VERDICT with it and let the gate certify a PR whose blocker still
+        # stands — the fail-OPEN direction, and the very hole this ledger
+        # exists to close. Stripping keeps the verdict and loses only the ref
+        # nobody could have followed. It also means the sanitized stream can be
+        # handed straight back to the now-strict `_gh_pr_reply_origins_block`
+        # without one human typo inside the PR comment permanently breaking the
+        # ledger write.
+        _ref=$(_gh_pr_reply_origin_ref "$_line")
+        if [ -n "$_ref" ] &&
+            ! _gh_pr_reply_tracking_ref_is_valid "$_ref"; then
+            _rest="${_line#*:}"
+            _tail="${_rest#*:}"
+            printf '%s:%s:%s\n' "${_line%%:*}" "${_rest%%:*}" "${_tail%%:*}"
+            continue
+        fi
+        printf '%s\n' "$_line"
     done
 }
 
@@ -468,8 +602,7 @@ _gh_pr_reply_origins_merge() {
         case "$_line" in
         *:*:*) ;;
         *)
-            printf '[gh-pr-reply] malformed origin line (want <reviewer>:<severity>:<verdict>): %s\n' \
-                "$_line" >&2
+            _gh_pr_reply_malformed_origin_line "$_line"
             return 2
             ;;
         esac
@@ -489,8 +622,7 @@ EOF
         case "$_line" in
         *:*:*) ;;
         *)
-            printf '[gh-pr-reply] malformed origin line (want <reviewer>:<severity>:<verdict>): %s\n' \
-                "$_line" >&2
+            _gh_pr_reply_malformed_origin_line "$_line"
             return 2
             ;;
         esac
@@ -568,6 +700,8 @@ _gh_pr_reply_post_origins_ledger() {
 #   pass=no-blocker              no BLOCKER-severity item was raised at all
 #   pass=blockers-resolved:<n>   all <n> BLOCKER items are ACCEPT/ACCEPT-PARTIAL
 #   hold=unresolved-blocker:<r>  <r> has a BLOCKER that is not resolved
+#   hold=unresolved-blocker-tracked:<r>:<ref>
+#                                same, but the item was escalated to <ref>
 #   hold=no-external-review      no external reviewer ever looked at this PR
 #
 # The origin stream is expected to be the MERGED one (this pass's lines plus
@@ -607,7 +741,7 @@ _gh_pr_reply_post_origins_ledger() {
 # the safe direction for a gate that authorizes `review-passed`.
 _gh_pr_reply_review_passed_gate() {
     local _evidence="${1-}"
-    local _origins _line _rev _rest _sev _verd _blocking=0
+    local _origins _line _rev _rest _sev _tail _verd _ref _blocking=0
 
     # Read stdin whole before deciding: an early `return` mid-loop would leave
     # a piped producer facing EPIPE.
@@ -618,22 +752,40 @@ _gh_pr_reply_review_passed_gate() {
         case "$_line" in
         *:*:*) ;;
         *)
-            printf '[gh-pr-reply] malformed origin line (want <reviewer>:<severity>:<verdict>): %s\n' \
-                "$_line" >&2
+            _gh_pr_reply_malformed_origin_line "$_line"
             return 2
             ;;
         esac
         _rev="${_line%%:*}"
         _rest="${_line#*:}"
         _sev="${_rest%%:*}"
-        _verd=$(printf '%s' "${_rest#*:}" | tr '[:lower:]' '[:upper:]')
-
+        # Filter on severity BEFORE parsing the rest: only a blocking line's
+        # verdict and ref are ever read, and `_verd` costs a fork per line.
         _gh_pr_reply_severity_is_blocking "$_sev" || continue
         _blocking=$((_blocking + 1))
+
+        _tail="${_rest#*:}"
+        _verd=$(printf '%s' "${_tail%%:*}" | tr '[:lower:]' '[:upper:]')
+        # #1762: everything after the verdict is the optional tracking ref. A
+        # 3-field line leaves `_tail` colon-free and `_ref` empty, so this
+        # parses the old shape unchanged. An UNPARSEABLE ref degrades to empty
+        # rather than failing: the ledger lives in an ordinary PR comment and
+        # `_gh_pr_reply_history_origins` already drops garbage silently for
+        # exactly that reason — reporting a ref nobody can follow would be
+        # worse than reporting none, and the hold is identical either way.
+        _ref=$(_gh_pr_reply_origin_ref "$_line")
+        _gh_pr_reply_tracking_ref_is_valid "$_ref" || _ref=""
+
         case "$_verd" in
         ACCEPT | ACCEPT-PARTIAL) ;;
         *)
-            printf 'hold=unresolved-blocker:%s\n' "$_rev"
+            # Escalation is NOT resolution: both branches are a hold and both
+            # leave the PR unlabelled. Only the report line differs (#1762).
+            if [ -n "$_ref" ]; then
+                printf 'hold=unresolved-blocker-tracked:%s:%s\n' "$_rev" "$_ref"
+            else
+                printf 'hold=unresolved-blocker:%s\n' "$_rev"
+            fi
             return 0
             ;;
         esac
@@ -665,7 +817,7 @@ EOF
 # label is written by `_gh_pr_reply_apply_review_passed` below, which prints
 # this line only once the write actually succeeded.
 _gh_pr_reply_review_passed_report() {
-    local _token="${1-}" _who
+    local _token="${1-}" _who _rest _ref
     case "$_token" in
     pass=no-blocker)
         printf '[OK] 미해결 BLOCKER 없음(BLOCKER 항목 자체가 없음) — review-passed 적용 (외부 재검토 없음, #1636)\n'
@@ -673,6 +825,17 @@ _gh_pr_reply_review_passed_report() {
     pass=blockers-resolved:*)
         printf '[OK] BLOCKER %s건 전부 해소 — review-blocked 해제, review-passed 적용 (외부 재검토 없음, #1636)\n' \
             "${_token#pass=blockers-resolved:}"
+        ;;
+    hold=unresolved-blocker-tracked:*)
+        # Matched BEFORE the bare form. The two patterns cannot actually
+        # collide — `hold=unresolved-blocker:` requires the colon that
+        # `-tracked` displaces — but ordering them this way keeps that
+        # non-collision from being load-bearing.
+        _rest="${_token#hold=unresolved-blocker-tracked:}"
+        _who="${_rest%%:*}"
+        _ref="${_rest#*:}"
+        printf '[BLOCKED] %s 의 블로커가 미해결 — %s 로 에스컬레이션(추적 중, 해소 아님), review-passed 미부여, review-blocked 유지\n' \
+            "$_who" "$_ref"
         ;;
     hold=unresolved-blocker:*)
         _who="${_token#hold=unresolved-blocker:}"
@@ -756,6 +919,8 @@ _gh_pr_reply_apply_review_passed() {
 # fall back to the old global rule.
 for _gprtr_selfcheck_fn in \
     _gh_pr_reply_origin_line \
+    _gh_pr_reply_tracking_ref_is_valid \
+    _gh_pr_reply_origin_ref \
     _gh_pr_reply_reviewer_is_bot \
     _gh_pr_reply_severity_is_blocking \
     _gh_pr_reply_origin_tally \
