@@ -79,7 +79,7 @@ else
         # ABSENT — no marker at all, but the lookup succeeded. Route as
         # unverified (never merge on it) but do NOT delete: absence alone
         # doesn't prove the label is wrong for THIS head, only that it
-        # cannot be proven right — e.g. a pre-#1601 label, or a marker post
+        # cannot be proven right — e.g. a label predating dEitY719/dotfiles#1601, or a marker post
         # that itself failed. Deleting every such label the moment this
         # feature ships was flagged as an unacceptable operational cliff
         # across two independent PR dEitY719/dotfiles#1608 review rounds (agy).

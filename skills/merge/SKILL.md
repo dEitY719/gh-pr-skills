@@ -140,7 +140,7 @@ fi
 # Empty VERIFY_SKILL with all five values bound — repo not registered, no
 # registry, or no jq, so the feature is simply unavailable — means do nothing
 # at all: no output, no dispatch, and no [WARN] either. An unwatched repo
-# stays byte-identical to its pre-#1511 behavior.
+# stays byte-identical to how it behaved before dEitY719/dotfiles#1511.
 if [ -n "$VERIFY_SKILL" ]; then
     # gh-verify:post-merge-verify's dispatch block is READ and run here, not
     # reached via `Skill(gh-verify:post-merge-verify, ...)`: as a Skill() call

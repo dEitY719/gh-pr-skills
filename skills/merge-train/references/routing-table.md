@@ -84,7 +84,7 @@ else
     # the label is wrong for this head, so only 1 self-heals (drops the
     # label). 2 (ABSENT — no marker at all) and 3 (UNDETERMINED — the lookup
     # itself failed) both route as unverified without touching the label:
-    # deleting on absence alone would strip every pre-#1601 review-passed PR
+    # deleting on absence alone strips every review-passed PR predating dEitY719/dotfiles#1601
     # the moment this feature ships (agy, PR dEitY719/dotfiles#1608 review, both rounds), and
     # deleting on a lookup failure would let one network blip destroy an
     # otherwise-valid label (agy round-2 BLOCKER).

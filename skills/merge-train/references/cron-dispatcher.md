@@ -61,7 +61,7 @@ base. It is built by `herdr_agent_name`
 `issue_watcher_cron.sh` and `gh-verify:post-merge-verify`.
 
 The workspace label is the *same string* as the agent name (dEitY719/dotfiles#1549) — no longer
-`mt-<host>-<owner>-<repo>`. Pre-#1549 the label kept its own host-qualified
+`mt-<host>-<owner>-<repo>`. Before dEitY719/dotfiles#1549 the label kept its own host-qualified
 fold while the agent name had already moved to `herdr_agent_name` (dEitY719/dotfiles#1530), so
 the same train answered to two different names: `herdr workspace list` showed
 one, `herdr agent get` the other, with no way to cross-reference them. Dropping
