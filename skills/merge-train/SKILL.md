@@ -3,8 +3,8 @@ name: merge-train
 description: >-
   Clean up and merge your own open PRs one at a time — each routed to
   gh-resolve:outdated / :conflict / :ci-fail, then gh-pr:merge. Use for
-  /gh-pr:merge-train, "열린 PR 순차로 정리하고 머지해",
-  "머지 트레인 돌려". A single PR is gh-pr:merge, not this.
+  /gh-pr:merge-train, "열린 PR 순차로 정리하고 머지해", "머지 트레인 돌려". A single PR is gh-pr:merge, not this.
+license: MIT
 allowed-tools: Bash, Read, Grep, Skill
 metadata:
   model_recommendation:

@@ -2,9 +2,9 @@
 name: merge
 description: >-
   Merge an approved GitHub PR — rebase by default, or squash/merge — without
-  asking. Use for /gh-pr:merge, "PR 51 머지해", "squash merge", "#99
-  머지". Refuses un-approved PRs, failing CI, drafts, conflicts — bypass is
-  gh-pr:merge-emergency.
+  asking. Use for /gh-pr:merge, "PR 51 머지해", "squash merge", "#99 머지".
+  Refuses un-approved PRs, failing CI, drafts, conflicts — bypass is gh-pr:merge-emergency.
+license: MIT
 allowed-tools: Bash, Read, Grep
 metadata:
   model_recommendation:

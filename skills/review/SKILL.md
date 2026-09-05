@@ -2,9 +2,9 @@
 name: review
 description: >-
   Delegate a GitHub PR review to one external AI CLI and post one aggregate
-  comment. Use for /gh-pr:review, "PR 99 코덱스에 리뷰 시켜", "agy
-  한테 2차 의견 받아", "second-opinion review on PR 42". No approve/request-changes,
-  no per-comment replies.
+  comment. Use for /gh-pr:review, "PR 99 코덱스에 리뷰 시켜", "agy 한테 2차 의견 받아",
+  "second-opinion review on PR 42". No approve/request-changes, no per-comment replies.
+license: MIT
 allowed-tools: Bash, Read, Grep, Glob, Agent
 metadata:
   model_recommendation:

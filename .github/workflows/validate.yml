@@ -20,8 +20,8 @@ jobs:
       plugin-name: gh-pr
       # MIGRATION DEBT (dotfiles #1410 Phase 3 / #1677). Four of the eight
       # SKILL.md files arrived from dotfiles already over the 100-line
-      # progressive-disclosure limit: merge 197, merge-train 146, reply 143,
-      # review 110 (commit, create, approve, and merge-emergency are at 100).
+      # progressive-disclosure limit: merge 197, merge-train 148, reply 143,
+      # review 110 (commit, create, approve, and merge-emergency are at 101).
       # Phase 3 is a placement-and-naming migration — #1410's Non-Goals forbid
       # changing skill behaviour on the way across — so the content was copied
       # verbatim and the limit raised here instead of the files being cut down.
