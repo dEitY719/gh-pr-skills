@@ -182,9 +182,14 @@ third is settled, and the fourth is a standing decision, both kept here so the
    `lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md` (SSOT:
    `gh-verify-skills` `skills/post-merge-verify/references/dispatch.sh.md`) and
    read through the same two-tier idiom as item 2, with `GH_VERIFY_ROOT` as the
-   first tier. For a repo that IS in the watched-repos registry, an unstageable
-   dispatch is now a loud `[FAIL]`, not a `[WARN]`: it is a broken install, not
-   an opt-out. An unregistered repo stays byte-silent, as designed.
+   first tier. For a repo that IS in the watched-repos registry, a dispatch
+   that will not stage or will not source is now a loud `[FAIL]`, not a
+   `[WARN]`: it is a broken install, not an opt-out. An unregistered repo stays
+   byte-silent, as designed. `tests/pmv-dispatch-resolves.sh` is the regression
+   guard — run `sh tests/pmv-dispatch-resolves.sh` after touching either side of
+   that path pair. CI shellchecks it but does not execute it: `validate.yml`
+   owns no CI logic of its own, so a test *runner* has to land in
+   `harness-skills`' reusable `skill-check.yml` before any repo here gets one.
 4. **Two dotfiles files are still cited, deliberately un-vendored.**
    `shell-common/tools/custom/pr_merge_train_cron.sh` (`merge-train`'s
    unattended trigger) and `shell-common/functions/gh_audit_builtin_workflows.sh`
