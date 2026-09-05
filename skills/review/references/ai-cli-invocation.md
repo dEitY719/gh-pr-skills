@@ -120,7 +120,7 @@ is identical to `claude-yolo --user <name>`.
 # sourcing: a missing helper must fail closed with a readable message,
 # not abort the step on a `.` of a nonexistent path.
 _CLAUDE_SH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
-[ -f "$_CLAUDE_SH" ] || { echo "--user needs shell-common/tools/integrations/claude.sh (dotfiles-only, not vendored) — install dotfiles or drop --user" >&2; exit 1; }
+[ -f "$_CLAUDE_SH" ] || { echo "--user needs shell-common/tools/integrations/claude.sh (dotfiles-only, not vendored) — install dotfiles, or drop --user to run under the calling shell's own CLAUDE_CONFIG_DIR" >&2; exit 1; }
 . "$_CLAUDE_SH"
 
 CFG_DIR=$(_claude_resolve_account "$USER_ACCOUNT") || {

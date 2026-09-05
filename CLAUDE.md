@@ -180,7 +180,11 @@ repo still need from dotfiles" answer stays in one place:
    *non*-vendored sibling misses silently once `SHELL_COMMON` points at
    `lib/vendor/`. `devx_pr_review_all.sh` was that hole
    (`gh_pr_reply_targeted_review.sh:273`, `:735`) and is now vendored too
-   (#14 C2). Anything still reached only from `$HOME/dotfiles` is listed in
+   (#14 C2); `tests/vendor-sources-resolve.sh` is the regression guard — it
+   asserts that closure and sources the verdict-label write path with `HOME`
+   aimed away from any dotfiles checkout, so re-opening the hole fails loudly
+   instead of silently. Anything still reached only from `$HOME/dotfiles` is
+   listed in
    items 4 and 5; the one unvendorable case is
    `shell-common/tools/integrations/claude.sh`, which `review`'s
    `--ai claude --user` / `--ai opencode` / `--ai hermes` lanes now `[ -f ]`-test
