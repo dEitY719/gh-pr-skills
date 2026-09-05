@@ -31,7 +31,7 @@ DOTFILES_ROOT=/nonexistent
 CLAUDE_PLUGIN_ROOT="$ROOT"
 export HOME DOTFILES_ROOT CLAUDE_PLUGIN_ROOT
 
-PMV_BLOCK="${GH_VERIFY_ROOT:-$PWD}/skills/post-merge-verify/references/dispatch.sh.md"
+PMV_BLOCK="${GH_VERIFY_ROOT:+$GH_VERIFY_ROOT/skills/post-merge-verify/references/dispatch.sh.md}"
 [ -r "$PMV_BLOCK" ] || PMV_BLOCK="${CLAUDE_PLUGIN_ROOT:-$PWD}/$VENDORED"
 
 if [ -r "$PMV_BLOCK" ]; then
