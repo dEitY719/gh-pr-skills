@@ -59,10 +59,13 @@ and classify as **ACCEPT** / **ACCEPT-PARTIAL** / **DECLINE** / **QUESTION**.
 Bot comments (gemini-code-assist, sourcery-ai, copilot) follow the same
 rules; see `references/reply-templates.md` for the full rubric.
 
-Record each item's origin as `<reviewer>:<severity>:<verdict>` into `ORIGINS`
-via `_gh_pr_reply_origin_line` (`references/review-passed-gate.md` § Step 3) —
-Steps 6 and 7 both read that stream, because a flat accepted/declined count
-cannot tell an unresolved BLOCKER from a declined suggestion (dEitY719/dotfiles#1616).
+Record each item's origin as `<reviewer>:<severity>:<verdict>[:<owner>/<repo>#<N>]`
+into `ORIGINS` via `_gh_pr_reply_origin_line` (`references/review-passed-gate.md`
+§ Step 3) — Steps 6 and 7 both read that stream, because a flat
+accepted/declined count cannot tell an unresolved BLOCKER from a declined
+suggestion (dEitY719/dotfiles#1616). The optional 4th field names the issue a
+declined BLOCKER was escalated to (dEitY719/dotfiles#1762); it changes the
+report line, never the gate's decision — escalation is not resolution.
 
 ## Step 4: Apply Fixes (ACCEPT / ACCEPT-PARTIAL only)
 
