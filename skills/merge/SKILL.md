@@ -110,13 +110,10 @@ HEAD_BRANCH=<headRefName>     # Step 2's `gh pr view` already read it
 BASE_BRANCH=<baseRefName>     # ditto — never a hardcoded `main`
 REMOTE=<remote>               # the `[remote]` positional, default `origin`
 
-# A binding mistake is not just an empty value — it is also an unsubstituted
-# placeholder (`<owner/repo>` left as-is) or a whitespace-only value, both of
-# which pass `[ -n ]` and would silently reproduce this same #1576 bug (PR
-# #1603 review, agy + codex: "non-empty" != "correctly substituted"). None of
-# the three can be told apart from an unwatched repo by the lookup below, so
-# name every offender and never look up a half-bound run — the dispatch
-# closes tabs and rebases the main checkout.
+# A binding mistake is also an unsubstituted placeholder (`<owner/repo>`) or a
+# whitespace-only value: both pass `[ -n ]`, both silently reproduce #1576 (PR
+# #1603 review, agy + codex), and neither is distinguishable from an unwatched
+# repo below — name every offender; the dispatch closes tabs and rebases main.
 PMV_MISSING=""
 _pmv_need() {
     case "$2" in
@@ -145,34 +142,37 @@ fi
 # at all: no output, no dispatch, and no [WARN] either. An unwatched repo
 # stays byte-identical to its pre-#1511 behavior.
 if [ -n "$VERIFY_SKILL" ]; then
-    # gh-verify:post-merge-verify's dispatch block is READ from its SSOT and run
-    # here, rather than reached through `Skill(gh-verify:post-merge-verify, ...)`.
-    # As a Skill() call this step ran 0/10 inside gh-pr:merge-train and 1/1 at
-    # top level, while every pasted block in Step 4 ran 10/10 — and a tab that
-    # is never closed starves issue-watcher's _IW_MAX_PER_REPO budget (#1565).
-    PMV_BLOCK="${DOTFILES_ROOT:-$HOME/dotfiles}/claude/skills/gh-pr-post-merge-verify/references/dispatch.sh.md"
+    # gh-verify:post-merge-verify's dispatch block is READ and run here, not
+    # reached via `Skill(gh-verify:post-merge-verify, ...)`: as a Skill() call
+    # it ran 0/10 inside gh-pr:merge-train vs 10/10 for every pasted block, and
+    # an unclosed tab starves issue-watcher's budget (#1565). Two tiers as
+    # everywhere here: GH_VERIFY_ROOT's live gh-verify, else the vendored copy.
+    PMV_BLOCK="${GH_VERIFY_ROOT:-}/skills/post-merge-verify/references/dispatch.sh.md"
+    [ -r "$PMV_BLOCK" ] || PMV_BLOCK="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md"
     # The fence marker is built with printf, never typed, so this block can sit
     # inside a fenced block of its own without closing it. Only the FIRST bash
     # fence is taken — the file's later snippets are documentation, not steps.
     PMV_FENCE=$(printf '\140\140\140')
+    PMV_OK=""
     if [ -r "$PMV_BLOCK" ] && PMV_SH=$(mktemp 2>/dev/null); then
-        # The staged file must not outlive this block. The sourced dispatch
-        # returns early on most of its paths, and a caller running under
-        # `set -e` can leave the shell entirely between the two lines below —
-        # so cleanup is armed before anything can go wrong and cleared on the
-        # success path, the same shape as _PMT_ERRF in
-        # shell-common/tools/custom/pr_merge_train_cron.sh.
+        # The staged file must not outlive this block: the sourced dispatch
+        # returns early on most paths and a caller under `set -e` can leave the
+        # shell mid-block, so cleanup is armed first and cleared on success.
         trap 'rm -f "$PMV_SH"' EXIT INT TERM
         awk -v f="$PMV_FENCE" \
             '$0 == f "bash" && !b { b = 1; next } $0 == f && b { exit } b' \
             "$PMV_BLOCK" >"$PMV_SH"
+        # An empty extraction is this same bug in another mask (right file,
+        # wrong fence); sourcing it is silent, so treat it as never staged.
         # shellcheck source=/dev/null
-        . "$PMV_SH"
+        if [ -s "$PMV_SH" ]; then PMV_OK=1; . "$PMV_SH"; fi
         rm -f "$PMV_SH"
         trap - EXIT INT TERM
-    else
-        printf '[WARN] gh-pr:merge: could not stage %s — post-merge verification skipped.\n' "$PMV_BLOCK"
     fi
+    # A registered repo that cannot stage the dispatch is a broken install, not
+    # an opt-out: loud, and never confusable with the silent unregistered skip.
+    [ -n "$PMV_OK" ] || printf '[FAIL] gh-pr:merge: post-merge verification did NOT run for %s (registered) — %s is unreadable or has no bash fence. Broken install, not an opt-out: repair the gh-pr plugin or point GH_VERIFY_ROOT at a gh-verify checkout, then run /gh-verify:post-merge-verify %s by hand.\n' \
+        "$TARGET_REPO" "$PMV_BLOCK" "$PR_NUMBER"
 fi
 ```
 

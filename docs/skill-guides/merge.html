@@ -367,16 +367,20 @@
 
       <h3 style="margin-bottom:14px;">알려진 마이그레이션 부채</h3>
       <details open>
-        <summary><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.8"/></svg>부채 1 &mdash; Step 5 의 dispatch 경로가 아직 dotfiles 를 가리킨다<svg class="caret" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5l5 5-5 5"/></svg></summary>
+        <summary><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.8"/></svg>부채 1 &mdash; Step 5 의 dispatch 경로 (해소됨, #13)<svg class="caret" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5l5 5-5 5"/></svg></summary>
         <div class="details-body">
-          <p>Step 5 는 post-merge 검증 블록을 dotfiles 경로에서 읽어 인라인 실행한다:</p>
+          <p>Step 5 는 예전에 post-merge 검증 블록을 아래 dotfiles 경로에서 읽었다:</p>
           <pre><code>${DOTFILES_ROOT:-$HOME/dotfiles}/claude/skills/gh-pr-post-merge-verify/references/dispatch.sh.md</code></pre>
-          <p>그런데 그 스킬은 현재 <code>gh-verify-skills</code> 의 <code>post-merge-verify</code> 로 옮겨갔고,
-            위 경로는 dotfiles 원본이 삭제되기 전까지 바이트 동일하게 남겨둔 상태다.</p>
-          <p>파일을 읽을 수 없으면 <code>[WARN]</code> 한 줄을 찍고 <strong>건너뛴다</strong> &mdash;
-            dotfiles 체크아웃이 없는 머신에서는 머지 자체는 정상이고 검증 dispatch 만 빠진다.</p>
-          <p>또한 이 dispatch 는 watched-repos 레지스트리에 등록된 저장소에서만 동작하며,
-            미등록 저장소는 출력도 dispatch 도 <code>[WARN]</code> 도 없다.</p>
+          <p>그러나 <code>~/dotfiles/claude/skills/</code> 는 이미 삭제됐고 스킬 이름도
+            <code>post-merge-verify</code> 로 바뀌어, <code>[ -r ]</code> 가드가 394줄짜리 검증 게이트를
+            매 머지마다 조용히 건너뛰고 있었다.</p>
+          <p>지금은 2단 폴백으로 읽는다 &mdash; 1순위 <code>GH_VERIFY_ROOT</code> 가 가리키는 라이브
+            <code>gh-verify</code>, 2순위 이 저장소가 벤더링한 사본
+            <code>lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md</code>
+            (SSOT: <code>gh-verify-skills</code> 의 <code>skills/post-merge-verify/references/dispatch.sh.md</code>).</p>
+          <p>watched-repos 레지스트리에 <strong>등록된</strong> 저장소인데 dispatch 를 스테이징하지 못하면
+            <code>[WARN]</code> 이 아니라 <code>[FAIL]</code> 로 크게 실패한다 &mdash; opt-out 이 아니라 깨진 설치이기 때문이다.
+            미등록 저장소는 예전 그대로 출력도 dispatch 도 <code>[WARN]</code> 도 없다.</p>
         </div>
       </details>
       <details>

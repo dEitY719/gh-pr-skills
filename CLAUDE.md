@@ -158,8 +158,10 @@ These are acceptance criteria carried over from dotfiles, not advice:
 
 ## Known migration debt
 
-Three things came across verbatim because #1410's Non-Goals forbid changing
-behaviour during a placement-and-naming migration. All three are Phase 4 work:
+Two things came across verbatim because #1410's Non-Goals forbid changing
+behaviour during a placement-and-naming migration; both are Phase 4 work. The
+third is settled, and the fourth is a standing decision, both kept here so the
+"what does this repo still need from dotfiles" answer stays in one place:
 
 1. **Four `SKILL.md` files exceed the 100-line progressive-disclosure limit**
    (`merge` 197, `merge-train` 146, `reply` 143, `review` 110). CI is pinned to
@@ -171,13 +173,25 @@ behaviour during a placement-and-naming migration. All three are Phase 4 work:
    without the dotfiles checkout those sources fail and the affected steps
    degrade. Every call site already soft-fails rather than aborting, which is
    why the migration could proceed, but the coupling is real.
-3. **`merge`'s Step 5 reads a dispatch block from a dotfiles path** —
-   `${DOTFILES_ROOT:-$HOME/dotfiles}/claude/skills/gh-pr-post-merge-verify/references/dispatch.sh.md`.
-   That skill now lives in `gh-verify-skills` as `post-merge-verify`. The path
-   was left byte-identical because dotfiles keeps its originals until Phase 4;
-   when they are deleted, this path has to be repointed at the installed
-   `gh-verify` plugin. The block already prints a `[WARN]` and skips when the
-   file is unreadable, so a standalone install degrades rather than breaks.
+3. **Settled (#13).** `merge`'s Step 5 used to read its dispatch block from
+   `${DOTFILES_ROOT:-$HOME/dotfiles}/claude/skills/gh-pr-post-merge-verify/references/dispatch.sh.md`,
+   on the premise that dotfiles kept its originals until Phase 4. It did not —
+   `~/dotfiles/claude/skills/` is gone and the skill was renamed on the way out
+   — so the `[ -r ]` guard silently skipped a 394-line verification gate on
+   every merge. The block is now vendored at
+   `lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md` (SSOT:
+   `gh-verify-skills` `skills/post-merge-verify/references/dispatch.sh.md`) and
+   read through the same two-tier idiom as item 2, with `GH_VERIFY_ROOT` as the
+   first tier. For a repo that IS in the watched-repos registry, an unstageable
+   dispatch is now a loud `[FAIL]`, not a `[WARN]`: it is a broken install, not
+   an opt-out. An unregistered repo stays byte-silent, as designed.
+4. **Two dotfiles files are still cited, deliberately un-vendored.**
+   `shell-common/tools/custom/pr_merge_train_cron.sh` (`merge-train`'s
+   unattended trigger) and `shell-common/functions/gh_audit_builtin_workflows.sh`
+   (`merge/references/board-policy.md`'s "see also") appear only as prose. No
+   skill sources or executes either, so neither can break a run the way item 3
+   did; the cron script is host setup that belongs in dotfiles, and the audit
+   function is a manual pointer. Revisit only if a skill starts executing one.
 
 ## Emojis
 

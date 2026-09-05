@@ -85,15 +85,18 @@
 - 모든 `gh` 호출은 같은 remote URL 에서 해석한 `GH_HOST` 와 `--repo` 를 **둘 다** 싣는다.
   `gh api` 에는 `--repo` 가 없으므로 repo 는 경로(`repos/$TARGET_REPO/...`)에 들어가고
   `GH_HOST=` 접두는 그대로 남는다.
-- **알려진 마이그레이션 부채 1 — Step 5 의 dispatch 경로.** Step 5 는 post-merge 검증
-  블록을 dotfiles 경로
+- **마이그레이션 부채 1 — Step 5 의 dispatch 경로 (해소됨, #13).** Step 5 는 예전에
+  post-merge 검증 블록을 dotfiles 경로
   `${DOTFILES_ROOT:-$HOME/dotfiles}/claude/skills/gh-pr-post-merge-verify/references/dispatch.sh.md`
-  에서 읽어 인라인 실행한다. 그런데 그 스킬은 현재 `gh-verify-skills` 의
-  `post-merge-verify` 로 옮겨갔고, 위 경로는 dotfiles 원본이 삭제되기 전까지 바이트
-  동일하게 남겨둔 상태다. 파일을 읽을 수 없으면 `[WARN]` 한 줄을 찍고 **건너뛴다** —
-  dotfiles 체크아웃이 없는 머신에서는 머지 자체는 정상이고 검증 dispatch 만 빠진다.
-  또한 이 dispatch 는 watched-repos 레지스트리에 등록된 저장소에서만 동작하며,
-  미등록 저장소는 출력도 dispatch 도 `[WARN]` 도 없다.
+  에서 읽었다. 그러나 `~/dotfiles/claude/skills/` 는 이미 삭제됐고 스킬 이름도
+  `post-merge-verify` 로 바뀌어, `[ -r ]` 가드가 394줄짜리 검증 게이트를 매 머지마다
+  조용히 건너뛰고 있었다. 지금은 2단 폴백으로 읽는다 — 1순위 `GH_VERIFY_ROOT` 가
+  가리키는 라이브 `gh-verify`, 2순위 이 저장소가 벤더링한 사본
+  `lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md` (SSOT: `gh-verify-skills`
+  의 `skills/post-merge-verify/references/dispatch.sh.md`). watched-repos
+  레지스트리에 **등록된** 저장소인데 dispatch 를 스테이징하지 못하면 `[WARN]` 이
+  아니라 `[FAIL]` 로 크게 실패한다 — opt-out 이 아니라 깨진 설치이기 때문이다.
+  미등록 저장소는 예전 그대로 출력도 dispatch 도 `[WARN]` 도 없다.
 - **알려진 마이그레이션 부채 2 — SKILL.md 길이.** `skills/merge/SKILL.md` 는 197줄로
   이 플러그인에서 가장 길고, 100줄 progressive-disclosure 한도를 넘긴다. CI 는
   `max-skill-lines: 197` 로 고정해 이를 허용하고 있다. 해결책은 한도를 올리는 것이
