@@ -17,7 +17,7 @@ Reject unknown flags, `--self-record` with `--admin-merge`, and legacy
 `--self-ok` with:
 `--self-ok is not supported; GitHub blocks self-approval server-side.`
 
-## GitHub target (dEitY719/dotfiles#1403/dEitY719/dotfiles#1407)
+## GitHub target (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407)
 
 Bind host and repo from **one and the same** remote URL, before any `gh` call:
 

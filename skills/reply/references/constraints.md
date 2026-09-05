@@ -28,7 +28,7 @@
   path (dEitY719/dotfiles#1636).** State it plainly rather than quietly: this skill now applies
   `review-passed` **from its own judgment, with no external AI CLI re-call**,
   whenever no BLOCKER-severity item is left unresolved.
-  - What it replaced: dEitY719/dotfiles#1563/dEitY719/dotfiles#1616 required an **independent** `gh-pr:review`
+  - What it replaced: dEitY719/dotfiles#1563 / dEitY719/dotfiles#1616 required an **independent** `gh-pr:review`
     re-call to return a non-blocking verdict before the label could be
     written. That re-call was the only way to re-earn `review-passed`, and its
     cost/latency/failure rate is what repeatedly jammed `gh-pr:merge-train`

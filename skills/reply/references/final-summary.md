@@ -10,7 +10,7 @@ PR #123 review comments processed: 5 total
   By reviewer:
     codex  blocking 2/2 accepted · non-blocking 0 (0 declined)
     agy    blocking 0/0 accepted · non-blocking 3 (3 declined)
-  [OK] BLOCKER 2건 전부 해소 — review-blocked 해제, review-passed 적용 (외부 재검토 없음, dEitY719/dotfiles#1636)
+  [OK] BLOCKER 2건 전부 해소 — review-blocked 해제, review-passed 적용 (외부 재검토 없음, #1636)
   -> All comments replied to.
 ```
 

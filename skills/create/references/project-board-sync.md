@@ -177,7 +177,7 @@ wrapper — no auth state changes, no API mutation.
 - **Helper unavailable** — when `_HELPER` is unreadable, the inline block
   silently skips (NF-1 fallback, dEitY719/dotfiles#644). When the file sources but the
   function is undefined (interactive-guard regression, partial sourcing,
-  future rename), an explicit `#724` warning is printed and the sync is
+  future rename), an explicit `dEitY719/dotfiles#724` warning is printed and the sync is
   skipped — preventing the silent `rc 127` swallow.
 
 ## Where the helper lives

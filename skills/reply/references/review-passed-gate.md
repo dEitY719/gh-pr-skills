@@ -295,10 +295,10 @@ printf '%s\n' "$MERGED" |
 
 | 상황 | 문구 |
 |---|---|
-| BLOCKER 없음 | `[OK] 미해결 BLOCKER 없음(BLOCKER 항목 자체가 없음) — review-passed 적용 (외부 재검토 없음, dEitY719/dotfiles#1636)` |
-| BLOCKER 전부 해소 | `[OK] BLOCKER <n>건 전부 해소 — review-blocked 해제, review-passed 적용 (외부 재검토 없음, dEitY719/dotfiles#1636)` |
+| BLOCKER 없음 | `[OK] 미해결 BLOCKER 없음(BLOCKER 항목 자체가 없음) — review-passed 적용 (외부 재검토 없음, #1636)` |
+| BLOCKER 전부 해소 | `[OK] BLOCKER <n>건 전부 해소 — review-blocked 해제, review-passed 적용 (외부 재검토 없음, #1636)` |
 | BLOCKER 미해결 | `[BLOCKED] <r> 의 블로커가 미해결 — review-passed 미부여, review-blocked 유지` |
-| 외부 리뷰 근거 없음 | `[BLOCKED] 외부 리뷰 근거(ai-review 마커) 없음 — review-passed 미부여 (dEitY719/dotfiles#1636 의 분업 전제 미충족)` |
+| 외부 리뷰 근거 없음 | `[BLOCKED] 외부 리뷰 근거(ai-review 마커) 없음 — review-passed 미부여 (#1636 의 분업 전제 미충족)` |
 | 원장 기록됨 | `[OK] origin 원장 기록됨 — 다음 pass 가 이 pass 의 판정을 본다` |
 | 원장 기록 실패 | `[WARN] origin 원장 기록 실패 — 다음 pass 가 이번 판정을 못 본다(BLOCKER 재분류 필요)` |
 | 라벨 미프로비저닝 | `[WARN] label \`review-passed\` missing in <repo> — provision it first (gh-setup:label-bootstrap)` |
