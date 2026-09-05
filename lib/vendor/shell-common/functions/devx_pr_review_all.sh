@@ -1,9 +1,7 @@
 #!/bin/sh
 # VENDORED — do not edit here.
 # SSOT: dEitY719/dotfiles shell-common/functions/devx_pr_review_all.sh
-# Synced 2026-09-05 — re-copy from the SSOT to update.
-# Banner sits below the shebang, unlike its eight siblings here, so the
-# pre-push shellcheck guard does not trip SC1128 on it.
+# Synced 2026-09-05T10:16Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
 # shell-common/functions/devx_pr_review_all.sh
 # Pure arg parser for the devx:pr-review-all skill. Mirrors the
