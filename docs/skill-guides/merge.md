@@ -47,7 +47,7 @@
 
 1. **Step 1 — 인자 해석 + repo 해석.** `START_TS` 를 기록하고, `remote` 하나의 URL 에서
    `TARGET_REPO` 와 `TARGET_HOST` 를 함께 바인딩한 뒤 `GH_HOST` 를 export 한다
-   (dEitY719/dotfiles#1403/dEitY719/dotfiles#1407). remote 가 없으면 `git remote -v` 를 나열하고 정지 — 조용한 `origin`
+   (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). remote 가 없으면 `git remote -v` 를 나열하고 정지 — 조용한 `origin`
    폴백은 없다. 호스트를 잘못 바인딩했을 때 그 잘못된 서버 호출이 도달하는 지점이
    `gh pr merge --delete-branch`, 즉 저장소에서 가장 파괴적인 쓰기이기 때문이다.
 2. **Step 2 — 사전 점검(병렬).** `gh pr view --json state,isDraft,mergeable,`

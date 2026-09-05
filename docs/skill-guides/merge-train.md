@@ -37,7 +37,7 @@
 ## 동작 단계
 
 1. **Step 1 — 타깃 바인딩.** `TARGET_REPO` / `TARGET_HOST` / `GH_HOST` 를 **같은 remote URL
-   하나**에서 해석한 뒤에야 `gh` 를 호출한다(dEitY719/dotfiles#1403/dEitY719/dotfiles#1407). `owner/repo` 를 명시해도 호스트는 여전히 remote URL 에서 온다.
+   하나**에서 해석한 뒤에야 `gh` 를 호출한다(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). `owner/repo` 를 명시해도 호스트는 여전히 remote URL 에서 온다.
 2. **Step 2 — 큐 수집과 정렬.** `gh pr list --author @me --state open`(작성자 한정은 선택이
    아니다, D-7) 결과를 공용 필터 `_gh_pr_merge_train_filter_targets` 에 통과시킨다 — draft,
    `reply-pending` 라벨, **11분 quiet period**(D-6) 안의 갱신을 떨어뜨리며, cron 디스패처와

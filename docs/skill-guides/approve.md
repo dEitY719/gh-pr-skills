@@ -45,7 +45,7 @@ help 은 **arg #1 에서만** 감지된다 — `--self-ok -h` 는 help 이 아�
 ## 동작 단계
 
 1. **Step 1 — 인자 해석 + 사전 게이트(병렬).** `START_TS` 를 기록하고, 하나의 remote URL
-   에서 `TARGET_HOST` 와 `TARGET_REPO` 를 함께 바인딩한다(dEitY719/dotfiles#1403/dEitY719/dotfiles#1407). PR 메타데이터,
+   에서 `TARGET_HOST` 와 `TARGET_REPO` 를 함께 바인딩한다(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). PR 메타데이터,
    `ME`(인증 사용자), REST 전용 `rebaseable`, `gh pr checks` 를 병렬로 가져온다.
    **정지**: `state != OPEN`, draft, required check 실패. **경고 후 진행**:
    `mergeable: CONFLICTING` 또는 `rebaseable: false` — 경고 블록이 리뷰 본문 앞에 붙고
@@ -98,4 +98,4 @@ help 은 **arg #1 에서만** 감지된다 — `--self-ok -h` 는 help 이 아�
 - `gh label list` 로 존재가 확인되지 않은 라벨/마일스톤은 붙이지 않는다.
 - 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST"` 와 `--repo "$TARGET_REPO"` 를 **둘 다** 싣는다.
   `--repo` 만으로는 gh CLI 자신의 기본 호스트를 따라가므로, 이중 호스트 로그인
-  (github.com + GHES)에서 조용히 잘못된 서버를 향한다(dEitY719/dotfiles#1403/dEitY719/dotfiles#1407).
+  (github.com + GHES)에서 조용히 잘못된 서버를 향한다(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
