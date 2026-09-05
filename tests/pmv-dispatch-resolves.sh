@@ -39,7 +39,7 @@ if [ -r "$PMV_BLOCK" ]; then
 	#    (right file, wrong fence) and would be sourced silently.
 	F=$(printf '\140\140\140')
 	n=$(awk -v f="$F" '$0 == f "bash" && !b { b = 1; next } $0 == f && b { exit } b' \
-		"$PMV_BLOCK" | wc -l)
+		"$PMV_BLOCK" | wc -l | tr -d "[:space:]")
 	[ "$n" -gt 300 ] || {
 		printf 'FAIL  first bash fence of %s is %s lines (expected the ~394-line dispatch)\n' \
 			"$PMV_BLOCK" "$n"
