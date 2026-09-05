@@ -10,7 +10,7 @@ two questions the old policy conflated:
    (`git log HEAD.."$REMOTE/$BASE_BRANCH"`). Wrong answer here means a
    missing rebase.
 
-`$REMOTE` is the `[remote]` positional bound in Step 1a-0 (#1405); it defaults
+`$REMOTE` is the `[remote]` positional bound in Step 1a-0 (dEitY719/dotfiles#1405); it defaults
 to `origin`, which is why every function below defaults its remote parameter
 to `origin` too. Wherever this file says `origin`, read "the target remote".
 
@@ -77,7 +77,7 @@ gh_pr_normalize_upstream() {
 # No upstream at all → 1 (that is row 1 of the push table, not a mispair).
 #   $1  upstream ref (may be empty)
 #   $2  current branch name
-#   $3  target remote (optional, default "origin" — the [remote] positional, #1405)
+#   $3  target remote (optional, default "origin" — the [remote] positional, dEitY719/dotfiles#1405)
 gh_pr_upstream_is_mispaired() {
     local _upstream _current="${2-}" _remote="${3:-origin}"
     _upstream=$(gh_pr_normalize_upstream "${1-}")
@@ -91,7 +91,7 @@ gh_pr_upstream_is_mispaired() {
 #   $1  current branch name
 #   $2  upstream ref ("" when the branch has no upstream)
 #   $3  "diverged" when the branch and its upstream have both moved
-#   $4  target remote (optional, default "origin" — the [remote] positional, #1405)
+#   $4  target remote (optional, default "origin" — the [remote] positional, dEitY719/dotfiles#1405)
 # Output: "push -u <remote> HEAD" | "push" | "STOP"
 gh_pr_push_action() {
     local _current="${1-}" _upstream="${2-}" _diverged="${3-}" _remote="${4:-origin}"
@@ -196,7 +196,7 @@ Auto-rewind only when this holds; otherwise warn and leave the base alone:
   set that moved to the new branch (no stragglers left behind).
 
 **Why there is no separate "already pushed to the remote" condition** (it was
-removed after review of PR #1318): Step 1b always runs `git fetch "$REMOTE"`
+removed after review of PR dEitY719/dotfiles#1318): Step 1b always runs `git fetch "$REMOTE"`
 *before* this decision. After that fetch, any local commit that had already
 reached `$REMOTE/$BASE_BRANCH` by another path is, by definition, reachable
 from `$REMOTE/$BASE_BRANCH` — so `git rev-list "$REMOTE/$BASE_BRANCH..$BASE_BRANCH"`
@@ -334,7 +334,7 @@ esac
 conversation); the fallback `<type>/<YYYYMMDD>-<short-sha>` form covers that.
 `BASE_BRANCH` is whatever Step 1a bound — possibly a parent PR's head ref
 (`references/stacked-pr.md`), never a hard-coded `main`. `REMOTE` is whatever
-Step 1a-0 bound from the `[remote]` positional, defaulting to `origin` (#1405).
+Step 1a-0 bound from the `[remote]` positional, defaulting to `origin` (dEitY719/dotfiles#1405).
 Pass it as the trailing argument of `gh_pr_push_action` /
-`gh_pr_upstream_is_mispaired` in Step 5 — omitting it keeps the pre-#1405
-`origin` behaviour.
+`gh_pr_upstream_is_mispaired` in Step 5 — omitting it keeps the older
+`origin` behaviour from before dEitY719/dotfiles#1405.

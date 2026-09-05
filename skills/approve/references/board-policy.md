@@ -14,7 +14,7 @@ The column's purpose: **the PR is already reviewed, and the author is
 now deciding whether to actually merge it.** It is a human decision
 gate, not a bookkeeping stop.
 
-## Ownership (issue #1350)
+## Ownership (issue dEitY719/dotfiles#1350)
 
 `gh-pr:approve` is the **sole skill** writer of this column: no other
 skill may promote a card into it, and promotion happens only when a
@@ -30,12 +30,12 @@ collaborator's Approve; both writers are enumerated in
 allowlist-gated). That was removed: `agy` / `codex` reviews and
 `gh-pr:reply` answers all post as `COMMENTED`, which never changes
 `reviewDecision`, so the `""|null|APPROVED` guard passed
-unconditionally and BLOCKING PRs landed in `Approved` (PR #1349). The
+unconditionally and BLOCKING PRs landed in `Approved` (PR dEitY719/dotfiles#1349). The
 env var `GH_PR_REPLY_AUTO_APPROVE_REPOS` and its `~/.zshrc.local`
 wiring are gone with it.
 
 This rule used to cascade into `gh-pr:merge` as a merge-time refusal.
-That cascade was removed in #1513 — see "2. Merge gate (read side)"
+That cascade was removed in dEitY719/dotfiles#1513 — see "2. Merge gate (read side)"
 below. The column is now advisory for merge purposes; `gh-pr:merge`
 gates on `reviewDecision` and CI only.
 
@@ -66,13 +66,13 @@ reachable approval signal at all — see enforcement point 2.)
 `_GH_PROJECT_STATUS_GUARD_APPROVED_BYPASS=1` for emergency operator
 intent.
 
-This guard was added in #393 along with the verify pair — both are
+This guard was added in dEitY719/dotfiles#393 along with the verify pair — both are
 defenses against the same class of bug (Status drifts away from what the
 helper thinks it set).
 
-### 2. Merge gate (read side) — **removed in #1513**
+### 2. Merge gate (read side) — **removed in dEitY719/dotfiles#1513**
 
-`gh-pr:merge` Step 2-B (added by #397) used to read the current board
+`gh-pr:merge` Step 2-B (added by dEitY719/dotfiles#397) used to read the current board
 Status before merging and refuse anything outside `Approved`, with
 `GH_PR_MERGE_SKIP_BOARD_CHECK=1` as the escape. Both the step and the
 env var are gone.
@@ -105,7 +105,7 @@ one doing the work.
 
 ## Audit
 
-`gh-audit-builtin-workflows` (shell-common function added in #397)
+`gh-audit-builtin-workflows` (shell-common function added in dEitY719/dotfiles#397)
 checks that the asynchronous "Pull request linked to issue" builtin
 workflow is OFF on every attached projectV2 — that builtin races with
 the deterministic Status transitions and would silently invalidate this
@@ -116,5 +116,5 @@ guard.
 - `references/board-approved-sync.sh.md` — Step 4.5 promotion block.
 - `shell-common/functions/gh_project_status.sh` — write-side guard impl.
 - `../../merge/references/board-policy.md` — cross-link
-  (records the #1513 removal of the merge gate).
+  (records the dEitY719/dotfiles#1513 removal of the merge gate).
 - `docs/.ssot/github-project-board.md` — column semantics SSOT.

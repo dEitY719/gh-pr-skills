@@ -5,9 +5,9 @@
 | # | Name | Default | Description |
 |---|------|---------|-------------|
 | 1 | issue-number, remote-name, or `-h`/`--help`/`help` | auto-detected | Link PR to this GitHub issue via `Closes #N` (or `Fixes #N` for bug fixes) in the body |
-| 2 | remote-name or issue-number | `origin` | Git remote the PR is pushed to and opened on (#1405) |
+| 2 | remote-name or issue-number | `origin` | Git remote the PR is pushed to and opened on (dEitY719/dotfiles#1405) |
 
-**Positional parsing rule (#1405):** a positional consisting only of digits is
+**Positional parsing rule (dEitY719/dotfiles#1405):** a positional consisting only of digits is
 the issue number; any other positional is the remote name. Order does not
 matter — `/gh-pr:create 123`, `/gh-pr:create upstream`, `/gh-pr:create 123 upstream` all parse. The
 remote drives both the `gh` target (host + `--repo`) and the git plumbing
@@ -32,7 +32,7 @@ Auto-detect (default) is a no-op on solo / non-stacked repos. See
 - `/gh-pr:create 123` — same, force-link to issue `#123`.
 - `/gh-pr:create upstream` — push and open the PR on `upstream` instead of `origin`.
 - `/gh-pr:create 123 upstream` — both (this is what `gh-flow:issue <N> upstream`
-  passes down, #1405).
+  passes down, dEitY719/dotfiles#1405).
 - `/gh-pr:create --no-stack` — auto-detect off, base = default branch.
 - `/gh-pr:create --base release/v2.0` — auto-detect off, custom base branch.
 - `/gh-pr:create -h` / `--help` / `help` — print this help.
@@ -89,7 +89,7 @@ $ /gh-pr:create --base release/v2.0    →  base=release/v2.0
    using a `mktemp` body file. Always self-assigns. Host and repo are both
    read from `<remote>`'s URL (`origin` unless `[remote]` says otherwise), so a
    `gh` logged into both github.com and a GHES instance cannot open the PR on
-   the wrong server (#1403 / #1405).
+   the wrong server (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1405).
 7. Applies labels derived from conventional-commit types (feat, fix, docs,
    etc.) plus scope labels — but only labels that **already exist** in the
    repo. Never creates new labels.

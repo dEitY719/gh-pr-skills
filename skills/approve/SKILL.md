@@ -71,12 +71,12 @@ PR's dominant language.
   `--admin-merge` exactly as specified in `references/self-pr-handling.md`.
 
 After submitting the review (any path), post a separate ai-metrics PR comment —
-`references/ai-metrics.md` has the command, footer, and `GH_DISABLE_AI_METRICS=1` skip path (#399/#403).
+`references/ai-metrics.md` has the command, footer, and `GH_DISABLE_AI_METRICS=1` skip path (dEitY719/dotfiles#399 / dEitY719/dotfiles#403).
 
 ## Step 4.5: Promote the Board Card (soft-fail)
 
-Sole owner of the `Approved` column (#1350): on 4a / 4b / self-PR `--self-record`,
-sync the card per `references/board-approved-sync.sh.md` (`--self-record` needs the #393 single-call bypass).
+Sole owner of the `Approved` column (dEitY719/dotfiles#1350): on 4a / 4b / self-PR `--self-record`,
+sync the card per `references/board-approved-sync.sh.md` (`--self-record` needs the dEitY719/dotfiles#393 single-call bypass).
 
 ## Step 5: Verify and Report
 
@@ -92,7 +92,7 @@ state, the Step 4.5 board line, and PR URL — plus the conflict warning if the 
 - Never fabricate follow-ups. Each issue must represent a defensible concern.
 - Never merge a colleague's PR. `--admin-merge` is self-PR only.
 - No labels/milestones unless `gh label list` confirms the label exists.
-- Never call `gh` without both `GH_HOST="$TARGET_HOST"` and `--repo "$TARGET_REPO"` (#1403/#1407) — `--repo` alone follows gh CLI's own default host, not git's remote.
+- Never call `gh` without both `GH_HOST="$TARGET_HOST"` and `--repo "$TARGET_REPO"` (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407) — `--repo` alone follows gh CLI's own default host, not git's remote.
 - Never promote a card to `Approved` on the 4c / analysis-only / `--admin-merge` paths.
 
 ## Related Skills

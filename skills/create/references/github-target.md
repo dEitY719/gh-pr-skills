@@ -1,8 +1,8 @@
-# gh-pr:create — Positional Args and GitHub Target (#1403, #1405)
+# gh-pr:create — Positional Args and GitHub Target (dEitY719/dotfiles#1403, dEitY719/dotfiles#1405)
 
 Run this in Step 1a-0, **before any `gh` call**.
 
-## Positional args (#1405)
+## Positional args (dEitY719/dotfiles#1405)
 
 `/gh-pr:create [N] [remote] [--no-stack] [--base <branch>]` — a positional made only
 of digits is the issue number, any other positional is the remote name;

@@ -4,7 +4,7 @@ Called from `SKILL.md` Step 7, after printing the final report. Post a
 PR comment with ai-metrics (soft-fail — warn on error, never block).
 `COMMENT_COUNT` is the number of comments addressed in Step 5 (including
 declined and bot comments). When `GH_DISABLE_AI_METRICS=1`, skip the
-comment entirely (issue #399).
+comment entirely (issue dEitY719/dotfiles#399).
 
 ```bash
 ELAPSED=$(( ($(date +%s) - START_TS) / 60 ))

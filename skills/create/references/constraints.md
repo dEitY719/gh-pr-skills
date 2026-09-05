@@ -51,16 +51,16 @@ range `<base>..HEAD` is the contract. A 5-commit PR mentions all 5
 concerns. If commits are truly trivial (e.g. typo fixes), group them but
 still acknowledge them.
 
-## Host and repo targeting (#1403)
+## Host and repo targeting (dEitY719/dotfiles#1403)
 
 Never call `gh` without both `GH_HOST="$TARGET_HOST"` and `--repo "$GH_REPO"`,
 and never derive those two from different sources — Step 1a-0 reads both from
 the one `git remote get-url "$REMOTE"` URL (`$REMOTE` = the `[remote]`
-positional, `origin` by default, #1405). Without `--repo`, `gh` follows its
+positional, `origin` by default, dEitY719/dotfiles#1405). Without `--repo`, `gh` follows its
 own `gh repo set-default` rather than git's remote; when the user is
 authenticated to both github.com and a GHES instance and those two disagree,
 `gh` queries the wrong server and **succeeds** — no error, just wrong data.
-That is how an OPEN issue came back as "doesn't exist" in #1403.
+That is how an OPEN issue came back as "doesn't exist" in dEitY719/dotfiles#1403.
 
 Never "fix" a surprising `gh` result (missing PR, missing label, unexpected
 default branch) by retrying or by relaxing the target. Check the host first.

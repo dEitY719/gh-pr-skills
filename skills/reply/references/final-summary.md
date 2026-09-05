@@ -27,12 +27,12 @@ PR #123 review comments processed: 5 total
   (`shell-common/functions/gh_pr_reply_targeted_review.sh`). This is the row
   that makes "codex's 2 BLOCKERs are fixed, agy's 3 suggestions were
   declined" readable at a glance — the flat pair above cannot express it,
-  which is exactly how PR #1609 got a stuck `review-blocked` (#1616).
+  which is exactly how PR dEitY719/dotfiles#1609 got a stuck `review-blocked` (dEitY719/dotfiles#1616).
 - **`review-passed` gate line** — the Step 6 gate's outcome, printed verbatim
   by `_gh_pr_reply_apply_review_passed` (which renders it through
   `_gh_pr_reply_review_passed_report`). One of the rows tabled in
   `references/review-passed-gate.md` § "Step 7 문구". **Always present** —
-  unlike the #1616 lane line it replaced, this one does not depend on
+  unlike the dEitY719/dotfiles#1616 lane line it replaced, this one does not depend on
   `PUSHED_FIXES`: a pass whose every BLOCKER was already resolved still
   earns the label even when no new commit was pushed.
 - **Closing line** — `-> All comments replied to.` confirms the
@@ -43,7 +43,7 @@ PR #123 review comments processed: 5 total
   `references/review-passed-gate.md`). Both steps use one stream — never
   re-derive it.
 - **No board-promotion row** — `Approved` is owned by `gh-pr:approve`
-  (#1350). This skill's only board write is the Step 6 `In review`
+  (dEitY719/dotfiles#1350). This skill's only board write is the Step 6 `In review`
   recovery, which the table does not report.
 
 ## Optional appendix

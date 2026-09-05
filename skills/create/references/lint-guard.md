@@ -1,7 +1,7 @@
 # Lint Guard — pre-push lint detection and execution
 
 Used by Step 4.5 of the `gh-pr:create` skill, **before** Step 5 pushes the branch.
-Source: issue #396, design SSOT in
+Source: issue dEitY719/dotfiles#396, design SSOT in
 [#384#issuecomment-4403809305](https://github.com/dEitY719/dotfiles/issues/384#issuecomment-4403809305).
 
 ## Why
@@ -105,7 +105,7 @@ After all tools finish, if any failed:
 
 ## Why fail-loud over warn-only
 
-The design discussion (#384) considered warn-only with an opt-in to
+The design discussion (dEitY719/dotfiles#384) considered warn-only with an opt-in to
 hard-fail. We picked hard-fail with an env-var escape because:
 
 - Warn-only is silent in scrollback and easy to ignore.

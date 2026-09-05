@@ -60,7 +60,7 @@ export TARGET_REPO TARGET_HOST
 `_gh_pr_review_resolve_target_repo` yields the **repo slug only** — it carries
 no host, so the `TARGET_HOST` half above is what actually pins the server.
 
-## Host targeting rule (issues #1403, #1407)
+## Host targeting rule (issues dEitY719/dotfiles#1403, dEitY719/dotfiles#1407)
 
 Every `gh` call this skill runs must name both host and repo:
 
@@ -74,7 +74,7 @@ For `gh api` there is no `--repo` flag — the repo goes in the path
 A `gh` call without `--repo` follows gh CLI's own `gh repo set-default`, not
 git's remote; and `--repo <owner>/<repo>` carries no host, so on a dual-host
 login (github.com + GHES) the slug resolves against the wrong server **without
-an error** — that is the silent misroute #1403 hit. `export GH_HOST` also lets
+an error** — that is the silent misroute dEitY719/dotfiles#1403 hit. `export GH_HOST` also lets
 the helpers this skill sources (`gh_pr_review.sh`, `gh_pr_edit_safe.sh`,
 `gh_project_status.sh`) inherit the same host; the reference files still spell
 the prefix out on every example for copy-paste safety.

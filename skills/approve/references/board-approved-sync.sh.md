@@ -1,7 +1,7 @@
 # Step 4.5 — promote the PR card to `Approved`
 
 `gh-pr:approve` is the **sole owner** of the `Approved` column (issue
-#1350). No other skill may promote a card into it. Run this block right
+dEitY719/dotfiles#1350). No other skill may promote a card into it. Run this block right
 after the Step 4 review submission succeeds, and only on the paths that
 represent a human deciding "this PR is reviewed and ready":
 
@@ -18,7 +18,7 @@ represent a human deciding "this PR is reviewed and ready":
 
 `shell-common/functions/gh_project_status.sh` fail-closes any
 `_gh_project_status_sync pr <N> "Approved"` whose `reviewDecision` is not
-`APPROVED` (#393). GitHub refuses self-approval server-side, so a solo
+`APPROVED` (dEitY719/dotfiles#393). GitHub refuses self-approval server-side, so a solo
 repo's own PR is stuck at `reviewDecision == ""` no matter what. The
 guard stays in place for every other caller; `--self-record` is the one
 place where a human has explicitly said "I reviewed my own PR", so it
@@ -51,7 +51,7 @@ runs `/gh-pr:reply` and it actually pushes fix commits (its Step 6.5).
 On every other route back — a manual push, `/gh-resolve:ci-fail`, a
 reply round where every comment was declined — the card stays at
 `In progress` and `/gh-pr:approve` silently refuses to promote it. Before
-#1513, `gh-pr:merge` Step 2-B would then fail-close on `Status !=
+dEitY719/dotfiles#1513, `gh-pr:merge` Step 2-B would then fail-close on `Status !=
 Approved`, pushing a normally-reviewed PR onto the emergency merge path
 for a bookkeeping reason — that specific consequence is gone now that
 Step 2-B is retired, but the underlying point stands: requiring the
@@ -64,7 +64,7 @@ card came from.
 
 ```sh
 # Inputs: PR_NUMBER; TARGET_REPO (Step 1); BOARD_BYPASS=1 only on --self-record.
-# --repo "$TARGET_REPO" is explicit (#1405): without it the helper falls back
+# --repo "$TARGET_REPO" is explicit (dEitY719/dotfiles#1405): without it the helper falls back
 # to `gh repo view`, which answers `gh repo set-default`, not this skill's
 # resolved remote.
 _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
@@ -90,7 +90,7 @@ if [ -r "$_HELPER" ]; then
         fi
     fi
 fi
-# helper missing → board sync silently skipped (NF-1, #644).
+# helper missing → board sync silently skipped (NF-1, dEitY719/dotfiles#644).
 ```
 
 Helper returns `0` on the happy path *and* on a silent no-op (repo has no
@@ -111,5 +111,5 @@ Board: not promoted (request-changes / analysis-only path)
 
 - `references/board-policy.md` — what the `Approved` column means.
 - `references/self-pr-handling.md` — the `--self-record` procedure.
-- `shell-common/functions/gh_project_status.sh` — #393 write-side guard.
+- `shell-common/functions/gh_project_status.sh` — dEitY719/dotfiles#393 write-side guard.
 - `docs/.ssot/github-project-board.md` — column semantics SSOT.
