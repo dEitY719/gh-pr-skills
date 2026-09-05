@@ -1,7 +1,7 @@
 # Parser Contract — for gh-pr:review
 
 Step 1 delegates to `gh_pr_review_parse` in
-`shell-common/functions/gh_pr_review.sh` (issue #664). That function is
+`shell-common/functions/gh_pr_review.sh` (issue dEitY719/dotfiles#664). That function is
 the **single source of truth** for the argument surface — the flat
 state machine, the closed `--review` enum, the KR-alias normalization,
 the `--user` cross-AI rejection, and the exit-code mapping (0 / 1 / 2)
@@ -68,7 +68,7 @@ has already happened. Free-text values are rejected (see exit codes).
   ```
 
   Never derive the repo from `gh repo view` — that answers
-  `gh repo set-default`, not the remote this run resolved (#1405).
+  `gh repo set-default`, not the remote this run resolved (dEitY719/dotfiles#1405).
 - Resolve `PR_NUMBER` from the explicit arg, or auto-detect from the
   current branch with `GH_HOST="$TARGET_HOST" gh pr view --json number -q
   .number`. Failing either → exit 1. This is the one call that takes the
@@ -77,7 +77,7 @@ has already happened. Free-text values are rejected (see exit codes).
   flag`), and the point of this call is to let `gh` read the PR off the
   current branch. `GH_HOST` still pins the server.
 
-## Host targeting rule (issues #1403 / #1407)
+## Host targeting rule (issues dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407)
 
 Every `gh` call this skill runs carries both halves:
 

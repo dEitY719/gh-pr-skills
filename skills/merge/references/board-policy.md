@@ -14,7 +14,7 @@ its prose.
 - `gh-pr:approve` still owns the write side: a human running
   `/gh-pr:approve` is what moves a card into `Approved`.
 
-## Retired: Step 2-B (removed in #1513)
+## Retired: Step 2-B (removed in dEitY719/dotfiles#1513)
 
 Step 2-B used to read the current board Status via
 `_gh_project_status_query_current` and exit 2 unless it was `Approved`
@@ -22,7 +22,7 @@ Step 2-B used to read the current board Status via
 var are gone.
 
 Why: see `../../approve/references/board-policy.md` →
-"2. Merge gate (read side) — removed in #1513" for the full rationale
+"2. Merge gate (read side) — removed in dEitY719/dotfiles#1513" for the full rationale
 (the gate was permanently un-satisfiable on `dEitY719/dotfiles`, so it
 was deleted rather than left as dead policy).
 
@@ -31,7 +31,7 @@ was deleted rather than left as dead policy).
 - `../../approve/references/board-policy.md` — full rule
   set, why fail-closed, the write-side guard rationale.
 - `shell-common/functions/gh_project_status.sh` — `Approved` write-side
-  guard (unchanged by #1513).
+  guard (unchanged by dEitY719/dotfiles#1513).
 - `shell-common/functions/gh_audit_builtin_workflows.sh` — audits that
   the "Pull request linked to issue" builtin is OFF, so the guard isn't
   invalidated by an async overwrite.

@@ -12,7 +12,7 @@ STATE=$(GH_HOST="$TARGET_HOST" gh pr view "$N" --repo "$TARGET_REPO" \
   --json number,isDraft,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup,headRefName,headRefOid,labels,url)
 ```
 
-`headRefOid` (#1601) is what the verdict gate's freshness check compares a
+`headRefOid` (dEitY719/dotfiles#1601) is what the verdict gate's freshness check compares a
 `review-passed` marker's sha against — free to add here since the call is
 already made; it would otherwise cost a second `gh pr view` just for this.
 
@@ -41,9 +41,9 @@ Four conditions **short-circuit the table** — check all four before reading
 | `labels[].name` contains `reply-pending` | `[SKIPPED] reply-pending — review reply not yet complete` |
 | `labels[].name` contains `review-blocked` | `[SKIPPED] review-blocked — reviewer verdict is blocking` |
 | `labels[].name` contains neither verdict label | `[SKIPPED] review not verified — no review-passed label` |
-| `review-passed` present, marker exists but sha MISMATCHES current head (#1601) | `[SKIPPED] review-passed label stale — head advanced without invalidation` (drops the label) |
-| `review-passed` present, no marker at all from the trusted login (#1601) | `[SKIPPED] review-passed not confirmed for this head — no freshness marker found` (label untouched) |
-| `review-passed` present, freshness lookup itself failed (#1601) | `[SKIPPED] review-passed freshness unknown — marker lookup failed, treating as unverified` (label untouched) |
+| `review-passed` present, marker exists but sha MISMATCHES current head (dEitY719/dotfiles#1601) | `[SKIPPED] review-passed label stale — head advanced without invalidation` (drops the label) |
+| `review-passed` present, no marker at all from the trusted login (dEitY719/dotfiles#1601) | `[SKIPPED] review-passed not confirmed for this head — no freshness marker found` (label untouched) |
+| `review-passed` present, freshness lookup itself failed (dEitY719/dotfiles#1601) | `[SKIPPED] review-passed freshness unknown — marker lookup failed, treating as unverified` (label untouched) |
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
@@ -61,16 +61,16 @@ export SHELL_COMMON="$_SC"
 # them, so a reply-pending PR printed its skip line and then fell straight
 # into the verdict-gate check below, which could print a SECOND line (or
 # worse, let the PR reach the D-1 table) for a PR that should have stopped
-# at reply-pending (agy, PR #1608 round-4 FOLLOW-UP). Folding reply-pending
+# at reply-pending (agy, PR dEitY719/dotfiles#1608 round-4 FOLLOW-UP). Folding reply-pending
 # into this same chain makes every branch here mutually exclusive by
 # construction, not by convention.
 HEAD_OID=$(printf '%s' "$STATE" | jq -r '.headRefOid')
-# ME: the one login a marker may be trusted from (#1601, "Marker authorship"
+# ME: the one login a marker may be trusted from (dEitY719/dotfiles#1601, "Marker authorship"
 # in review-verdict-gate.md). Reuse the same hoisted binding train-loop.md's
 # delegated-review step already makes; recomputed here only when this block
 # runs standalone. GH_PR_MERGE_TRAIN_TRUSTED_LOGIN overrides the auto-detected
 # identity for setups where the review pipeline and the merge-train dispatcher
-# authenticate as different accounts (PR #1608 review, agy round-2 BLOCKER).
+# authenticate as different accounts (PR dEitY719/dotfiles#1608 review, agy round-2 BLOCKER).
 ME="${GH_PR_MERGE_TRAIN_TRUSTED_LOGIN:-${ME:-$(GH_HOST="$TARGET_HOST" gh api user -q .login)}}"
 if printf '%s' "$STATE" | _gh_pr_merge_train_has_reply_pending_label; then
     echo "[SKIPPED] reply-pending"
@@ -79,13 +79,13 @@ elif printf '%s' "$STATE" | _gh_pr_merge_train_has_review_blocked_label; then
 elif ! printf '%s' "$STATE" | _gh_pr_merge_train_has_review_passed_label; then
     echo "[SKIPPED] review not verified — no review-passed label"
 else
-    # #1601 — the label alone proves some head was reviewed, not this one.
+    # dEitY719/dotfiles#1601 — the label alone proves some head was reviewed, not this one.
     # Four-way exit code, not a boolean: only 1 (MISMATCH) is positive proof
     # the label is wrong for this head, so only 1 self-heals (drops the
     # label). 2 (ABSENT — no marker at all) and 3 (UNDETERMINED — the lookup
     # itself failed) both route as unverified without touching the label:
-    # deleting on absence alone would strip every pre-#1601 review-passed PR
-    # the moment this feature ships (agy, PR #1608 review, both rounds), and
+    # deleting on absence alone strips every review-passed PR predating dEitY719/dotfiles#1601
+    # the moment this feature ships (agy, PR dEitY719/dotfiles#1608 review, both rounds), and
     # deleting on a lookup failure would let one network blip destroy an
     # otherwise-valid label (agy round-2 BLOCKER).
     _gh_pr_merge_train_review_passed_stale "$N" "$TARGET_REPO" "$TARGET_HOST" "$HEAD_OID" "$ME"
@@ -109,7 +109,7 @@ All four are defense-in-depth: Step 2 already dropped drafts and
 Step 3.5 already applied the verdict gate to what survived. The re-check earns
 its place because a label can be **added or changed mid-run** — a deferred
 `gh-verify:review-all` pass can fire minutes after Step 2 built the queue,
-adding `reply-pending` (#1524) or flipping a verdict label (#1564) — and
+adding `reply-pending` (dEitY719/dotfiles#1524) or flipping a verdict label (dEitY719/dotfiles#1564) — and
 F-3's re-query is the only thing that would see it. A PR whose `review-passed`
 turned into `review-blocked` between the queue build and its turn must not
 merge on the strength of a snapshot.

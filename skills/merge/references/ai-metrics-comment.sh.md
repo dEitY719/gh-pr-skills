@@ -2,10 +2,10 @@
 
 Posted after the board sync (Step 4) completes. Soft-fail: on error,
 print `[WARN] ai-metrics comment failed — continuing.` and proceed.
-When `GH_DISABLE_AI_METRICS=1`, skip the comment entirely (issue #399).
+When `GH_DISABLE_AI_METRICS=1`, skip the comment entirely (issue dEitY719/dotfiles#399).
 
 The footer glyphs (🤖 📊 👤) are intentional — `gh-pr-merge` is on the
-emoji allowlist (CLAUDE.md #317/#320/#367). Keep them as-is.
+emoji allowlist (CLAUDE.md dEitY719/dotfiles#317 / dEitY719/dotfiles#320 / dEitY719/dotfiles#367). Keep them as-is.
 
 ```bash
 ELAPSED=$(( ($(date +%s) - START_TS) / 60 ))

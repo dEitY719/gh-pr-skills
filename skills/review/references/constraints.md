@@ -18,7 +18,7 @@ rationale lives here.
   self-approve restriction does not apply.
 - **Never edit the PR body.** Use `gh pr comment` (append) — `gh pr
   edit --body` silently exits 1 on repos with classic Projects
-  attached (issue #326 Bug B). If a future iteration needs body
+  attached (issue dEitY719/dotfiles#326 Bug B). If a future iteration needs body
   mutation, route through `_gh_pr_edit_safe_body` per CLAUDE.md.
 - **Never log the external CLI's stderr to a PR comment.** Stderr is
   only used to derive the error-message first line on non-zero exit.

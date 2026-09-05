@@ -3,7 +3,7 @@
 Read the repo's **actual** policy and obey it. This skill never bypasses an
 approval requirement and never manufactures one that the platform does not
 impose. Both halves of that sentence are load-bearing: inventing a requirement
-the platform cannot impose is the failure #1519 fixed.
+the platform cannot impose is the failure dEitY719/dotfiles#1519 fixed.
 
 ## Read the requirement — once per distinct base branch, from two sources
 
@@ -33,7 +33,7 @@ queue. `@uri` turns the slash into `%2F` so the ref stays one path segment.
 ## Classify each source by HTTP status, not by exit code
 
 `gh api` collapses every failure into a non-zero exit, which is exactly the
-information loss that produced the #1519 bug. Use `-i` so the status line
+information loss that produced the dEitY719/dotfiles#1519 bug. Use `-i` so the status line
 survives, and read the body out of the same response — that keeps the cost at
 one call per source.
 
@@ -55,7 +55,7 @@ _gate_probe() {
         403)
             # NOT every 403 means "no policy". Only the plan-limit message
             # does; permission, rate-limit and SSO denials are unreadable
-            # policy and must fail closed (PR #1526 agy+codex review).
+            # policy and must fail closed (PR dEitY719/dotfiles#1526 agy+codex review).
             case "$_body" in
                 *"Upgrade to GitHub Pro"*) echo none ;;
                 *) echo unknown ;;
@@ -96,10 +96,10 @@ stays on.
 
 That asymmetry is the whole point. `unknown` costs a `[SKIPPED]` the next tick
 retries; `none` on a repo that really does require approvals is an unreviewed
-merge. `#1519` narrowed which answers are definitive; it must never widen
+merge. `dEitY719/dotfiles#1519` narrowed which answers are definitive; it must never widen
 which answers are *assumed* definitive.
 
-The `403` split is what the PR #1526 review added: the original patch keyed on
+The `403` split is what the PR dEitY719/dotfiles#1526 review added: the original patch keyed on
 the status alone, and GitHub reuses `403` for "your plan lacks this feature",
 "your token may not read this", "you are rate limited", and "this org needs
 SSO". Only the first is a statement about the policy.
@@ -117,9 +117,9 @@ SSO". Only the first is a statement about the policy.
 | `2xx` with an empty or unparseable body | an answer arrived but was not understood | `unknown` |
 | anything else (5xx, 401, network, no response) | genuinely undetermined | `unknown` |
 
-### Combining the two sources (#1519 F-3, F-4)
+### Combining the two sources (dEitY719/dotfiles#1519 F-3, F-4)
 
-| Sources | Gate | Header (#1519 NF-1) |
+| Sources | Gate | Header (dEitY719/dotfiles#1519 NF-1) |
 |---|---|---|
 | either says `required n >= 1` | **on** — strictest `n` wins | `on (<source>: <n> approvals)` |
 | neither requires, at least one `unknown` | **on** — fail-closed | `on (fail-closed: <base> policy unreadable)` |
@@ -127,10 +127,10 @@ SSO". Only the first is a statement about the policy.
 
 `required` outranks `unknown` for the header text only; both mean the gate is
 on. The three header strings are not cosmetic: distinguishing them is what
-makes #1519's symptom visible — `report-format.md` → "The `approval gate:`
+makes dEitY719/dotfiles#1519's symptom visible — `report-format.md` → "The `approval gate:`
 field" carries the reason and is what the doc-guard tests pin.
 
-## Why 403 and 404 are "no policy", not "lookup failed" (#1519 D-1)
+## Why 403 and 404 are "no policy", not "lookup failed" (dEitY719/dotfiles#1519 D-1)
 
 `403 Upgrade to GitHub Pro or make this repository public to enable this
 feature` and `404 Branch not protected` are statements *about the policy*, not
@@ -150,15 +150,15 @@ is unlocked but unconfigured, and neither would have required an approval. The
 *mechanism* still sniffs `gh api`'s exit code, so it cannot tell a 5xx from a
 403 either; it fails open rather than closed, so the same information loss
 shows up there as an over-permissive read instead of an unclearable skip.)
-`#1513` fixed the same asymmetry in `gh-pr:merge`'s board gate.
+`dEitY719/dotfiles#1513` fixed the same asymmetry in `gh-pr:merge`'s board gate.
 
 **No opt-in gate is required for the off verdict.** If the repo owner put no
 approval policy on this base, the safety boundary is exactly where they put it
 — the same reasoning that makes skipping at `0` legitimate. Off does *not*
 mean "merge unreviewed", though: the off path runs a delegated review first
-(#1519 D-3, next section).
+(dEitY719/dotfiles#1519 D-3, next section).
 
-## Why both sources, and not just `gh-pr:merge`'s one (#1519 D-2)
+## Why both sources, and not just `gh-pr:merge`'s one (dEitY719/dotfiles#1519 D-2)
 
 Making this identical to `gh-pr:merge` — read classic protection only — would
 be a regression, not a simplification. A repo that enforces review purely
@@ -169,7 +169,7 @@ recoverable mistake; in an unattended loop it is a batch of unreviewed merges.
 Reading both and taking the strictest is what makes "off" trustworthy enough to
 act on.
 
-## Why the gate being off still runs a review (#1519 D-3, D-4)
+## Why the gate being off still runs a review (dEitY719/dotfiles#1519 D-3, D-4)
 
 Gate off means "the *platform* does not require an approval". It does not mean
 "nobody needs to look at this". On the off path the train runs
@@ -179,9 +179,9 @@ suppression, and its failure handling are in `train-loop.md` → "Delegated
 review on the gate-off path".
 
 That step is not a rubber stamp: of eight agent-run `--self-record` reviews in
-the issue #1477 session, one withheld promotion over a real defect.
+the issue dEitY719/dotfiles#1477 session, one withheld promotion over a real defect.
 
-Reading the board here is **not** a revival of the board *gate* `#1513`
+Reading the board here is **not** a revival of the board *gate* `dEitY719/dotfiles#1513`
 retired — see `train-loop.md` → "Gates `gh-pr:merge` owns", which keeps that
 distinction next to the board read it governs.
 
@@ -240,7 +240,7 @@ to make: an *undetermined* policy is treated as "approval required", so
 unapproved PRs are `[SKIPPED] policy unreadable — approval assumed required`
 and nothing merges on a guess.
 
-`#1519` narrowed **what counts as undetermined**; it did not weaken the
+`dEitY719/dotfiles#1519` narrowed **what counts as undetermined**; it did not weaken the
 principle. A 5xx, a 401, or a dead network still fails closed. What no longer
 fails closed is a definitive answer that happens to arrive with a 4xx status.
 

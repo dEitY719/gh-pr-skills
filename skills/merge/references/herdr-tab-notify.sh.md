@@ -22,7 +22,7 @@ all: silence, not a second info line (F-4).
 # the worktree scan below.
 if command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     # "Which herdr agent is sitting on this worktree?" comes from one SSOT
-    # (#1569), sourced — never re-implemented here. This hint used to carry the
+    # (dEitY719/dotfiles#1569), sourced — never re-implemented here. This hint used to carry the
     # weakest of the four hand-copied answers: a plain `.cwd == $wt` string
     # equality, which missed both a session that had `cd`-ed inside its worktree
     # and a worktree reached through a symlink. Adopting the shared predicate
@@ -93,7 +93,7 @@ non-zero to the caller.
   the two, so it stays silent for both.
 - **No agent on the worktree path** — the worktree exists but no tab is
   parked on it, or under it, or standing in it → the lookup returns non-zero
-  → nothing printed. Since #1569 "on the path" means `cwd` OR
+  → nothing printed. Since dEitY719/dotfiles#1569 "on the path" means `cwd` OR
   `foreground_cwd`, matched on a path boundary against the physical path, so
   a session that `cd`-ed into a subdirectory and a worktree reached through a
   symlink now DO count — this hint used to miss both.
@@ -102,7 +102,7 @@ non-zero to the caller.
   tab that is mid-run would be wrong, and a "still working" line would be
   noise.
 - **`shell-common/functions/herdr_agent_lookup.sh` unreadable** — the shared
-  match predicate (#1569) is not there to be sourced → nothing printed. The
+  match predicate (dEitY719/dotfiles#1569) is not there to be sourced → nothing printed. The
   hint degrades to silence, never to a hand-rolled copy of the predicate.
 - **Two or more agents on the same worktree** — abnormal; the lookup takes
   the first, the rest are ignored, and no warning is emitted. The idle gate

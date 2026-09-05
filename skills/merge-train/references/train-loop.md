@@ -31,7 +31,7 @@ For each PR `N` in the Step 2 queue order:
    implementation tab").
 8. **Record** the outcome and continue.
 
-## Closing the merged PR's implementation tab (step 7, #1565)
+## Closing the merged PR's implementation tab (step 7, dEitY719/dotfiles#1565)
 
 `gh-pr:merge` Step 5 already closes this tab as part of its post-merge
 verification dispatch. This is the belt-and-braces half: run it anyway, right
@@ -54,7 +54,7 @@ call. Run this **only after** `gh-pr:merge` reported success; a `[SKIPPED]` or
 # never fail the PR it just merged.
 if command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     # "Which herdr agent is sitting on this worktree?" comes from one SSOT
-    # (#1569), sourced — never re-implemented here. This block, the Step 4 hint,
+    # (dEitY719/dotfiles#1569), sourced — never re-implemented here. This block, the Step 4 hint,
     # gh-verify:post-merge-verify's dispatch and `_iw_live_agents` each carried
     # their own copy of that predicate, and the copies had already drifted:
     # the Step 4 hint matched `.cwd` by plain string equality, so it missed
@@ -108,7 +108,7 @@ the rule (idle closes, non-idle never does) against the executable mirror
 `tests/bats/skills/_fixtures/gh_pr_merge_train_close_impl_tab.sh`. Change the
 block above, change that fixture.
 
-## Delegated review on the gate-off path (step 2b, #1519 F-6 … F-9)
+## Delegated review on the gate-off path (step 2b, dEitY719/dotfiles#1519 F-6 … F-9)
 
 The gate being off means the platform asks for no approval — not that nothing
 should be reviewed (`approval-gate.md` → "Why the gate being off still runs a
@@ -122,7 +122,7 @@ review a human explicitly blocked is never handed to a self-record run.
 
 ```bash
 # Hoisted out of the loop — bind once per run, next to TARGET_REPO / TARGET_HOST.
-# Shared with F-3's freshness check (#1601, routing-table.md) — same login,
+# Shared with F-3's freshness check (dEitY719/dotfiles#1601, routing-table.md) — same login,
 # same reason: it is the one identity a marker/self-record can be trusted from.
 ME=$(GH_HOST="$TARGET_HOST" gh api user -q .login)
 
@@ -139,12 +139,12 @@ LAST_OID=$(GH_HOST="$TARGET_HOST" gh api --paginate "repos/$TARGET_REPO/pulls/$N
 "did *this* account already review *this* head", so an empty `$ME` would make
 `LAST_OID` always empty and re-run a full review every tick.
 
-1. **Suppress a repeat review (#1519 F-8).** `LAST_OID` non-empty and equal to
+1. **Suppress a repeat review (dEitY719/dotfiles#1519 F-8).** `LAST_OID` non-empty and equal to
    `HEAD_OID` means this exact head was already reviewed by `$ME` — skip to
    step 3 without calling anything. Otherwise run
    `Skill(gh-pr:approve, "<N> <remote> --self-record")` once. Never twice, and
-   never a retry (#1519 F-7).
-2. **Read the verdict (#1519 D-4)** — `_gh_project_status_query_current pr <N>
+   never a retry (dEitY719/dotfiles#1519 F-7).
+2. **Read the verdict (dEitY719/dotfiles#1519 D-4)** — `_gh_project_status_query_current pr <N>
    "$TARGET_REPO"` from `shell-common/functions/gh_project_status.sh`.
 3. **Decide:**
 
@@ -152,14 +152,14 @@ LAST_OID=$(GH_HOST="$TARGET_HOST" gh api --paginate "repos/$TARGET_REPO/pulls/$N
 |---|---|---|
 | `Approved` | either | proceed to step 3 — merge |
 | anything else | yes, just ran | `[SKIPPED] self-record withheld approval (BLOCKER)` |
-| anything else | no, suppressed by #1519 F-8 | `[SKIPPED] approval withheld (unchanged since review)` |
+| anything else | no, suppressed by dEitY719/dotfiles#1519 F-8 | `[SKIPPED] approval withheld (unchanged since review)` |
 | unreadable | either | `[SKIPPED] board unreadable — approval unconfirmed` |
-| — | the skill call itself errored | `[SKIPPED] self-record failed` (#1519 F-9) |
+| — | the skill call itself errored | `[SKIPPED] self-record failed` (dEitY719/dotfiles#1519 F-9) |
 
 Reading the board **after** the suppression check is what keeps a stalled-but-
 approved PR moving: a PR whose review passed on an earlier tick but whose merge
 then failed on CI comes back with `Approved` still on the card, so row 1 clears
-it without paying for a second review. #1519 F-8's suppression only ever produces a
+it without paying for a second review. dEitY719/dotfiles#1519 F-8's suppression only ever produces a
 `[SKIPPED]` for a PR the review actually declined.
 
 Nothing here spends an F-5 attempt — no remediation was performed. Every row
@@ -304,14 +304,14 @@ Reporting that as a bare `[FAILED]` tells the reader nothing they can act on;
 naming the `reviewDecision` value tells them exactly what to dismiss.
 
 The projectV2 board Status is **not** one of these gates. `gh-pr:merge`'s
-Step 2-B board check was removed in #1513, so a card sitting outside `Approved`
+Step 2-B board check was removed in dEitY719/dotfiles#1513, so a card sitting outside `Approved`
 — which is the normal state for a PR `gh-flow:issue` just opened — is no longer
 a reason to skip. Do not query the board here.
 
 That retirement is about the board as a **policy gate**, standing in for a
 platform approval the repo never granted; used that way it blocked every
 self-authored PR forever. Step 2b's read is a different thing wearing the same
-column: `gh-pr:approve` is the only skill that writes `Approved` (#1350) and
+column: `gh-pr:approve` is the only skill that writes `Approved` (dEitY719/dotfiles#1350) and
 only promotes when it found no BLOCKER, so the train is reading the return
 value of a review it just ran — not asking the board for permission. Keep the
 two apart: nothing may consult the board *before* a review has been run for

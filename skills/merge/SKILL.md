@@ -30,7 +30,7 @@ Record `START_TS=$(date +%s)` immediately for elapsed-time tracking in Step 4.
 - `strategy` — default `rebase`; one of `rebase`/`squash`/`merge`. Other → print allowed values, stop.
 - `remote` — default `origin`. Bind `TARGET_REPO` **and** `TARGET_HOST` from
   that one remote URL and `export GH_HOST` per `references/github-target.md`
-  (#1403/#1407). Missing remote → list `git remote -v`, stop (no silent fallback).
+  (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). Missing remote → list `git remote -v`, stop (no silent fallback).
 
 ## Step 2: Pre-flight (parallel)
 
@@ -51,7 +51,7 @@ check FAILURE/pending; `reviewDecision != APPROVED` → suggest
 `INFO: No branch protection on <baseRefName> — accepting empty reviewDecision.`
 (a non-empty non-APPROVED value still stops).
 
-The projectV2 board Status is **not** a merge gate (#1513) — do not read it
+The projectV2 board Status is **not** a merge gate (dEitY719/dotfiles#1513) — do not read it
 here. Rationale + the retired Step 2-B in `references/board-policy.md`.
 
 ## Step 3: Merge (no confirmation)
@@ -80,7 +80,7 @@ tab (soft-fail and read-only; skip entirely when there is no local worktree, no
 
 Then drop the now-readerless `review-passed` label per
 `references/review-passed-cleanup.sh.md` — `_gh_pr_drop_label "$PR_NUMBER"
-review-passed "$TARGET_REPO" "$TARGET_HOST"` (#1636, soft-fail: the merge
+review-passed "$TARGET_REPO" "$TARGET_HOST"` (dEitY719/dotfiles#1636, soft-fail: the merge
 already succeeded, so a failed delete is one `[WARN]` line and never touches
 the Step 5 report or the exit status).
 
@@ -103,7 +103,7 @@ post-merge verification gate **and** its dispatch, in one run:
 # hand from Steps 1-2, so nothing here re-queries GitHub. Bind them all, even
 # the ones an earlier step already set: each block runs in its own shell, and
 # an unbound TARGET_REPO makes the registry lookup below answer empty — the
-# silent no-dispatch #1565 is about.
+# silent no-dispatch dEitY719/dotfiles#1565 is about.
 PR_NUMBER=<N>                 # the merged PR
 TARGET_REPO=<owner/repo>      # Step 1's single remote URL, the registry key
 HEAD_BRANCH=<headRefName>     # Step 2's `gh pr view` already read it
@@ -111,8 +111,8 @@ BASE_BRANCH=<baseRefName>     # ditto — never a hardcoded `main`
 REMOTE=<remote>               # the `[remote]` positional, default `origin`
 
 # A binding mistake is also an unsubstituted placeholder (`<owner/repo>`) or a
-# whitespace-only value: both pass `[ -n ]`, both silently reproduce #1576 (PR
-# #1603 review, agy + codex), and neither is distinguishable from an unwatched
+# whitespace-only value: both pass `[ -n ]`, both silently reproduce dEitY719/dotfiles#1576 (PR
+# dEitY719/dotfiles#1603 review, agy + codex), and neither is distinguishable from an unwatched
 # repo below — name every offender; the dispatch closes tabs and rebases main.
 PMV_MISSING=""
 _pmv_need() {
@@ -140,12 +140,12 @@ fi
 # Empty VERIFY_SKILL with all five values bound — repo not registered, no
 # registry, or no jq, so the feature is simply unavailable — means do nothing
 # at all: no output, no dispatch, and no [WARN] either. An unwatched repo
-# stays byte-identical to its pre-#1511 behavior.
+# stays byte-identical to how it behaved before dEitY719/dotfiles#1511.
 if [ -n "$VERIFY_SKILL" ]; then
     # gh-verify:post-merge-verify's dispatch block is READ and run here, not
     # reached via `Skill(gh-verify:post-merge-verify, ...)`: as a Skill() call
     # it ran 0/10 inside gh-pr:merge-train vs 10/10 for every pasted block, and
-    # an unclosed tab starves issue-watcher's budget (#1565). Two tiers as
+    # an unclosed tab starves issue-watcher's budget (dEitY719/dotfiles#1565). Two tiers as
     # everywhere here: GH_VERIFY_ROOT's live gh-verify, else the vendored copy.
     PMV_BLOCK="${GH_VERIFY_ROOT:+$GH_VERIFY_ROOT/skills/post-merge-verify/references/dispatch.sh.md}"
     [ -r "$PMV_BLOCK" ] || PMV_BLOCK="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md"

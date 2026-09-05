@@ -82,7 +82,7 @@ The quiet period is a **time-based proxy** for the question that actually
 matters: *has the deferred review-reply pass finished?* Time is a bad proxy. A
 reply pass slower than 11 minutes outlives the window, and the train merges a
 PR whose replies and `/simplify` fixes are still in flight — which is what
-happened to PR #1522 (issue #1524, bug A).
+happened to PR dEitY719/dotfiles#1522 (issue dEitY719/dotfiles#1524, bug A).
 
 So there is now a real signal, checked **regardless of the quiet period**:
 
@@ -93,7 +93,7 @@ So there is now a real signal, checked **regardless of the quiet period**:
 A PR carrying `reply-pending` is not a train target however far outside the
 11-minute quiet period it sits.
 
-#### Its sibling signal: the verdict labels (#1564)
+#### Its sibling signal: the verdict labels (dEitY719/dotfiles#1564)
 
 `reply-pending` answers *when* — has the reply pass finished. It says nothing
 about *what the reviewers concluded*. That second question is answered by a
@@ -101,7 +101,7 @@ different pair of labels, on a different schedule, in a different step:
 
 | Signal | Set by | Cleared by |
 |---|---|---|
-| `review-blocked` / `review-passed` | `gh-verify:review-all` Step 3.5 (the only writer) | `_gh_pr_drop_label` on any head advance (#1563); the opposite label on a re-review |
+| `review-blocked` / `review-passed` | `gh-verify:review-all` Step 3.5 (the only writer) | `_gh_pr_drop_label` on any head advance (dEitY719/dotfiles#1563); the opposite label on a re-review |
 
 The train reads them in Step 3.5, not here: they are **not** part of
 `_gh_pr_merge_train_filter_targets`, because a PR they stop must appear in the
@@ -136,7 +136,7 @@ threads, edits, commits and pushes — generously an hour — plus slack. It is
 ~8x the quiet period, so the two windows can never be mistaken for each other.
 
 Without the bound, a label nobody ever removes excludes its PR from the train
-**forever** (PR #1545 review, codex BLOCKER). With it, "the remover died"
+**forever** (PR dEitY719/dotfiles#1545 review, codex BLOCKER). With it, "the remover died"
 degrades to "the PR waits out 90 minutes" — at most six 15-minute cron ticks.
 
 So the quiet period stays on as the **backstop** for the two cases the label
@@ -153,7 +153,7 @@ cannot cover:
 
 `shell-common/tools/custom/pr_merge_train_cron.sh` and this skill call the
 **literal same function**, `_gh_pr_merge_train_filter_targets` in
-`shell-common/functions/gh_pr_merge_train.sh` (issue #1524). Before that fix
+`shell-common/functions/gh_pr_merge_train.sh` (issue dEitY719/dotfiles#1524). Before that fix
 the dispatcher had the filter as real `jq` and this skill had it as prose, so
 the prose half could be — and was — silently skipped by the LLM executing it.
 They cannot drift now: there is one implementation.

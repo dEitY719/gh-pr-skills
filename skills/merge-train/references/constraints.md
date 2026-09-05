@@ -42,7 +42,7 @@ repo's actual settings.
 train drains, and GitHub forbids approving your own PR — with `--author @me`,
 every PR here is yours, so no approving review is obtainable at all.
 
-**The one delegated exception (#1519 D-3).** When the approval gate reads
+**The one delegated exception (dEitY719/dotfiles#1519 D-3).** When the approval gate reads
 *off*, no platform rule is asking for a review, and merging on that basis
 alone would put unexamined code on the base branch. In that one case the train
 runs `Skill(gh-pr:approve, "<N> <remote> --self-record")` once and reads the
@@ -53,9 +53,9 @@ train only routes on the answer. The constraint it preserves is the real one —
 **the train never decides whether a PR is good.**
 
 It also does not duplicate Step 2.4: a self-record review runs at most once per
-head (`#1519 F-8`), and only on PRs the platform leaves ungated.
+head (`dEitY719/dotfiles#1519 F-8`), and only on PRs the platform leaves ungated.
 
-**Step 3.5's verdict gate is not an exception to this either (#1564).** It
+**Step 3.5's verdict gate is not an exception to this either (dEitY719/dotfiles#1564).** It
 reads two labels — `review-blocked` / `review-passed` — and applies a fixed
 table. The judgement they encode was made by `gh-verify:review-all`, their only
 writer. The train must **never** parse a review comment body to reach the same

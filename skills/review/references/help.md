@@ -20,7 +20,7 @@ request-changes) is submitted** — see `gh-pr-approve` for that.
 | `--review <preset>` | no | Review depth/lens enum. Default `default`. See below. |
 | `--user <name>` | no | `--ai claude` only. Multi-account routing via `_claude_resolve_account` (e.g. `personal`, `work`, `work1`). |
 | `--no-post-comment` | no | Skip the automatic PR comment; only print to stdout. |
-| `--paths <path>` | no | Repeatable. Review only these files — the diff is filtered by path, so the run stays on the inline path however large the PR is. A scope matching no file exits 1. Added for `gh-pr:reply`'s targeted re-review lane (#1616). |
+| `--paths <path>` | no | Repeatable. Review only these files — the diff is filtered by path, so the run stays on the inline path however large the PR is. A scope matching no file exits 1. Added for `gh-pr:reply`'s targeted re-review lane (dEitY719/dotfiles#1616). |
 
 ## `--review` enum
 
