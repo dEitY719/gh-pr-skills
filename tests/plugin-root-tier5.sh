@@ -5,10 +5,15 @@
 #
 # Two assertions, because the defect has a mechanical half and a behavioural one:
 #
-#   1. No tracked file splices an explicitly-empty default into a path. With
-#      CLAUDE_PLUGIN_ROOT unset, "${CLAUDE_PLUGIN_ROOT:-}/lib/..." resolves to
-#      the filesystem root and the export that followed it poisoned every later
-#      ${SHELL_COMMON:-...} default in the same run (gh-resolve-skills#8).
+#   1. No tracked file splices an explicitly-empty default into a path — an
+#      expansion of CLAUDE_PLUGIN_ROOT with an empty default, immediately
+#      followed by a slash. With the variable unset that resolves to the
+#      filesystem root, and the export that followed it poisoned every later
+#      SHELL_COMMON default in the same run (gh-resolve-skills#8).
+#
+#      This file states the pattern in prose rather than quoting it, so the
+#      gate needs no self-exclusion here. Only the convention's own page
+#      carries one, because it has to show the literal.
 #   2. A real resolution block, run with no override and a cwd outside any
 #      checkout, stops at tier 5: non-zero, names the path it tried, and leaves
 #      SHELL_COMMON unset rather than pointing at "/".
@@ -22,7 +27,8 @@ fail=0
 
 # 1. The gate grep. It has no false positives: an explicitly empty default
 #    immediately followed by "/" is always the defect.
-hits=$(cd "$ROOT" && git ls-files -z \
+cd "$ROOT"
+hits=$(git ls-files -z \
 	| xargs -0 grep -nE '\$\{[A-Za-z_][A-Za-z0-9_]*:?-\}/' || :)
 if [ -n "$hits" ]; then
 	printf 'FAIL  empty-default path splice still present:\n%s\n' "$hits"
@@ -53,9 +59,11 @@ esac
 
 # Sourced instead of run: `return 1 2>/dev/null || exit 1` must not kill the
 # caller, and SHELL_COMMON must still be unset — never "/lib/vendor/shell-common".
+# shellcheck disable=SC2016  # the inner shell expands these, not this one
 sc=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT -u SHELL_COMMON \
 	HOME=/nonexistent DOTFILES_ROOT=/nonexistent \
-	sh -c '. "$1" >/dev/null 2>&1; printf "%s" "${SHELL_COMMON-<unset>}"' sh "$TMP/block.sh")
+	sh -c '. "$1" >/dev/null 2>&1; printf "%s" "${SHELL_COMMON-<unset>}"' \
+	sh "$TMP/block.sh")
 [ "$sc" = "<unset>" ] || {
 	printf 'FAIL  SHELL_COMMON exported before the proof: %s\n' "$sc"
 	fail=1
