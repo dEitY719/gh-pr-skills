@@ -96,7 +96,7 @@ stays on.
 
 That asymmetry is the whole point. `unknown` costs a `[SKIPPED]` the next tick
 retries; `none` on a repo that really does require approvals is an unreviewed
-merge. `#1519` narrowed which answers are definitive; it must never widen
+merge. `dEitY719/dotfiles#1519` narrowed which answers are definitive; it must never widen
 which answers are *assumed* definitive.
 
 The `403` split is what the PR dEitY719/dotfiles#1526 review added: the original patch keyed on
@@ -150,7 +150,7 @@ is unlocked but unconfigured, and neither would have required an approval. The
 *mechanism* still sniffs `gh api`'s exit code, so it cannot tell a 5xx from a
 403 either; it fails open rather than closed, so the same information loss
 shows up there as an over-permissive read instead of an unclearable skip.)
-`#1513` fixed the same asymmetry in `gh-pr:merge`'s board gate.
+`dEitY719/dotfiles#1513` fixed the same asymmetry in `gh-pr:merge`'s board gate.
 
 **No opt-in gate is required for the off verdict.** If the repo owner put no
 approval policy on this base, the safety boundary is exactly where they put it
@@ -181,7 +181,7 @@ review on the gate-off path".
 That step is not a rubber stamp: of eight agent-run `--self-record` reviews in
 the issue dEitY719/dotfiles#1477 session, one withheld promotion over a real defect.
 
-Reading the board here is **not** a revival of the board *gate* `#1513`
+Reading the board here is **not** a revival of the board *gate* `dEitY719/dotfiles#1513`
 retired — see `train-loop.md` → "Gates `gh-pr:merge` owns", which keeps that
 distinction next to the board read it governs.
 
@@ -240,7 +240,7 @@ to make: an *undetermined* policy is treated as "approval required", so
 unapproved PRs are `[SKIPPED] policy unreadable — approval assumed required`
 and nothing merges on a guess.
 
-`#1519` narrowed **what counts as undetermined**; it did not weaken the
+`dEitY719/dotfiles#1519` narrowed **what counts as undetermined**; it did not weaken the
 principle. A 5xx, a 401, or a dead network still fails closed. What no longer
 fails closed is a definitive answer that happens to arrive with a 4xx status.
 

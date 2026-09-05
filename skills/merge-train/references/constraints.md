@@ -53,7 +53,7 @@ train only routes on the answer. The constraint it preserves is the real one —
 **the train never decides whether a PR is good.**
 
 It also does not duplicate Step 2.4: a self-record review runs at most once per
-head (`#1519 F-8`), and only on PRs the platform leaves ungated.
+head (`dEitY719/dotfiles#1519 F-8`), and only on PRs the platform leaves ungated.
 
 **Step 3.5's verdict gate is not an exception to this either (dEitY719/dotfiles#1564).** It
 reads two labels — `review-blocked` / `review-passed` — and applies a fixed

@@ -30,7 +30,7 @@ Record `START_TS=$(date +%s)` immediately for elapsed-time tracking in Step 4.
 - `strategy` — default `rebase`; one of `rebase`/`squash`/`merge`. Other → print allowed values, stop.
 - `remote` — default `origin`. Bind `TARGET_REPO` **and** `TARGET_HOST` from
   that one remote URL and `export GH_HOST` per `references/github-target.md`
-  (dEitY719/dotfiles#1403/dEitY719/dotfiles#1407). Missing remote → list `git remote -v`, stop (no silent fallback).
+  (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). Missing remote → list `git remote -v`, stop (no silent fallback).
 
 ## Step 2: Pre-flight (parallel)
 

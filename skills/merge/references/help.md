@@ -27,7 +27,7 @@ _Availability depends on repo settings → General → Pull Requests. If a strat
 ## What the skill does
 
 1. Parses args. Validates strategy ∈ {rebase, squash, merge}.
-2. Resolves target repo **and host** from the remote URL (`GH_HOST` pinned, dEitY719/dotfiles#1403/dEitY719/dotfiles#1407).
+2. Resolves target repo **and host** from the remote URL (`GH_HOST` pinned, dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 3. Pre-flight (in parallel):
    - PR state, draft status, mergeable, mergeStateStatus, reviewDecision
    - `gh pr checks` — required checks must pass

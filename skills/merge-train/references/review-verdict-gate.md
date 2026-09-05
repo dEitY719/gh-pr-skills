@@ -262,7 +262,7 @@ Do not add one.
 
 ## What this gate is not
 
-- **Not the board `Approved` gate.** `#1513` retired that, and this does not
+- **Not the board `Approved` gate.** `dEitY719/dotfiles#1513` retired that, and this does not
   revive it. The signal here is a label written by the reviewer fan-out, not a
   project-board column.
 - **Not the approval gate.** `approval-gate.md` answers "does the *platform*

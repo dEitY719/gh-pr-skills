@@ -33,7 +33,7 @@ content verbatim, then stop. **No API calls.** That file tables the positionals
 
 Copy the binding block from `references/github-target.md` and run it **before
 any `gh` call** — `TARGET_REPO` / `TARGET_HOST` / `GH_HOST` come from one and
-the same remote URL (dEitY719/dotfiles#1403/dEitY719/dotfiles#1407). An explicit `owner/repo` positional pins
+the same remote URL (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). An explicit `owner/repo` positional pins
 `TARGET_REPO` directly; the host still comes from the remote URL.
 
 ## Step 2: Collect and order the queue
