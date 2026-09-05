@@ -30,7 +30,7 @@ incident issue exist to make overuse visible.
 
 Record `START_TS=$(date +%s)` for Step 5 elapsed time. Positional: `<PR> <reason> [remote]`.
 
-- `remote` — default `origin`; bind `TARGET_REPO` + `TARGET_HOST` from that URL and export `GH_HOST` per `references/github-target.md` (#1403/#1407) **first**, before any `gh` call below; missing → `git remote -v` and stop.
+- `remote` — default `origin`; bind `TARGET_REPO` + `TARGET_HOST` from that URL and export `GH_HOST` per `references/github-target.md` (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407) **first**, before any `gh` call below; missing → `git remote -v` and stop.
 - `PR` — required; omitted → `GH_HOST="$TARGET_HOST" gh pr view --json number` on current branch, else stop. No `--repo` here: `gh` rejects it without a PR argument (`references/github-target.md` → "Exception").
 - `reason` — **required**, ≥10 chars, citing an incident/ticket ID or concrete user impact; vague (`"urgent"`, `"fix"`) → refuse. Examples: `references/help.md`.
 
@@ -69,7 +69,7 @@ Attach an `incident` label **only if** `GH_HOST="$TARGET_HOST" gh label list --r
 confirms it exists.
 
 Append the ai-metrics footer to the incident issue body before creating it
-(required artifact — no soft-fail; honors `GH_DISABLE_AI_METRICS=1`, issue #399).
+(required artifact — no soft-fail; honors `GH_DISABLE_AI_METRICS=1`, issue dEitY719/dotfiles#399).
 Exact block: `references/audit-templates.md` -> "ai-metrics footer".
 
 ## Step 6: Sync Project Board Status

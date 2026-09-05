@@ -45,7 +45,7 @@ help 은 **arg #1 에서만** 감지된다 — `--self-ok -h` 는 help 이 아�
 ## 동작 단계
 
 1. **Step 1 — 인자 해석 + 사전 게이트(병렬).** `START_TS` 를 기록하고, 하나의 remote URL
-   에서 `TARGET_HOST` 와 `TARGET_REPO` 를 함께 바인딩한다(#1403/#1407). PR 메타데이터,
+   에서 `TARGET_HOST` 와 `TARGET_REPO` 를 함께 바인딩한다(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). PR 메타데이터,
    `ME`(인증 사용자), REST 전용 `rebaseable`, `gh pr checks` 를 병렬로 가져온다.
    **정지**: `state != OPEN`, draft, required check 실패. **경고 후 진행**:
    `mergeable: CONFLICTING` 또는 `rebaseable: false` — 경고 블록이 리뷰 본문 앞에 붙고
@@ -70,7 +70,7 @@ help 은 **arg #1 에서만** 감지된다 — `--self-ok -h` 는 help 이 아�
    - 제출 경로와 무관하게 ai-metrics PR 코멘트를 별도로 남긴다
      (`GH_DISABLE_AI_METRICS=1` 이면 건너뛴다).
 5. **Step 4.5 — 보드 카드 승격(soft-fail).** 이 스킬은 projectV2 보드 `Approved` 칼럼의
-   **유일한 스킬 소유자**다(#1350). 4a / 4b / `--self-record` 에서만 승격하고,
+   **유일한 스킬 소유자**다(dEitY719/dotfiles#1350). 4a / 4b / `--self-record` 에서만 승격하고,
    4c / 분석 전용 / `--admin-merge` 에서는 절대 승격하지 않는다.
 6. **Step 5 — 검증과 보고.** `reviewDecision` 과 `mergeStateStatus` 를 다시 읽어
    verdict, blocker/follow-up 개수, 이슈 링크, 머지 상태, 보드 결과, PR URL 을 보고한다.
@@ -98,4 +98,4 @@ help 은 **arg #1 에서만** 감지된다 — `--self-ok -h` 는 help 이 아�
 - `gh label list` 로 존재가 확인되지 않은 라벨/마일스톤은 붙이지 않는다.
 - 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST"` 와 `--repo "$TARGET_REPO"` 를 **둘 다** 싣는다.
   `--repo` 만으로는 gh CLI 자신의 기본 호스트를 따라가므로, 이중 호스트 로그인
-  (github.com + GHES)에서 조용히 잘못된 서버를 향한다(#1403/#1407).
+  (github.com + GHES)에서 조용히 잘못된 서버를 향한다(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).

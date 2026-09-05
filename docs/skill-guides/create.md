@@ -25,7 +25,7 @@
 ```
 
 `references/help.md` 와 `references/options.md` 가 1차 근거다. 위치 인자 파싱
-규칙(#1405)은 `commit` 과 같다: **숫자로만 된 위치 인자는 이슈 번호**, 그 외는
+규칙(dEitY719/dotfiles#1405)은 `commit` 과 같다: **숫자로만 된 위치 인자는 이슈 번호**, 그 외는
 remote 이름이고 순서는 무관하다.
 
 | 인자 / 옵션 | 기본값 | 설명 |
@@ -115,7 +115,7 @@ range 가 비어 있으면("nothing to PR"), `--no-stack` 과 `--base` 를 같�
 자동 탐지된 부모 PR 이 `OPEN` 이 아니면(`rc=5`), Step 4.5 lint 가 실패하면 —
 모두 push 전에 `[FAIL] <이유>` + `Next: <복구>` 로 중단한다.
 
-**host / repo 타게팅(#1403 / #1405)** — 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST"` 와
+**host / repo 타게팅(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1405)** — 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST"` 와
 `--repo "$GH_REPO"` 를 함께 싣고, 둘은 **같은** `git remote get-url "$REMOTE"` URL
 하나에서 나온다. push 대상 remote 와 PR 대상 서버가 반드시 일치해야 한다. bare `gh` 는
 gh CLI 자신의 `gh repo set-default` 를 따르므로, github.com 과 GHES 양쪽 로그인
@@ -126,5 +126,5 @@ gh CLI 자신의 `gh repo set-default` 를 따르므로, github.com 과 GHES 양
 `shell-common/functions/gh_pr_lint.sh` 를, Step 6 의 라벨 적용은
 `gh_pr_edit_safe.sh` 를 source 한다. dotfiles 체크아웃이 없는 머신에서는 해당 단계가
 degrade 된다. 라벨 wrapper 는 classic project board 가 붙은 저장소에서 `gh pr edit
---add-label` 이 GraphQL 경고와 함께 exit 1 로 라벨을 통째로 흘리는 문제(#326)를
+--add-label` 이 GraphQL 경고와 함께 exit 1 로 라벨을 통째로 흘리는 문제(dEitY719/dotfiles#326)를
 REST 폴백으로 우회하는 것이므로, 없으면 라벨이 조용히 안 붙을 수 있다.

@@ -27,7 +27,7 @@ output its content verbatim, then stop. No API calls.
 Stage the relevant changes and create a new git commit in the repo's commit
 style, with a `Closes #N` / `Fixes #N` footer when a GitHub issue is known.
 `Refs` / `Resolves` / `See` / `References` keywords are forbidden — they break
-GitHub auto-close and project-board automation (see issue #392).
+GitHub auto-close and project-board automation (see issue dEitY719/dotfiles#392).
 
 ## Step 1: Inspect State (parallel) — ALWAYS FIRST
 
@@ -39,9 +39,9 @@ NOT ask "what did you change?". In a single message run: `git status` (never
 `-uall`), `git diff` (staged + unstaged), `git diff --staged` if anything is
 staged, and `git log --oneline -20` (to mimic the repo's commit style).
 
-In that same message, parse `[issue-number] [remote]` (#1405) and bind the
+In that same message, parse `[issue-number] [remote]` (dEitY719/dotfiles#1405) and bind the
 GitHub target for Step 5: read `references/github-target.md` and paste its
-snippet verbatim (exports `GH_HOST`/`TARGET_REPO`/`TARGET_HOST`/`REMOTE`, #1403).
+snippet verbatim (exports `GH_HOST`/`TARGET_REPO`/`TARGET_HOST`/`REMOTE`, dEitY719/dotfiles#1403).
 
 ## Step 2: Resolve the Issue Number
 
@@ -70,14 +70,14 @@ or spans unrelated areas.
 - See `references/commit-message-format.md` for the exact HEREDOC command.
 
 After `git commit` succeeds, emit the step-completion marker so the step-skip
-guard (`skill_completion_guard.py`, issue #753) can verify this step ran:
+guard (`skill_completion_guard.py`, issue dEitY719/dotfiles#753) can verify this step ran:
 `printf '[step:gh-pr-commit/stage-commit] OK\n'`.
 
 ## Step 5: AI Metrics + Sync Project Board Status
 
 The ai-metrics comment POST (`GH_DISABLE_AI_METRICS` branch, token formula,
 soft-fail) follows [`references/ai-metrics-comment.md`](references/ai-metrics-comment.md).
-The project-board sync (`--only-from Backlog` guard, helper-fallback NF-1/#724
+The project-board sync (`--only-from Backlog` guard, helper-fallback NF-1/dEitY719/dotfiles#724
 defense) follows [`references/board-sync.md`](references/board-sync.md) —
 skip it entirely when no issue footer was written. After both blocks, emit
 `printf '[step:gh-pr-commit/metrics-board-sync] OK\n'`.

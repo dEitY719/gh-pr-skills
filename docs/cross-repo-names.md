@@ -6,7 +6,7 @@ wire format that moved with it. Summarised in [`README.md`](../README.md) under
 
 Like `gh-issue-skills` and unlike the Phase 2 repos, this one was migrated
 **after** the Phase 3 names were fixed, so every reference to a sibling repo is
-written in its final form (#1677 §2):
+written in its final form (dEitY719/dotfiles#1677 §2):
 
 | Old | New | Lives in |
 |-----|-----|----------|
@@ -29,7 +29,7 @@ repo's decision.
 
 Unlike `gh-issue-skills`, the step-marker wire format **did** move here. `create`
 prints `[step:gh-pr-create/<id>] OK` and `commit` prints
-`[step:gh-pr-commit/<id>] OK`; dotfiles #1677 F-8 added matching
+`[step:gh-pr-commit/<id>] OK`; dEitY719/dotfiles#1677 F-8 added matching
 `skill_step_catalog.yml` keys alongside the old `gh-pr` / `gh-commit` ones,
 which stay to guard the un-deleted dotfiles originals until Phase 4. The step
 IDs inside the markers are unchanged.

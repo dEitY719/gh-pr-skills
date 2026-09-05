@@ -1,10 +1,10 @@
-# gh-pr:commit — Positional Args and GitHub Target (#1403, #1405)
+# gh-pr:commit — Positional Args and GitHub Target (dEitY719/dotfiles#1403, dEitY719/dotfiles#1405)
 
 Step 1 parses the positionals and resolves the host and repo from the chosen
 remote's URL in the same message that inspects the working tree, then exports
 them for Step 5.
 
-## Positional args (#1405)
+## Positional args (dEitY719/dotfiles#1405)
 
 `/gh-pr:commit [issue-number] [remote]` — a positional made only of digits is the
 issue number, any other positional is the remote name. `/gh-pr:commit 123`,

@@ -287,7 +287,7 @@
 
       <div class="callout" style="margin:18px 0;">
         <svg class="ic-acc" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        <p><strong>위치 인자 파싱 규칙 (#1405)</strong> — <code>commit</code> 과 같다.
+        <p><strong>위치 인자 파싱 규칙 (dEitY719/dotfiles#1405)</strong> — <code>commit</code> 과 같다.
         숫자로만 된 위치 인자는 이슈 번호, 그 외는 remote 이름이고 순서는 무관하다.</p>
       </div>
 
@@ -470,7 +470,7 @@
         </div>
 
         <div class="card">
-          <h3><svg class="ic-acc" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>host / repo 타게팅 (#1403 / #1405)</h3>
+          <h3><svg class="ic-acc" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>host / repo 타게팅 (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1405)</h3>
           <p>모든 <code>gh</code> 호출은 <code>GH_HOST="$TARGET_HOST"</code> 와 <code>--repo "$GH_REPO"</code> 를 함께 싣고,
           둘은 <strong>같은</strong> <code>git remote get-url "$REMOTE"</code> URL 하나에서 나온다.
           push 대상 remote 와 PR 대상 서버가 반드시 일치해야 한다.</p>
@@ -485,7 +485,7 @@
           Step 6 의 라벨 적용은 <code>gh_pr_edit_safe.sh</code> 를 source 한다.
           dotfiles 체크아웃이 없는 머신에서는 해당 단계가 degrade 된다.</p>
           <p style="margin-top:9px;">라벨 wrapper 는 classic project board 가 붙은 저장소에서
-          <code>gh pr edit --add-label</code> 이 GraphQL 경고와 함께 exit 1 로 라벨을 통째로 흘리는 문제(#326)를
+          <code>gh pr edit --add-label</code> 이 GraphQL 경고와 함께 exit 1 로 라벨을 통째로 흘리는 문제(dEitY719/dotfiles#326)를
           REST 폴백으로 우회하는 것이므로, 없으면 라벨이 조용히 안 붙을 수 있다.</p>
         </div>
       </div>

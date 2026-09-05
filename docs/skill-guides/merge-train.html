@@ -286,7 +286,7 @@
       <li data-n="1">
         <h4>Step 1 — 타깃 바인딩</h4>
         <p><code>TARGET_REPO</code> / <code>TARGET_HOST</code> / <code>GH_HOST</code> 를
-        <strong>같은 remote URL 하나</strong>에서 해석한 뒤에야 <code>gh</code> 를 호출한다(#1403 / #1407).
+        <strong>같은 remote URL 하나</strong>에서 해석한 뒤에야 <code>gh</code> 를 호출한다(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
         <code>owner/repo</code> 를 명시해도 호스트는 여전히 remote URL 에서 온다.</p>
       </li>
       <li data-n="2">
@@ -305,7 +305,7 @@
         <code>baseRefName</code> 마다 한 번씩</strong> 읽어 캐시한다(base 당 2콜).
         한쪽이라도 <code>&gt;= 1</code> 이면 게이트 ON, 양쪽 다 "정책 없음"이면 OFF(D-5).
         판정 기준은 exit code 가 아니라 <strong>HTTP status</strong> — <code>403</code>/<code>404</code> 는
-        "정책 없음"이고, 진짜 판정 불가(5xx / 401 / 무응답)만 fail-closed 로 게이트를 켠다(#1519).</p>
+        "정책 없음"이고, 진짜 판정 불가(5xx / 401 / 무응답)만 fail-closed 로 게이트를 켠다(dEitY719/dotfiles#1519).</p>
       </li>
       <li data-n="4">
         <h4>Step 3.5 — 리뷰 verdict 게이트</h4>
@@ -318,9 +318,9 @@
         <p>큐 순서대로 (1) 처리 직전 상태 <strong>재조회</strong>(F-3 — 앞의 머지가 뒤의 모든 상태를 무효화했다),
         (2) D-1 라우팅 테이블로 분기, (3) 필요하면 원자 스킬에 위임, (4) 재조회 후 재라우팅,
         (5) <code>Skill(gh-pr:merge, "&lt;N&gt;")</code>(전략 인자 없음),
-        (6) 머지 성공 시 그 PR 의 구현 탭이 <code>idle</code> 이면 닫는다(#1565).
+        (6) 머지 성공 시 그 PR 의 구현 탭이 <code>idle</code> 이면 닫는다(dEitY719/dotfiles#1565).
         <code>BEHIND</code> / <code>DIRTY</code> 의 리베이스는 시도마다 만들고 반드시 제거하는
-        <strong>detached scratch worktree</strong> 안에서 돈다(#1493). 시도는 PR 당 <strong>최대 3회</strong>(F-5),
+        <strong>detached scratch worktree</strong> 안에서 돈다(dEitY719/dotfiles#1493). 시도는 PR 당 <strong>최대 3회</strong>(F-5),
         실패하면 그 PR 만 건너뛰고 train 은 계속한다(F-6).</p>
       </li>
       <li data-n="6">
@@ -367,7 +367,7 @@
       <div class="acc-body">
         <p><strong>short-circuit</strong> — <code>isDraft</code>, <code>reply-pending</code> 라벨,
         <code>review-blocked</code> 라벨, 두 verdict 라벨의 부재, <code>review-passed</code> 의 sha 신선도
-        (#1601 — 마커 불일치 / 부재 / 조회 실패가 각각 다른 <code>[SKIPPED]</code> 사유).</p>
+        (dEitY719/dotfiles#1601 — 마커 불일치 / 부재 / 조회 실패가 각각 다른 <code>[SKIPPED]</code> 사유).</p>
         <p style="margin-top:12px"><strong><code>UNSTABLE</code> 은 rollup 으로 갈라진다</strong> —
         <code>FAILURE</code> / <code>TIMED_OUT</code> / <code>CANCELLED</code> / <code>ACTION_REQUIRED</code>
         가 있으면 <code>Skill(gh-resolve:ci-fail, "&lt;N&gt;")</code>,

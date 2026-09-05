@@ -5,9 +5,9 @@
 | # | Name | Default | Description |
 |---|------|---------|-------------|
 | 1 | issue-number, remote-name, or `-h`/`--help`/`help` | auto-detected from chat | Link commit to this GitHub issue via `Closes #N` footer |
-| 2 | issue-number or remote-name | `origin` | Git remote whose repo owns the issue (#1405) |
+| 2 | issue-number or remote-name | `origin` | Git remote whose repo owns the issue (dEitY719/dotfiles#1405) |
 
-**Positional parsing rule (#1405):** a positional consisting only of digits is
+**Positional parsing rule (dEitY719/dotfiles#1405):** a positional consisting only of digits is
 the issue number; any other positional is the remote name. Order does not
 matter, so `/gh-pr:commit 123`, `/gh-pr:commit upstream`, `/gh-pr:commit 123 upstream`
 and `/gh-pr:commit upstream 123` all resolve correctly. The remote defaults to
@@ -30,7 +30,7 @@ instead of silently falling back to `origin`.
    unconditionally — the working-tree state is the source of truth.
 2. Resolves the issue number (explicit all-digit arg → recent chat scan →
    none) and the target remote (non-digit arg → `origin`), then binds
-   `TARGET_REPO`/`TARGET_HOST`/`GH_HOST` from that remote's URL (#1405).
+   `TARGET_REPO`/`TARGET_HOST`/`GH_HOST` from that remote's URL (dEitY719/dotfiles#1405).
 3. Drafts a commit message that mimics the repo's existing style (subject
    line length, conventional-commit prefix usage, footer style).
 4. Stages only files relevant to this commit (never `git add -A`).
