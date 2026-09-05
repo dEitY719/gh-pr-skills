@@ -336,5 +336,5 @@ conversation); the fallback `<type>/<YYYYMMDD>-<short-sha>` form covers that.
 (`references/stacked-pr.md`), never a hard-coded `main`. `REMOTE` is whatever
 Step 1a-0 bound from the `[remote]` positional, defaulting to `origin` (dEitY719/dotfiles#1405).
 Pass it as the trailing argument of `gh_pr_push_action` /
-`gh_pr_upstream_is_mispaired` in Step 5 — omitting it keeps the pre-#1405
-`origin` behaviour.
+`gh_pr_upstream_is_mispaired` in Step 5 — omitting it keeps the older
+`origin` behaviour from before dEitY719/dotfiles#1405.
