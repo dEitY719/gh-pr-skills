@@ -5,6 +5,7 @@ description: >-
   trail: reason comment plus follow-up incident issue. Use for
   /gh-pr:merge-emergency, "긴급 머지", "approval 없이
   머지", "admin bypass merge". CI still gates.
+license: MIT
 allowed-tools: Bash, Read, Grep, Glob
 metadata:
   model_recommendation:

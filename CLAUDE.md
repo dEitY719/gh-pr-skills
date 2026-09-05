@@ -28,9 +28,11 @@ below is a hard rule rather than a preference.
 The skills were extracted from `dEitY719/dotfiles`
 (`claude/skills/{gh-commit,gh-pr,gh-pr-review,gh-pr-reply,gh-pr-approve,gh-pr-merge,gh-pr-merge-emergency,gh-pr-merge-train}`)
 as a content snapshot at source commit
-`96c90bc8d961d51d9c3286dae730e8b928afdfc8` — no history rewriting. The dotfiles
-copies remain in place; they are removed in Phase 4 of that repo's migration
-plan (#1410 NF-1 / NF-3). This is Phase 3 of dotfiles #1410, alongside the two
+`96c90bc8d961d51d9c3286dae730e8b928afdfc8` — no history rewriting. Those
+directories are a historical origin, not a live path: `~/dotfiles/claude/skills/`
+has since been deleted outright rather than kept until Phase 4 as
+#1410 NF-1 / NF-3 planned, so nothing here may resolve against it (#14 C4).
+This is Phase 3 of dotfiles #1410, alongside the two
 sibling repos `gh-issue-skills` and `gh-flow-skills`; `packaging-skills` was
 Phase 0 and `harness-skills` was Phase 1 and owns the shared assets.
 
@@ -158,21 +160,31 @@ These are acceptance criteria carried over from dotfiles, not advice:
 
 ## Known migration debt
 
-Two things came across verbatim because #1410's Non-Goals forbid changing
-behaviour during a placement-and-naming migration; both are Phase 4 work. The
-third is settled, and the fourth is a standing decision, both kept here so the
-"what does this repo still need from dotfiles" answer stays in one place:
+Items 1 and 2 came across verbatim because #1410's Non-Goals forbid changing
+behaviour during a placement-and-naming migration; item 1 is still Phase 4 work
+and item 2 is mitigated but not gone. Item 3 is settled, item 4 is a standing
+decision, and item 5 is owned upstream — all kept here so the "what does this
+repo still need from dotfiles" answer stays in one place:
 
 1. **Four `SKILL.md` files exceed the 100-line progressive-disclosure limit**
-   (`merge` 197, `merge-train` 146, `reply` 143, `review` 110). CI is pinned to
+   (`merge` 197, `merge-train` 148, `reply` 143, `review` 110). CI is pinned to
    197 to admit them. The fix is to extract detail into each skill's
    `references/`, not to raise the pin.
 2. **Several skills source dotfiles' `shell-common/functions/*.sh`** —
    `gh_project_status.sh`, `gh_pr_review.sh`, `gh_host.sh`,
-   `gh_pr_merge_train.sh`, `gh_pr_edit_safe.sh`, and others. On a machine
-   without the dotfiles checkout those sources fail and the affected steps
-   degrade. Every call site already soft-fails rather than aborting, which is
-   why the migration could proceed, but the coupling is real.
+   `gh_pr_merge_train.sh`, `gh_pr_edit_safe.sh`, and others. #3 / PR #4 made
+   every call site two-tier — live dotfiles first, then the copies under
+   `lib/vendor/shell-common/functions/`, re-exporting `SHELL_COMMON` at the
+   copy — so a standalone install degrades instead of failing. That fallback is
+   only as complete as the vendor set: a vendored file that sources a
+   *non*-vendored sibling misses silently once `SHELL_COMMON` points at
+   `lib/vendor/`. `devx_pr_review_all.sh` was that hole
+   (`gh_pr_reply_targeted_review.sh:273`, `:735`) and is now vendored too
+   (#14 C2). Anything still reached only from `$HOME/dotfiles` is listed in
+   items 4 and 5; the one unvendorable case is
+   `shell-common/tools/integrations/claude.sh`, which `review`'s
+   `--ai claude --user` / `--ai opencode` / `--ai hermes` lanes now `[ -f ]`-test
+   and refuse on rather than aborting the step.
 3. **Settled (#13).** `merge`'s Step 5 used to read its dispatch block from
    `${DOTFILES_ROOT:-$HOME/dotfiles}/claude/skills/gh-pr-post-merge-verify/references/dispatch.sh.md`,
    on the premise that dotfiles kept its originals until Phase 4. It did not —
@@ -197,6 +209,16 @@ third is settled, and the fourth is a standing decision, both kept here so the
    skill sources or executes either, so neither can break a run the way item 3
    did; the cron script is host setup that belongs in dotfiles, and the audit
    function is a manual pointer. Revisit only if a skill starts executing one.
+5. **One dead skill name survives in vendored code, and the fix is upstream.**
+   `lib/vendor/shell-common/functions/gh_pr_lint.sh:239` prints
+   `FAILED — fix lint errors and re-run /gh:pr` to the user; `/gh:pr` was
+   renamed to `/gh-pr:create` in the split. It is the only old name in this repo
+   that reaches a human. The file is vendored, SSOT
+   `dEitY719/dotfiles shell-common/functions/gh_pr_lint.sh:235`, so correct it
+   there and re-copy — hand-editing the vendored copy is reverted by the next
+   sync. Message string only; nothing dispatches on it. Every other old name
+   here is the rename-mapping documentation "Cross-repo references" above
+   forbids "correcting".
 
 ## Emojis
 

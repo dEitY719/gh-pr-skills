@@ -5,6 +5,7 @@ description: >-
   follow-up issues for the rest. Use for /gh-pr:approve,
   "approve PR 99", "#99 리뷰 승인", "re-review requested". Self-authored PRs can
   never be approved.
+license: MIT
 allowed-tools: Bash, Read, Grep, Glob, Agent
 metadata:
   model_recommendation:

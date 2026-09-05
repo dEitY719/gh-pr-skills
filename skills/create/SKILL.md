@@ -4,6 +4,7 @@ description: >-
   Create a GitHub PR from the current branch, bundling every commit since it
   diverged from base — not just HEAD. Use for /gh-pr:create, "PR 생성", "풀리퀘
   만들어", "지금까지 커밋들로 PR 올려". Creates the PR only — no review, no merge.
+license: MIT
 allowed-tools: Bash, Read, Grep
 metadata:
   model_recommendation:

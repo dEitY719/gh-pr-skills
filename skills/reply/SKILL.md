@@ -2,9 +2,9 @@
 name: reply
 description: >-
   Reply individually to every review comment on a GitHub PR — bots included —
-  and apply the valid fixes. Use for /gh-pr:reply, "PR 리뷰 코멘트
-  확인하고 수정", "PR 123 코멘트 처리해", "reply to review comments". Per-comment
-  replies, not a summary comment.
+  and apply the valid fixes. Use for /gh-pr:reply, "PR 리뷰 코멘트 확인하고 수정",
+  "PR 123 코멘트 처리해", "reply to review comments". Per-comment replies, not a summary comment.
+license: MIT
 allowed-tools: Bash, Read, Edit, Write, Grep, Glob
 metadata:
   model_recommendation:

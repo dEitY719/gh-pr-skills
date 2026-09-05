@@ -116,7 +116,12 @@ is identical to `claude-yolo --user <name>`.
 
 ```sh
 # Source the helper if not already in scope (login shells already source it).
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
+# Not vendored under lib/ — this file is dotfiles-only, so test before
+# sourcing: a missing helper must fail closed with a readable message,
+# not abort the step on a `.` of a nonexistent path.
+_CLAUDE_SH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
+[ -f "$_CLAUDE_SH" ] || { echo "--user needs shell-common/tools/integrations/claude.sh (dotfiles-only, not vendored) — install dotfiles or drop --user" >&2; exit 1; }
+. "$_CLAUDE_SH"
 
 CFG_DIR=$(_claude_resolve_account "$USER_ACCOUNT") || {
     ALLOWED=$(_claude_resolve_account --list | tr '\n' ' ')
@@ -160,7 +165,9 @@ omit `--user` and let the current shell's `CLAUDE_CONFIG_DIR` win.
 ## `--ai opencode`
 
 ```sh
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
+_CLAUDE_SH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
+[ -f "$_CLAUDE_SH" ] || { echo "--ai opencode needs shell-common/tools/integrations/claude.sh to evaluate the internal-PC gate (dotfiles-only, not vendored)" >&2; exit 1; }
+. "$_CLAUDE_SH"
 [ "$(_dotfiles_setup_mode)" = "internal" ] || {
     echo "--ai opencode is internal-PC only (~/.dotfiles-setup-mode != internal)" >&2
     exit 1
@@ -198,7 +205,9 @@ process tree before that 540s bound fires.
 ## `--ai hermes`
 
 ```sh
-. "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
+_CLAUDE_SH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
+[ -f "$_CLAUDE_SH" ] || { echo "--ai hermes needs shell-common/tools/integrations/claude.sh to evaluate the internal-PC gate (dotfiles-only, not vendored)" >&2; exit 1; }
+. "$_CLAUDE_SH"
 [ "$(_dotfiles_setup_mode)" = "internal" ] || {
     echo "--ai hermes is internal-PC only (~/.dotfiles-setup-mode != internal)" >&2
     exit 1

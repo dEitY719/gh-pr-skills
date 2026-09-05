@@ -209,7 +209,7 @@ rule. There is no local copy to keep in sync; a check added upstream applies her
 on the next run.
 
 `max-skill-lines` is pinned above the 100-line default because four `SKILL.md`
-files arrived from dotfiles already over it (`merge` 197, `merge-train` 146,
+files arrived from dotfiles already over it (`merge` 197, `merge-train` 148,
 `reply` 143, `review` 110). That is tracked migration debt, not a new standard —
 see [`CLAUDE.md`](CLAUDE.md) → "Known migration debt".
 

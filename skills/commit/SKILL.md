@@ -5,6 +5,7 @@ description: >-
   a GitHub issue number. Use for /gh-pr:commit, "커밋해", "지금까지 작업
   커밋", "이슈 N번 연결해서 커밋". Commits only — never pushes and never opens a
   PR (gh-pr:create).
+license: MIT
 allowed-tools: Bash, Read, Grep
 metadata:
   model_recommendation:

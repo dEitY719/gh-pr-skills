@@ -68,7 +68,7 @@ introduces a sibling marker `<!-- ai-review:<ai>:<head-sha> -->` that
 mirrors the same `<details>` + glyph pattern. Treat the new marker as a
 **scoped extension** of the existing exception:
 
-- 🤖 in `<summary>` line — allowed per `claude/skills/skill-check/references/allowed-emoji-skills.txt` (gh-pr-review registered; ai-metrics/AI-review footer SSOT, CLAUDE.md #317 F-2).
+- 🤖 in `<summary>` line — allowed per this repo's `allow-emoji-paths` list in `.github/workflows/validate.yml`, which registers this file (ai-metrics/AI-review footer SSOT, CLAUDE.md #317 F-2). The dotfiles-era register `claude/skills/skill-check/references/allowed-emoji-skills.txt` is gone with the rest of `~/dotfiles/claude/skills/`; the skill itself now lives in `authoring-skills` as `skill-check`.
 - All other emoji — still forbidden everywhere.
 
 If the CLAUDE.md SSOT needs updating, do it in the same PR that lands
