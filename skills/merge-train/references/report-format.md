@@ -1,7 +1,7 @@
 # gh-pr:merge-train — Final report (F-9)
 
 Always printed, including when the run ended early or merged nothing. Plain
-assistant text — never a `Bash` heredoc, never `Write` (#1270).
+assistant text — never a `Bash` heredoc, never `Write` (dEitY719/dotfiles#1270).
 
 ## Format
 
@@ -35,9 +35,9 @@ Rules:
 - PRs the **verdict gate** rejects (Step 3.5) *are* listed, one line each with
   their reason. They differ from the pre-queue exclusions above: those were
   never candidates, whereas a verdict-gated PR is a candidate a reviewer
-  stopped, and hiding that would hide the gate's whole output (#1564).
+  stopped, and hiding that would hide the gate's whole output (dEitY719/dotfiles#1564).
 
-## The `approval gate:` field (#1519 NF-1)
+## The `approval gate:` field (dEitY719/dotfiles#1519 NF-1)
 
 Exactly one of three strings, from `approval-gate.md`'s combine table:
 
@@ -47,7 +47,7 @@ Exactly one of three strings, from `approval-gate.md`'s combine table:
 | `on (<source>: <n> approvals)` | `<source>` is `ruleset` or `protection`; the strictest count wins |
 | `on (fail-closed: <base> policy unreadable)` | the policy is genuinely undetermined (5xx, 401, network) — **not** a 403/404. Stating it here shows once, at the top, why every unapproved PR below was skipped, instead of repeating it per line |
 
-Distinguishing the three is the point, not decoration. #1519's symptom was a
+Distinguishing the three is the point, not decoration. dEitY719/dotfiles#1519's symptom was a
 header reading `on (fail-closed: ruleset unreadable)` on a free-plan repo where
 no ruleset can exist — a bug that looked, for its whole lifetime, exactly like
 a transient API problem. A header that cannot tell "undetermined" from "there
@@ -82,12 +82,12 @@ reviewer has said anything":
 
 | Reason | What happened | Cleared by |
 |---|---|---|
-| `review-blocked — reviewer verdict is blocking` | a `gh-verify:review-all` lane returned a blocking verdict on this head | `gh-pr:reply` completing its reply-all pass (drops the label unconditionally, #1634), or a re-review |
+| `review-blocked — reviewer verdict is blocking` | a `gh-verify:review-all` lane returned a blocking verdict on this head | `gh-pr:reply` completing its reply-all pass (drops the label unconditionally, dEitY719/dotfiles#1634), or a re-review |
 | `review not verified — no review-passed label` | no verdict label at all — the PR has not been shown to pass review | a `gh-verify:review-all` pass, or a human adding the label |
 
 Neither spends an F-5 attempt, and neither is ever `[FAILED]`. The second is
 the expected state of every PR that was already open when the gate landed, and
-of any PR whose head advanced since its last review (#1563 drops the stale
+of any PR whose head advanced since its last review (dEitY719/dotfiles#1563 drops the stale
 `review-passed` on every push) — a `[SKIPPED]` here is the gate working, not a
 wedge. Unlike `reply-pending`, these reasons have **no staleness window**: see
 `review-verdict-gate.md` → "Why no time backstop".
@@ -99,9 +99,9 @@ distinguishes what a reader has to do about each:
 | Reason | What happened | Cleared by |
 |---|---|---|
 | `self-record withheld approval (BLOCKER)` | the review ran this tick and found a blocker | pushing a fix (new head re-arms the review) |
-| `approval withheld (unchanged since review)` | the same head was already reviewed and declined — **not re-reviewed**, by design (#1519 F-8) | pushing a fix, or promoting the card by hand |
+| `approval withheld (unchanged since review)` | the same head was already reviewed and declined — **not re-reviewed**, by design (dEitY719/dotfiles#1519 F-8) | pushing a fix, or promoting the card by hand |
 | `board unreadable — approval unconfirmed` | the review's verdict could not be read back | the next tick, usually |
-| `self-record failed` | `gh-pr:approve` itself errored (#1519 F-9) | the next tick |
+| `self-record failed` | `gh-pr:approve` itself errored (dEitY719/dotfiles#1519 F-9) | the next tick |
 
 None of the four spends an F-5 attempt, and none is ever `[FAILED]`: a
 withheld approval is a working review, not a broken train.

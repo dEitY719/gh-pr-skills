@@ -1,14 +1,14 @@
 # `review-passed` Cleanup — post-merge label removal (soft-fail)
 
 Runs inside Step 4 (post-merge housekeeping), after the board reconciliations
-and the herdr hint. Issue #1636, F-5.
+and the herdr hint. Issue dEitY719/dotfiles#1636, F-5.
 
 Why: `review-passed` is a claim about **one head commit of an open PR**, read
 by exactly one consumer — `gh-pr:merge-train`'s Step 3.5 gate. Once the PR is
 merged that consumer will never look at it again, so the label has no reader
 left. Leaving it on is not dangerous, just wrong-looking: a reopened PR (or a
 human scanning the closed list) sees a "verified" badge that describes a head
-nobody re-checked. Since #1636 `gh-pr:reply` is the one that applies the
+nobody re-checked. Since dEitY719/dotfiles#1636 `gh-pr:reply` is the one that applies the
 label, and it applies it per pass — so clearing it on merge keeps the
 lifecycle closed at both ends.
 
@@ -16,10 +16,10 @@ This is a **cleanup, not an invalidation**: unlike the drops in
 `gh-pr:reply` / `gh-resolve:conflict` / `gh-resolve:outdated`, no head
 advanced here. It uses the same shared primitive anyway — `_gh_pr_drop_label`
 is the single REST-DELETE implementation every skill routes through, never a
-hand-inlined REST call (#1563, and #326 Bug B for the add side).
+hand-inlined REST call (dEitY719/dotfiles#1563, and dEitY719/dotfiles#326 Bug B for the add side).
 
 `PR_NUMBER`, `TARGET_REPO` and `TARGET_HOST` are already bound by Step 1 per
-`references/github-target.md` (#1403 / #1407) — carry them forward, do not
+`references/github-target.md` (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407) — carry them forward, do not
 re-resolve them.
 
 ```bash
@@ -41,7 +41,7 @@ else
 fi
 ```
 
-Soft-fail is the whole contract here (#1636 Error Cases): **the merge already
+Soft-fail is the whole contract here (dEitY719/dotfiles#1636 Error Cases): **the merge already
 happened.** A failed label delete must never change the Step 5 report, never
 change this skill's exit status, and never be retried in a loop — it costs one
 `[WARN]` line and nothing else.

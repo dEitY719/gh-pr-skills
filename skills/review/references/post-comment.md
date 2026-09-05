@@ -3,7 +3,7 @@
 The external AI's stdout is preserved **verbatim** — no reformatting,
 no summarization. It is wrapped in a collapsed `<details>` block so
 the PR conversation stays readable for skimmers, plus an ai-metrics
-footer that matches the dotfiles SSOT (#317 / PR #320).
+footer that matches the dotfiles SSOT (dEitY719/dotfiles#317 / PR dEitY719/dotfiles#320).
 
 ## Body template
 
@@ -39,7 +39,7 @@ Substitutions:
 | `<HUMAN_H>` | Baseline human-review hours. See "Human time baseline" below. |
 | `<ELAPSED>` | `(($(date +%s) - START_TS) / 60))`. |
 
-## Why the marker carries the head sha (#1564)
+## Why the marker carries the head sha (dEitY719/dotfiles#1564)
 
 The `ai-review` markers are not decoration — they are the **only**
 machine-readable record of a lane's verdict, and `gh-verify:review-all`
@@ -53,7 +53,7 @@ stale `review-passed` can authorize a merge of code no reviewer saw.
 `devx_pr_review_all_lane_block <ai> <sha> <expected-login>` requires the
 open **and**
 close marker to carry the same `<ai>:<sha>` pair **and** the comment to
-have been posted by `<expected-login>` (#1639 — a marker from any other
+have been posted by `<expected-login>` (dEitY719/dotfiles#1639 — a marker from any other
 commenter is forged and ignored); a miss yields nothing,
 which reads downstream as `unknown` — no label, no merge. Comments
 posted before this change carry the unsuffixed form and therefore read
@@ -68,7 +68,7 @@ introduces a sibling marker `<!-- ai-review:<ai>:<head-sha> -->` that
 mirrors the same `<details>` + glyph pattern. Treat the new marker as a
 **scoped extension** of the existing exception:
 
-- 🤖 in `<summary>` line — allowed per this repo's `allow-emoji-paths` list in `.github/workflows/validate.yml`, which registers this file (ai-metrics/AI-review footer SSOT, CLAUDE.md #317 F-2). The dotfiles-era register `claude/skills/skill-check/references/allowed-emoji-skills.txt` is gone with the rest of `~/dotfiles/claude/skills/`; the skill itself now lives in `authoring-skills` as `skill-check`.
+- 🤖 in `<summary>` line — allowed per this repo's `allow-emoji-paths` list in `.github/workflows/validate.yml`, which registers this file (ai-metrics/AI-review footer SSOT, CLAUDE.md dEitY719/dotfiles#317 F-2). The dotfiles-era register `claude/skills/skill-check/references/allowed-emoji-skills.txt` is gone with the rest of `~/dotfiles/claude/skills/`; the skill itself now lives in `authoring-skills` as `skill-check`.
 - All other emoji — still forbidden everywhere.
 
 If the CLAUDE.md SSOT needs updating, do it in the same PR that lands
@@ -91,7 +91,7 @@ helpers in `shell-common/functions/gh_pr_review.sh`:
      `skipped (GH_DISABLE_AI_METRICS=1)` and return 0. The opt-out
      skips the **entire** PR comment (not just the metrics footer),
      because the AI-review body and the metrics footer ship together
-     (issue #399).
+     (issue dEitY719/dotfiles#399).
   3. `gh pr comment` non-zero exit → print `[WARN] PR comment post
      failed — output retained on stdout` to stderr, emit
      `[WARN] post failed` to stdout, and still return 0 — the user
@@ -118,7 +118,7 @@ A here-doc-built temp file isolates the substitution surface.
 
 This skill **appends a comment**, never edits the PR body. Editing
 the body would clobber the author's description and (as noted in
-issue #326 Bug B) silently exit 1 on repos with classic Projects
+issue dEitY719/dotfiles#326 Bug B) silently exit 1 on repos with classic Projects
 attached. `gh pr comment` has no such failure mode.
 
 ## Soft-fail on post failure
@@ -186,7 +186,7 @@ tokens=$(((tokens + 250) / 500 * 500))
 ```
 
 The byte count itself is measured right after Step 3+4 builds the prompt,
-not re-read at Step 6 comment-post time — the issue #1474 mitigation (the
+not re-read at Step 6 comment-post time — the issue dEitY719/dotfiles#1474 mitigation (the
 file-vanishing root cause itself is still open; only the measurement timing
 was fixed). Read the comment above `_gh_pr_review_estimate_tokens` and its
 caller in `gh_pr_review.sh` for the full rationale and the exact `[WARN]`

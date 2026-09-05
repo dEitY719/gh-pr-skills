@@ -33,7 +33,7 @@ content verbatim, then stop. **No API calls.** That file tables the positionals
 
 Copy the binding block from `references/github-target.md` and run it **before
 any `gh` call** — `TARGET_REPO` / `TARGET_HOST` / `GH_HOST` come from one and
-the same remote URL (#1403/#1407). An explicit `owner/repo` positional pins
+the same remote URL (dEitY719/dotfiles#1403/dEitY719/dotfiles#1407). An explicit `owner/repo` positional pins
 `TARGET_REPO` directly; the host still comes from the remote URL.
 
 ## Step 2: Collect and order the queue
@@ -50,7 +50,7 @@ GH_HOST="$TARGET_HOST" gh pr list --repo "$TARGET_REPO" --author @me --state ope
 ```
 
 `--author @me` is not optional (D-7) — never auto-merge a colleague's PR.
-`_gh_pr_merge_train_filter_targets` is the **shared** filter (#1524): it drops drafts,
+`_gh_pr_merge_train_filter_targets` is the **shared** filter (dEitY719/dotfiles#1524): it drops drafts,
 every PR carrying the `reply-pending` label, and every PR inside the D-6 quiet period —
 the exact same function `shell-common/tools/custom/pr_merge_train_cron.sh` runs, so the
 two can never disagree. **Do not re-implement or paraphrase that filter here** — run it.
@@ -69,7 +69,7 @@ branch protection per `references/approval-gate.md`, **once per distinct
 source requiring `>= 1` → gate on, unapproved PRs `[SKIPPED]`; both reporting
 no policy → off (D-5). Classify by **HTTP status, not exit code**: a `403`/`404`
 is "no policy", not a failed lookup, and only a genuinely undetermined answer
-stays fail-closed (#1519). Even with the gate off, a non-empty non-`APPROVED`
+stays fail-closed (dEitY719/dotfiles#1519). Even with the gate off, a non-empty non-`APPROVED`
 `reviewDecision` is `[SKIPPED]` before `gh-pr:merge` is called — it would
 refuse, and NF-2 forbids clearing that.
 
@@ -86,13 +86,13 @@ alone stays in the queue. Ask with
 not** re-derive the `jq` here, and **never** parse a review comment body: the
 verdict is decided by `gh-verify:review-all`, which is the labels' only writer.
 
-**Absence is "not verified", not "passed"** — that is the whole gate (#1527 /
-#1564). Neither outcome spends an F-5 attempt and neither is ever `[FAILED]`.
+**Absence is "not verified", not "passed"** — that is the whole gate (dEitY719/dotfiles#1527 /
+dEitY719/dotfiles#1564). Neither outcome spends an F-5 attempt and neither is ever `[FAILED]`.
 There is deliberately no staleness window here, unlike `reply-pending`'s.
 
 This pass is label-presence only, on purpose — it costs no API call. It
 cannot yet tell a `review-passed` label issued for the current head apart
-from a stale one; that sha-freshness check (#1601) happens once per PR, right
+from a stale one; that sha-freshness check (dEitY719/dotfiles#1601) happens once per PR, right
 before it is actually acted on, at Step 4's F-3 re-query
 (`references/routing-table.md`) — the same point that already re-derives
 everything else Step 2/3.5 could not have seen coming.
@@ -109,9 +109,9 @@ its verdict — no approval, no merge.
 After a **successful** merge, close that PR's implementation tab when its herdr
 agent is `idle` — the block in `references/train-loop.md` → "Closing the merged
 PR's implementation tab". A merged PR whose tab stays open keeps counting toward
-issue-watcher's `_IW_MAX_PER_REPO` budget and starves the pipeline (#1565).
+issue-watcher's `_IW_MAX_PER_REPO` budget and starves the pipeline (dEitY719/dotfiles#1565).
 The `BEHIND` / `DIRTY` rows rebase inside a **detached scratch worktree** the
-train creates and unconditionally removes per attempt (#1493). Attempts are
+train creates and unconditionally removes per attempt (dEitY719/dotfiles#1493). Attempts are
 capped at 3 per PR (F-5); a failure skips that PR and the train continues
 (F-6). Never process two PRs concurrently.
 

@@ -48,7 +48,7 @@ The shared review material has this shape:
 `<ai>`-discriminated template the stderr file uses. The `<ai>` + PR
 discriminators are mandatory, not cosmetic: `gh-verify:review-all` runs the
 agy and codex lanes concurrently, and a shared path lets one lane clobber
-the other's prompt so both CLIs review identical bytes (#1276).
+the other's prompt so both CLIs review identical bytes (dEitY719/dotfiles#1276).
 
 Large diffs follow the same delegation pattern as
 `gh-pr-approve/references/large-diff-delegation.md`. When `additions +
@@ -194,7 +194,7 @@ relying on the ambient 2-minute default: a short timeout kills the run
 mid-flight and leaves truncated/garbage stdout (typically a one-line plan
 fragment such as "먼저 관련 파일을 확인하겠습니다"), which must never be
 posted as a completed review. Two enforcement layers now back that up
-(issue #1506): `_gh_pr_review_run_ai` wraps this invocation in `timeout`
+(issue dEitY719/dotfiles#1506): `_gh_pr_review_run_ai` wraps this invocation in `timeout`
 (540s default, `GH_PR_REVIEW_SLOW_CLI_TIMEOUT_SEC` overrides) so a hang
 becomes a clean exit 124, which the existing non-zero gate in
 `gh_pr_review` already turns into a skipped Step 6; and the calling Bash
@@ -222,7 +222,7 @@ binary on a personal PC cannot reach the internal provider.
 
 `hermes -z` (long form `--oneshot`) is hermes's one-shot non-interactive
 flag. This is confirmed against real `hermes --help` output on an internal
-PC (issue #1452): the actual subcommand list is `chat, model, moa, …,
+PC (issue dEitY719/dotfiles#1452): the actual subcommand list is `chat, model, moa, …,
 send, …` — there is **no** `exec` subcommand, so the earlier
 `hermes exec … --file` shape could never have worked.
 
@@ -238,7 +238,7 @@ resolves (custom LLM endpoints are handled by `hermes/setup.sh`).
 
 **Runs slow — budget 8–10 minutes**, for the same reason as `--ai opencode`
 above (shared internal backend), and is bound by the same two enforcement
-layers described there (issue #1506): the internal `timeout` wrap and the
+layers described there (issue dEitY719/dotfiles#1506): the internal `timeout` wrap and the
 caller's own ≥ `600000` ms Bash-tool timeout.
 
 ## Step 5 dispatch procedure (`_gh_pr_review_run_ai`)
@@ -268,6 +268,6 @@ skips Step 6; partial output is discarded.
 | `--ai opencode` outside internal mode | 1 | `--ai opencode is internal-PC only (~/.dotfiles-setup-mode != internal)` |
 | `--ai hermes` outside internal mode | 1 | `--ai hermes is internal-PC only (~/.dotfiles-setup-mode != internal)` |
 | AI CLI not on PATH | 1 | `Required CLI '<name>' not found in PATH` |
-| AI CLI non-zero exit | 1 | `External AI CLI '<name>' failed (exit <rc>): <noise-filtered first line>` + full tail + `/tmp/gh-pr-review-stderr.<pid>.<ai>.log` (issue #694 Bug B — no longer surfaces codex's "Reading prompt from stdin…" banner as the failure cause) |
+| AI CLI non-zero exit | 1 | `External AI CLI '<name>' failed (exit <rc>): <noise-filtered first line>` + full tail + `/tmp/gh-pr-review-stderr.<pid>.<ai>.log` (issue dEitY719/dotfiles#694 Bug B — no longer surfaces codex's "Reading prompt from stdin…" banner as the failure cause) |
 | PR closed / merged / draft | 1 | `PR #<N> is <state>; aborting` |
 | `gh pr comment` post failed | 0 | `[WARN] PR comment post failed — output retained on stdout` (soft fail) |

@@ -1,4 +1,4 @@
-# gh-pr:merge-train — Review verdict gate (#1564)
+# gh-pr:merge-train — Review verdict gate (dEitY719/dotfiles#1564)
 
 A PR does not enter `gh-pr:merge` unless a reviewer said so. This gate is the
 consumer of two labels; it never forms an opinion of its own and never reads a
@@ -12,9 +12,9 @@ Producer SSOT — how the labels are decided and written:
 Applied to every PR that survived Step 2's `_gh_pr_merge_train_filter_targets`.
 Both labels come from the `labels` field that Step 2's `gh pr list --json` has
 already returned — the label check itself makes no API call of its own. The
-freshness check below (#1601) is the one exception: it costs at most two
+freshness check below (dEitY719/dotfiles#1601) is the one exception: it costs at most two
 `gh api` calls, and only for a PR that already carries `review-passed` alone
-(the case that would otherwise proceed unverified). Since #1615 that cost is
+(the case that would otherwise proceed unverified). Since dEitY719/dotfiles#1615 that cost is
 bounded regardless of comment count — it reads page 1's `Link: ...;
 rel="last"` header and, only if the PR spans more than one page, jumps
 straight to the last page, instead of `--paginate` walking every page on
@@ -25,9 +25,9 @@ every tick.
 | `review-blocked` (regardless of `review-passed`) | `[SKIPPED] review-blocked — reviewer verdict is blocking` |
 | neither label | `[SKIPPED] review not verified — no review-passed label` |
 | `review-passed` only, marker sha matches current head | stays in the queue |
-| `review-passed` only, marker exists but sha MISMATCHES current head (#1601) | `[SKIPPED] review-passed label stale — head advanced without invalidation` (self-heals: drops the label) |
-| `review-passed` only, no marker at all from the trusted login (#1601) | `[SKIPPED] review-passed not confirmed for this head — no freshness marker found` (label left untouched) |
-| `review-passed` only, freshness lookup itself failed (#1601) | `[SKIPPED] review-passed freshness unknown — marker lookup failed, treating as unverified` (label left untouched) |
+| `review-passed` only, marker exists but sha MISMATCHES current head (dEitY719/dotfiles#1601) | `[SKIPPED] review-passed label stale — head advanced without invalidation` (self-heals: drops the label) |
+| `review-passed` only, no marker at all from the trusted login (dEitY719/dotfiles#1601) | `[SKIPPED] review-passed not confirmed for this head — no freshness marker found` (label left untouched) |
+| `review-passed` only, freshness lookup itself failed (dEitY719/dotfiles#1601) | `[SKIPPED] review-passed freshness unknown — marker lookup failed, treating as unverified` (label left untouched) |
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
@@ -55,7 +55,7 @@ export SHELL_COMMON="$_SC"
 # delegated-review step); `${ME:-...}` here just makes this snippet runnable
 # standalone. GH_PR_MERGE_TRAIN_TRUSTED_LOGIN overrides the auto-detected
 # identity for setups where the review pipeline and the merge-train dispatcher
-# authenticate as different accounts (PR #1608 review, agy round-2 BLOCKER —
+# authenticate as different accounts (PR dEitY719/dotfiles#1608 review, agy round-2 BLOCKER —
 # see "Marker authorship" below).
 ME="${GH_PR_MERGE_TRAIN_TRUSTED_LOGIN:-${ME:-$(GH_HOST="$TARGET_HOST" gh api user -q .login)}}"
 
@@ -82,14 +82,14 @@ else
         # cannot be proven right — e.g. a pre-#1601 label, or a marker post
         # that itself failed. Deleting every such label the moment this
         # feature ships was flagged as an unacceptable operational cliff
-        # across two independent PR #1608 review rounds (agy).
+        # across two independent PR dEitY719/dotfiles#1608 review rounds (agy).
         echo "[SKIPPED] review-passed not confirmed for this head — no freshness marker found"
         ;;
     3)
         # UNDETERMINED — the lookup itself failed. Skip this tick (fail-
         # closed, same as any other unreadable state) but never delete the
         # label on the strength of a check that never completed: a network
-        # blip must not destroy an otherwise-valid review-passed (PR #1608
+        # blip must not destroy an otherwise-valid review-passed (PR dEitY719/dotfiles#1608
         # review, agy round-2 BLOCKER).
         echo "[SKIPPED] review-passed freshness unknown — marker lookup failed, treating as unverified"
         ;;
@@ -107,16 +107,16 @@ passes Step 3.5 is provisionally queued; F-3 is what actually proves the
 label is still trustworthy.
 
 `review-blocked` is tested **first**, so it wins over a stale `review-passed`
-if both are somehow present. #1563's invalidation should make that
+if both are somehow present. dEitY719/dotfiles#1563's invalidation should make that
 unreachable — every skill that advances a PR's head drops the stale verdict —
 but a gate on a merge has to be deterministic about a state it does not
 expect, not merely unlikely to meet it.
 
-## Freshness check (#1601)
+## Freshness check (dEitY719/dotfiles#1601)
 
 The label-presence check above answers "was this PR ever verified"; it
 cannot answer "was *this* head verified", because a label carries no data of
-its own. #1563 tried to keep the two in sync by having every head-advancing
+its own. dEitY719/dotfiles#1563 tried to keep the two in sync by having every head-advancing
 skill drop the label on push — but that list can never be complete: a manual
 `git push --force-with-lease` from a human's shell, a GitHub web-UI commit, or
 a future tool all advance the head with no hook this repo controls. Any of
@@ -144,7 +144,7 @@ This still does not make the train a comment parser in the sense "What this
 gate is not" forbids below: it never reads a *reviewer's* verdict line, only
 a fixed machine stamp this same subsystem writes for exactly this check.
 
-### Marker authorship (PR #1608 review, agy + codex BLOCKER)
+### Marker authorship (PR dEitY719/dotfiles#1608 review, agy + codex BLOCKER)
 
 A plain comment has no write-permission floor the way a label does — on most
 repos anyone who can see the PR can comment on it. An earlier version of this
@@ -182,7 +182,7 @@ as trusted:
   is the escape hatch — set it to the actual producer identity when it
   differs from `gh api user -q .login`'s answer in the consuming context.
 
-### Mismatch, absence, and undetermined are three different facts (PR #1608 review, agy rounds 2 and 3)
+### Mismatch, absence, and undetermined are three different facts (PR dEitY719/dotfiles#1608 review, agy rounds 2 and 3)
 
 Only ONE of the three ways a marker check can come back short of FRESH is
 positive proof the label is wrong for this head. Collapsing any pair of them
@@ -192,7 +192,7 @@ a real gap:
 - **MISMATCH (rc 1)** — a marker from the trusted login exists, but its sha
   names a different commit. This is direct evidence: the reviewed head is
   provably not the current one (a force-push moved past it, the original
-  #1601 scenario). Self-heal (drop the label) is safe here — the caller
+  dEitY719/dotfiles#1601 scenario). Self-heal (drop the label) is safe here — the caller
   isn't guessing, it's acting on proof.
 - **ABSENT (rc 2)** — the lookup succeeded and found no marker at all from
   the trusted login. This looks identical whether the label was applied
@@ -230,8 +230,8 @@ same rule `report-format.md` states for the delegated-review reasons).
 
 "Not reviewed" and "reviewed and passed" are different states, and a gate that
 collapses them is worse than no gate: it advertises a guarantee it does not
-provide. #1527's reproduction is PR #1518 — two independent blocking verdicts
-posted, merged 32 minutes later, 5 BLOCKERs into `main` (#1520, PR #1522) —
+provide. dEitY719/dotfiles#1527's reproduction is PR dEitY719/dotfiles#1518 — two independent blocking verdicts
+posted, merged 32 minutes later, 5 BLOCKERs into `main` (dEitY719/dotfiles#1520, PR dEitY719/dotfiles#1522) —
 and the reason the verdicts never reached the merge decision is precisely that
 nothing distinguished "no signal" from "green signal".
 
@@ -273,19 +273,19 @@ Do not add one.
   a reviewer's LGTM/BLOCKING prose. Parsing that lives entirely in the
   producer, and that direction is deliberate: a reviewer reformatting its
   verdict line yields `unknown` → no label → a skipped PR. Move the parsing
-  here and the same reformat would silently *unlock* the gate. The #1601
+  here and the same reformat would silently *unlock* the gate. The dEitY719/dotfiles#1601
   freshness check above reads a comment too, but a fixed machine-only marker
   the producer stamps for exactly this purpose, never a reviewer's own
   output — see "Freshness check" for why that line is not the one this rule
   guards.
 - **Not part of `_gh_pr_merge_train_filter_targets`.** That filter drops its
   rejects silently before the queue exists, and `report-format.md` documents
-  those PRs as never listed. #1564 requires a visible per-PR line, so this
+  those PRs as never listed. dEitY719/dotfiles#1564 requires a visible per-PR line, so this
   runs as a queue-level step over what the filter already passed.
 
 ## Provisioning
 
-`_gh_pr_edit_safe_label` refuses to auto-create a missing label (#326), so
+`_gh_pr_edit_safe_label` refuses to auto-create a missing label (dEitY719/dotfiles#326), so
 without provisioning the producer can never issue either one and every PR
 skips forever. `gh-setup:label-bootstrap` provisions both from the `pipeline|` feed
 in the `gh-setup-skills` sibling repo (`skills/label-bootstrap/references/gh-labels.md`), and `--prune` preserves them.

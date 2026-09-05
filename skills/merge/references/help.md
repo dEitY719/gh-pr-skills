@@ -27,7 +27,7 @@ _Availability depends on repo settings → General → Pull Requests. If a strat
 ## What the skill does
 
 1. Parses args. Validates strategy ∈ {rebase, squash, merge}.
-2. Resolves target repo **and host** from the remote URL (`GH_HOST` pinned, #1403/#1407).
+2. Resolves target repo **and host** from the remote URL (`GH_HOST` pinned, dEitY719/dotfiles#1403/dEitY719/dotfiles#1407).
 3. Pre-flight (in parallel):
    - PR state, draft status, mergeable, mergeStateStatus, reviewDecision
    - `gh pr checks` — required checks must pass
@@ -38,7 +38,7 @@ _Availability depends on repo settings → General → Pull Requests. If a strat
 5. Runs `GH_HOST="$TARGET_HOST" gh pr merge <N> --repo "$TARGET_REPO" --<strategy> --delete-branch` **without confirmation**.
 6. Moves the PR project-board card to `Done` when a projectV2 board is attached.
 7. Fetches the merge SHA and prints a compact report.
-8. For repos registered in the untracked watched-repos registry only (#1511, #1555), hands off to
+8. For repos registered in the untracked watched-repos registry only (dEitY719/dotfiles#1511, dEitY719/dotfiles#1555), hands off to
    `gh-verify:post-merge-verify`: closes the implementation herdr tab, rebases the main
    checkout, and opens a herdr session running that repo's `verify_skill`. An
    unregistered repo gets nothing at all, and every failure there is a `[WARN]` that

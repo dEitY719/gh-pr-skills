@@ -37,7 +37,7 @@ output it verbatim, then stop. No API calls.
 Delegate to `gh_pr_review_parse` (`shell-common/functions/gh_pr_review.sh`). Argument shape + KR aliases + exit
 codes: `references/parser-contract.md` — it also covers `START_TS`, `PR_NUMBER`, and binding `TARGET_REPO` +
 `TARGET_HOST` from one remote URL. Every `gh` call below then runs as
-`GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`; `--repo` alone carries no host (#1403 / #1407).
+`GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`; `--repo` alone carries no host (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
 ## Step 2: Pre-flight
 
@@ -64,7 +64,7 @@ Decide path: if `--paths <path>` (repeatable) was given, always take the
 **inline** `gh pr diff` path regardless of PR size — the diff is filtered by
 path in `_gh_pr_review_build_prompt`, so a scoped run never routes through
 large-diff delegation, and a scope matching no file exits 1 rather than
-reviewing an empty diff (#1616). Otherwise decide by diff size
+reviewing an empty diff (dEitY719/dotfiles#1616). Otherwise decide by diff size
 (`gh pr view --json additions,deletions`): `≥ 800` lines → follow
 `../../approve/references/large-diff-delegation.md`; else inline
 `gh pr diff`. Append the diff per `references/ai-cli-invocation.md` and write
@@ -83,7 +83,7 @@ Invocation shapes, stdout streaming, non-zero handling:
 For `--ai opencode` and `--ai hermes` only: set the Bash tool `timeout`
 parameter of that Step 4+5 call to at least `600000` (ms, 10 min). Never
 rely on the ambient 2-minute default — it kills the run before the
-dispatcher's own 540s bound can fail it cleanly (issue #1506).
+dispatcher's own 540s bound can fail it cleanly (issue dEitY719/dotfiles#1506).
 
 ## Step 6: Post PR Comment (default ON)
 

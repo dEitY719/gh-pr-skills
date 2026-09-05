@@ -1,4 +1,4 @@
-# gh-pr:merge — GitHub Target Binding (#1403, #1407)
+# gh-pr:merge — GitHub Target Binding (dEitY719/dotfiles#1403, dEitY719/dotfiles#1407)
 
 Run this in Step 1, **before any `gh` call**.
 
@@ -45,6 +45,6 @@ GH_HOST="$TARGET_HOST" gh <sub-command> ... --repo "$TARGET_REPO"
 A bare `gh` follows gh CLI's own `gh repo set-default` instead of git's
 `$REMOTE`, and `--repo <owner>/<repo>` carries no host at all. On a dual-host
 login (github.com + GHES) the slug then resolves against the wrong server
-**without an error** — the silent misroute #1403 hit. For this skill that
+**without an error** — the silent misroute dEitY719/dotfiles#1403 hit. For this skill that
 misroute lands on `gh pr merge --delete-branch`, the most destructive write in
 the repo, so both halves are mandatory.

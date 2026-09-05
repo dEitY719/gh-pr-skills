@@ -35,14 +35,14 @@
 - **The PRs still need a human's judgement.** The train forms no opinion of
   its own: `gh-flow:issue` Step 2.4 already ran `gh-verify:review-all`, and where
   the approval gate is off the train delegates one `gh-pr:approve
-  --self-record` pass rather than deciding anything itself (#1519 D-3).
+  --self-record` pass rather than deciding anything itself (dEitY719/dotfiles#1519 D-3).
 
 ## What the skill does
 
 1. Binds `TARGET_REPO` / `TARGET_HOST` from one remote URL (`references/github-target.md`).
 2. Lists your own open PRs and runs them through the shared filter
    `_gh_pr_merge_train_filter_targets` (`shell-common/functions/gh_pr_merge_train.sh`,
-   #1524) — drafts, PRs carrying the `reply-pending` label, and anything
+   dEitY719/dotfiles#1524) — drafts, PRs carrying the `reply-pending` label, and anything
    updated in the last **11 minutes** (D-6) are dropped — then sorts
    `CLEAN` → `BEHIND` → `UNSTABLE` → `DIRTY`, ties by ascending number (D-2).
 3. Reads `required_approving_review_count` once per *distinct base branch* in
@@ -53,12 +53,12 @@
    configured), or a `403` carrying GitHub's plan-limit message, means no
    policy can apply here. Everything else — a `403` from a permission,
    rate-limit or SSO denial, a 5xx, a 401, no response, or a `2xx` whose body
-   will not parse — is undetermined and stays **fail-closed** (#1519 F-2).
+   will not parse — is undetermined and stays **fail-closed** (dEitY719/dotfiles#1519 F-2).
    The report header names which of the three happened.
 4. Applies the **review verdict gate** to the surviving queue, from the
    `labels` it already holds — no extra API call. `review-blocked` is
    `[SKIPPED]`, and so is a PR carrying **neither** verdict label: absence is
-   "not verified", never "passed" (#1564). Only `review-passed` proceeds. The
+   "not verified", never "passed" (dEitY719/dotfiles#1564). Only `review-passed` proceeds. The
    labels are written solely by `gh-verify:review-all`; the train never parses a
    review comment. Table and rationale: `references/review-verdict-gate.md`.
 5. Processes **one PR at a time**. Immediately before each one it re-queries
@@ -66,7 +66,7 @@
    When the gate is off and `reviewDecision` is empty, it first runs one
    `gh-pr:approve --self-record` and merges only if that review promoted the
    board card — a withheld approval skips the PR, and an already-reviewed head
-   is never re-reviewed (#1519 F-6 … F-9).
+   is never re-reviewed (dEitY719/dotfiles#1519 F-6 … F-9).
 6. Routes on `mergeStateStatus` / `mergeable` through the D-1 table — the one
    copy lives in `references/routing-table.md`. Which atom each row reaches is
    summarised under "Atom skills it calls" below.
@@ -100,7 +100,7 @@
 | `gh-resolve:outdated` | `BEHIND` + `MERGEABLE` — clean rebase onto the moved base, in a scratch worktree |
 | `gh-resolve:conflict` | `DIRTY` + `CONFLICTING` — the LLM-judgement row, in a scratch worktree |
 | `gh-resolve:ci-fail` | `UNSTABLE` with a failing check — the other LLM-judgement row |
-| `gh-pr:approve` | `--self-record`, once per head, only when the approval gate is off and `reviewDecision` is empty (#1519 D-3) |
+| `gh-pr:approve` | `--self-record`, once per head, only when the approval gate is off and `reviewDecision` is empty (dEitY719/dotfiles#1519 D-3) |
 | `gh-pr:merge` | every row that reaches a mergeable state |
 | none | `BLOCKED` / `DRAFT` skip; `UNSTABLE` still running and `UNKNOWN` poll first |
 
@@ -109,7 +109,7 @@
 - `gh-flow:issue` — produces the parallel PRs this train drains; its Step 2.4
   `--defer-reply 4` is the reason for the 11-minute quiet period.
 - `gh-verify:review-all` — the only writer of the `review-blocked` /
-  `review-passed` labels this train's Step 3.5 gates on (#1564).
+  `review-passed` labels this train's Step 3.5 gates on (dEitY719/dotfiles#1564).
 - `gh-setup:label-bootstrap` — provisions those two labels; without them the
   producer cannot issue either and every PR skips.
 - `gh-pr:merge` — the single-PR case, and the atom this train ends every PR with.

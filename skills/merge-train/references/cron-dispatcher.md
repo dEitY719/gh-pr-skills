@@ -16,7 +16,7 @@ Register it with something like:
 
 Illustrative only — the actual schedule of this repo's `merge-train` job is
 whatever `shell-common/tools/custom/cron-jobs.json` says (`*/5 * * * *` as of
-#1482), installed via `aicron add merge-train`, not a hand-edited crontab
+dEitY719/dotfiles#1482), installed via `aicron add merge-train`, not a hand-edited crontab
 line. Treat that manifest, not the example above, as the schedule SSOT.
 
 `--dry-run` reports what a tick would launch without taking the lock or opening
@@ -60,13 +60,13 @@ base. It is built by `herdr_agent_name`
 (`shell-common/functions/herdr_agent_name.sh`), the SSOT shared with
 `issue_watcher_cron.sh` and `gh-verify:post-merge-verify`.
 
-The workspace label is the *same string* as the agent name (#1549) — no longer
+The workspace label is the *same string* as the agent name (dEitY719/dotfiles#1549) — no longer
 `mt-<host>-<owner>-<repo>`. Pre-#1549 the label kept its own host-qualified
-fold while the agent name had already moved to `herdr_agent_name` (#1530), so
+fold while the agent name had already moved to `herdr_agent_name` (dEitY719/dotfiles#1530), so
 the same train answered to two different names: `herdr workspace list` showed
 one, `herdr agent get` the other, with no way to cross-reference them. Dropping
 host/owner from the label rides on the same one-repo-in-watched-repos.json
-guard the agent name already accepted (#1530): herdr validates agent names
+guard the agent name already accepted (dEitY719/dotfiles#1530): herdr validates agent names
 against `^[a-z][a-z0-9_-]{0,31}$`, which has no room for a host, so a second
 host or a second owner sharing a repo name collides on both names now, not
 just the agent name. The trade-off and its expiry condition (a short digest
@@ -92,9 +92,9 @@ gone, the name is released) earns a new workspace/tab/agent.
   "worth waking a session?" heuristic; this skill re-derives the real queue and
   re-runs the filter authoritatively (`ordering.md`). Both call the *same*
   function — `_gh_pr_merge_train_filter_targets` in
-  `shell-common/functions/gh_pr_merge_train.sh` (#1524) — so this is one
+  `shell-common/functions/gh_pr_merge_train.sh` (dEitY719/dotfiles#1524) — so this is one
   implementation run at two clocks, not two implementations that could drift.
-  Duplicating the filter here as shell *or* as prose is exactly the bug #1524
+  Duplicating the filter here as shell *or* as prose is exactly the bug dEitY719/dotfiles#1524
   removed.
 
 ## Failure behaviour
@@ -102,9 +102,9 @@ gone, the name is released) earns a new workspace/tab/agent.
 | Failure | Dispatcher's response |
 |---|---|
 | `gh pr list` fails | end the tick, launch nothing — never merge without knowing state |
-| herdr launch fails | end the tick, closing the tab this tick opened if no agent was ever placed on it (#1512); the next tick retries |
-| `agent start` says `agent_name_taken` | close this tick's tab, then prompt the name's existing holder — a second pane under that name is impossible, and failing here would repeat every period. The holder is on another pane, so the tab this tick opened holds nothing and is closed like any other failed start (#1512) |
-| `agent start` says `agent_pane_busy` | make up to 3 start attempts with a short backoff — a pane's shell is not interactive the instant `tab create` answers (#1512) |
+| herdr launch fails | end the tick, closing the tab this tick opened if no agent was ever placed on it (dEitY719/dotfiles#1512); the next tick retries |
+| `agent start` says `agent_name_taken` | close this tick's tab, then prompt the name's existing holder — a second pane under that name is impossible, and failing here would repeat every period. The holder is on another pane, so the tab this tick opened holds nothing and is closed like any other failed start (dEitY719/dotfiles#1512) |
+| `agent start` says `agent_pane_busy` | make up to 3 start attempts with a short backoff — a pane's shell is not interactive the instant `tab create` answers (dEitY719/dotfiles#1512) |
 | a train is already live | end the tick quietly (NF-1) |
 | zero target PRs | end the tick quietly |
 
@@ -114,10 +114,10 @@ a prompt that looked stalled may well have landed. The `agent_pane_busy` retry
 is not that: it repeats a start that registered no agent at all, on a pane that
 holds none, so no attempt can produce a second train. A start that never places
 an agent also leaves its tab behind, which is why every such path closes the tab
-it opened (#1512) — cron ticks every few minutes, and the workspace had
+it opened (dEitY719/dotfiles#1512) — cron ticks every few minutes, and the workspace had
 collected dozens of dead tabs. Tabs that predate the fix need a manual sweep.
 
 A failed `agent start` now also carries herdr's own first stderr line as an
-indented `원인:` under the error — #1458's idiom. Without it a busy pane, a dead
+indented `원인:` under the error — dEitY719/dotfiles#1458's idiom. Without it a busy pane, a dead
 server and a rejected account all read as the same sentence in the cron log,
-which is why #1512 went unnoticed for weeks of failed ticks.
+which is why dEitY719/dotfiles#1512 went unnoticed for weeks of failed ticks.

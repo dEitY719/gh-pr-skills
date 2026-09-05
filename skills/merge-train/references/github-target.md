@@ -1,4 +1,4 @@
-# gh-pr:merge-train — GitHub target binding (#1403, #1407)
+# gh-pr:merge-train — GitHub target binding (dEitY719/dotfiles#1403, dEitY719/dotfiles#1407)
 
 Run this in Step 1, **before any `gh` call**.
 
@@ -32,7 +32,7 @@ export TARGET_REPO TARGET_HOST
 - An unknown remote stops the run with `git remote -v` — never a silent
   `origin` fallback, which would mask a typo and target the wrong repo.
 - Never continue with an empty `TARGET_HOST` — that is exactly the silent
-  misroute state of #1403.
+  misroute state of dEitY719/dotfiles#1403.
 
 ## When an explicit `owner/repo` is given
 
@@ -45,7 +45,7 @@ export TARGET_REPO
 ```
 
 The **host is still read from the remote URL**, never from the slug — a slug
-carries no host, which is the whole of #1403. If the named repo does not live
+carries no host, which is the whole of dEitY719/dotfiles#1403. If the named repo does not live
 on the resolved host, the run stops rather than guessing.
 
 ## Host targeting rule
@@ -71,7 +71,7 @@ the queue in Step 2 and the merges in Step 4 provably the same repo.
 
 The atoms (`gh-resolve:outdated`, `-conflict`, `-ci-fail`, `gh-pr:merge`)
 each re-resolve their own target from their `[remote]` positional, exactly as
-the `gh-flow:issue` chain does (#1405). Pass `<remote>` explicitly whenever the
+the `gh-flow:issue` chain does (dEitY719/dotfiles#1405). Pass `<remote>` explicitly whenever the
 train was invoked with a non-default remote, so the whole train lands on one
 server:
 
