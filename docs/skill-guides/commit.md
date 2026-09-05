@@ -29,7 +29,7 @@ Step 1 이 작업 트리 상태를 무조건 조회하므로 "뭘 바꿨나요?"
 /gh-pr:commit -h | --help | help
 ```
 
-`references/help.md` 가 1차 근거다. 위치 인자 파싱 규칙(#1405): **숫자로만 이루어진
+`references/help.md` 가 1차 근거다. 위치 인자 파싱 규칙(dEitY719/dotfiles#1405): **숫자로만 이루어진
 위치 인자는 이슈 번호**, 그 외의 위치 인자는 remote 이름이다. 순서는 상관없다.
 
 | 인자 | 기본값 | 설명 |
@@ -46,7 +46,7 @@ Step 1 이 작업 트리 상태를 무조건 조회하므로 "뭘 바꿨나요?"
 - `/gh-pr:commit 123 upstream` — 둘 다
 
 환경 변수 `GH_DISABLE_AI_METRICS=1` 이면 ai-metrics 코멘트를 건너뛴다(보드 sync 는
-계속 실행 — issue #399).
+계속 실행 — issue dEitY719/dotfiles#399).
 
 ## 동작 단계
 
@@ -54,7 +54,7 @@ Step 1 이 작업 트리 상태를 무조건 조회하므로 "뭘 바꿨나요?"
    `git status`(`-uall` 금지), `git diff`, staged 가 있으면 `git diff --staged`,
    `git log --oneline -20`(저장소 커밋 스타일 모방용)을 실행한다. 같은 메시지에서
    위치 인자를 파싱하고 `references/github-target.md` 스니펫을 그대로 붙여
-   `GH_HOST` / `TARGET_REPO` / `TARGET_HOST` / `REMOTE` 를 export 한다(#1403).
+   `GH_HOST` / `TARGET_REPO` / `TARGET_HOST` / `REMOTE` 를 export 한다(dEitY719/dotfiles#1403).
    지정한 remote 가 없으면 `git remote -v` 목록과 함께 중단한다 — `origin` 으로
    조용히 폴백하지 않는다.
 2. **Step 2 — 이슈 번호 결정.** 먼저 맞는 것이 이긴다: (1) 숫자 인자 명시,
@@ -92,7 +92,7 @@ Step 1 이 작업 트리 상태를 무조건 조회하므로 "뭘 바꿨나요?"
 **푸터 키워드 제약** — 허용되는 것은 `Closes #N`(기본)과 `Fixes #N`(버그 수정)
 둘뿐이다. `Refs` / `Resolves` / `See` / `References` 는 금지다. 앞의 셋은 GitHub
 auto-close 를 트리거하지 않아 프로젝트 보드 자동화를 깨고, `Resolves` 는
-AgentToolbox 의 stacked-closes-rollup 정책을 위반한다(issue #392). 부분 진행이라
+AgentToolbox 의 stacked-closes-rollup 정책을 위반한다(issue dEitY719/dotfiles#392). 부분 진행이라
 auto-close 를 원치 않으면 푸터를 생략하고 본문에 `(part of #N)` 을 인라인으로 적는다.
 
 **거부 조건** — 커밋할 변경이 없으면 "nothing to commit" 으로 중단한다. diff 가
@@ -103,10 +103,10 @@ auto-close 를 원치 않으면 푸터를 생략하고 본문에 `(part of #N)` 
 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"` 형태다. bare `gh` 는 git 의
 remote 가 아니라 gh CLI 자신의 `gh repo set-default` 를 따르기 때문에, github.com 과
 GHES 양쪽에 로그인된 상태에서는 **에러 없이 조용히 엉뚱한 서버에** 메트릭을
-남긴다(#1403). 놀라운 `gh` 결과를 `--repo` 를 빼서 우회하지 말고 host 부터 확인한다.
+남긴다(dEitY719/dotfiles#1403). 놀라운 `gh` 결과를 `--repo` 를 빼서 우회하지 말고 host 부터 확인한다.
 
 **알려진 마이그레이션 부채** — Step 5 의 보드 sync 는 dotfiles 의
 `shell-common/functions/gh_project_status.sh` 를 source 한다. dotfiles 체크아웃이
 없는 머신에서는 이 단계가 조용히 skip 된다. `[ -r ]` 는 통과했는데 함수가 정의되지
-않는 경우까지 방어하는 게이트가 들어 있고(#724), 이는 커밋을 막지 않는 soft-fail 이다.
+않는 경우까지 방어하는 게이트가 들어 있고(dEitY719/dotfiles#724), 이는 커밋을 막지 않는 soft-fail 이다.
 `GH_PROJECT_STATUS_SYNC=0` 으로 명시적 opt-out 할 수 있다.

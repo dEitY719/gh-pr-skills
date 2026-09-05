@@ -4,7 +4,7 @@ Record AI metrics as a soft-fail step: warn on error, never block the
 commit. Compute elapsed time and post a comment on the linked issue
 **only** when an issue number was resolved in Step 2. When
 `GH_DISABLE_AI_METRICS=1`, skip the comment entirely (board sync still
-runs — issue #399).
+runs — issue dEitY719/dotfiles#399).
 
 ```bash
 ELAPSED=$(( ($(date +%s) - START_TS) / 60 ))
@@ -40,15 +40,15 @@ fi
 
 `$TARGET_HOST` / `$TARGET_REPO` are the pair Step 1 bound from the
 `[remote]`'s URL — `$REMOTE`, which defaults to `origin` but is whatever the
-`[remote]` positional named (#1405). Both are mandatory: a bare `gh api repos/.../comments` resolves against
+`[remote]` positional named (dEitY719/dotfiles#1405). Both are mandatory: a bare `gh api repos/.../comments` resolves against
 gh CLI's own default host, so on a dual-host login the metrics comment lands
-on the wrong server's issue #N — or 404s — without failing loudly (#1403).
+on the wrong server's issue #N — or 404s — without failing loudly (dEitY719/dotfiles#1403).
 
 If no issue number exists, print the metrics to stdout only and skip the
 comment. On any API failure, print
 `[WARN] ai-metrics comment failed — continuing.` and proceed.
 
 > The four emoji glyphs above (`🤖 📊 👤`) are the intended ai-metrics
-> footer visual design — CLAUDE.md SSOT exception (#317 F-2, PR #320,
-> #367). `gh-commit` is registered in
-> `skill-check/references/allowed-emoji-skills.txt` (#837).
+> footer visual design — CLAUDE.md SSOT exception (dEitY719/dotfiles#317 F-2, PR dEitY719/dotfiles#320,
+> dEitY719/dotfiles#367). `gh-commit` is registered in
+> `skill-check/references/allowed-emoji-skills.txt` (dEitY719/dotfiles#837).

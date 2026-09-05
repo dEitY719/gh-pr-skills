@@ -1,4 +1,4 @@
-# gh-pr:merge-emergency — GitHub Target Binding (#1403, #1407)
+# gh-pr:merge-emergency — GitHub Target Binding (dEitY719/dotfiles#1403, dEitY719/dotfiles#1407)
 
 Run this in Step 1, **before any `gh` call**.
 
@@ -67,7 +67,7 @@ explicit `<N>` and therefore keeps `--repo "$TARGET_REPO"`.
 A bare `gh` follows gh CLI's own `gh repo set-default` instead of git's
 `$REMOTE`, and `--repo <owner>/<repo>` carries no host at all. On a dual-host
 login (github.com + GHES) the slug then resolves against the wrong server
-**without an error** — the silent misroute #1403 hit.
+**without an error** — the silent misroute dEitY719/dotfiles#1403 hit.
 
 This skill runs `gh pr merge --admin --squash --delete-branch`. A misrouted
 admin merge is unrecoverable and its audit trail (comment + incident issue)

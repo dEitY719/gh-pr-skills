@@ -24,7 +24,7 @@ Each skill's `references/` directory holds the detail it loads on demand.
 - **All eight** — an authenticated `gh` CLI. Every call carries `GH_HOST` **and**
   `--repo`: `--repo` alone names no server, and on a dual-host login (github.com
   plus a GHES instance) a bare call silently queries the wrong one
-  (dotfiles #1403 / #1407).
+  (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 - **There is no read-only skill here.** All eight write to a live repo — a
   commit, a PR, a comment, a verdict, a merge. Treat every invocation as a
   mutation.

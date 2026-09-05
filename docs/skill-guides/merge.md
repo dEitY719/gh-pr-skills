@@ -47,7 +47,7 @@
 
 1. **Step 1 — 인자 해석 + repo 해석.** `START_TS` 를 기록하고, `remote` 하나의 URL 에서
    `TARGET_REPO` 와 `TARGET_HOST` 를 함께 바인딩한 뒤 `GH_HOST` 를 export 한다
-   (#1403/#1407). remote 가 없으면 `git remote -v` 를 나열하고 정지 — 조용한 `origin`
+   (dEitY719/dotfiles#1403/dEitY719/dotfiles#1407). remote 가 없으면 `git remote -v` 를 나열하고 정지 — 조용한 `origin`
    폴백은 없다. 호스트를 잘못 바인딩했을 때 그 잘못된 서버 호출이 도달하는 지점이
    `gh pr merge --delete-branch`, 즉 저장소에서 가장 파괴적인 쓰기이기 때문이다.
 2. **Step 2 — 사전 점검(병렬).** `gh pr view --json state,isDraft,mergeable,`
@@ -63,7 +63,7 @@
    수용하고 `INFO: No branch protection on <baseRefName> — accepting empty reviewDecision.`
    를 출력한다. 비어 있지 않은 비-APPROVED 값(`CHANGES_REQUESTED`, `REVIEW_REQUIRED`)은
    protection 유무와 무관하게 정지한다 — 누군가 명시적으로 막은 신호다.
-   projectV2 보드 Status 는 머지 게이트가 **아니다**(#1513) — 여기서 읽지 않는다.
+   projectV2 보드 Status 는 머지 게이트가 **아니다**(dEitY719/dotfiles#1513) — 여기서 읽지 않는다.
 3. **Step 3 — 머지(확인 없음).**
    `GH_HOST="$TARGET_HOST" gh pr merge <N> --repo "$TARGET_REPO" --<strategy> --delete-branch`.
    `merge method is not allowed` 가 나오면 저장소 설정 안내를 출력하고 정지한다.

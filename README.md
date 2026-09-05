@@ -68,7 +68,7 @@ Each page is generated from a Markdown source under
 Every skill carries `GH_HOST` **and** `--repo` on every `gh` call, both resolved
 from the same remote URL. `--repo` alone names no server: on a dual-host login
 (github.com plus a GHES instance) a bare call silently queries the wrong one
-(dotfiles #1403 / #1407).
+(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
 ## Install
 
@@ -129,12 +129,12 @@ This repo owns none — deliberately.
   (`{codex,kimi,gemini,antigravity,hermes,opencode}-tools.md`). That repo is
   their sole owner; the other fourteen `*-skills` repos link there rather than
   carrying copies, so one tool rename is one edit, not fifteen
-  (dotfiles #1410 F-5 / NF-2). The only condensed mirror here is
+  (dEitY719/dotfiles#1410 F-5 / NF-2). The only condensed mirror here is
   `.kimi-plugin/plugin.json`'s `skillInstructions`, because Kimi CLI cannot read
   a reference file at load time — it points back to the canonical file.
 - **The reusable CI workflow** is
   [`harness-skills/.github/workflows/skill-check.yml`](https://github.com/dEitY719/harness-skills/blob/main/.github/workflows/skill-check.yml)
-  (#1410 D-10). See [CI](#ci).
+  (dEitY719/dotfiles#1410 D-10). See [CI](#ci).
 
 ## Layout
 
@@ -165,13 +165,13 @@ the full rationale and contribution rules.
 
 Skill directory names dropped their old `gh-pr-` / `gh-` prefixes in the
 migration: `/gh-pr:gh-pr-merge` stutters, and the plugin namespace already
-carries the meaning the prefix used to (#1410 F-4).
+carries the meaning the prefix used to (dEitY719/dotfiles#1410 F-4).
 
 One name needed a judgement call. `gh:pr` was the only skill whose directory
 name was *identical* to the plugin name, so stripping the redundant prefix would
 have left nothing. It became `create` — the verb for what it actually does, and
 a deliberate mirror of `gh-issue:create`, so the same word means "file the
-thing" in both plugins (#1677 §3).
+thing" in both plugins (dEitY719/dotfiles#1677 §3).
 
 The `.kimi-plugin/` manifest is pre-provisioned: Kimi CLI is not installed on the
 maintainer's machines yet, and shipping the manifest now costs nothing and saves
@@ -181,7 +181,7 @@ a migration later.
 
 Like `gh-issue-skills` and unlike the Phase 2 repos, this one was migrated
 **after** the Phase 3 names were fixed, so every reference to a sibling repo is
-written in its final form (#1677 §2), and the step-marker wire format moved here
+written in its final form (dEitY719/dotfiles#1677 §2), and the step-marker wire format moved here
 with it. The full old-to-new mapping and the marker details are in
 [`docs/cross-repo-names.md`](docs/cross-repo-names.md).
 
@@ -215,13 +215,13 @@ see [`CLAUDE.md`](CLAUDE.md) → "Known migration debt".
 
 The `allow-emoji-paths` entries cover text the skills **quote** rather than
 decorate with: the ai-metrics footer, whose chart / person / robot glyphs are the
-wire format itself (dotfiles #317 F-2, PR #320). Nothing else in the repo may
+wire format itself (dEitY719/dotfiles#317 F-2, PR dEitY719/dotfiles#320). Nothing else in the repo may
 carry an emoji.
 
 ## Provenance
 
 Extracted from [`dEitY719/dotfiles`](https://github.com/dEitY719/dotfiles) as a
-content snapshot in Phase 3 of the #1410 migration. Behaviour is unchanged; only
+content snapshot in Phase 3 of the dEitY719/dotfiles#1410 migration. Behaviour is unchanged; only
 the namespace moved, from `gh:` to `gh-pr:`. The snapshot sources, the coupling
 that came across with it, and the phase map are in
 [`docs/provenance.md`](docs/provenance.md).

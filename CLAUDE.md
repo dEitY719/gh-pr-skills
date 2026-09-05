@@ -31,8 +31,8 @@ as a content snapshot at source commit
 `96c90bc8d961d51d9c3286dae730e8b928afdfc8` — no history rewriting. Those
 directories are a historical origin, not a live path: `~/dotfiles/claude/skills/`
 has since been deleted outright rather than kept until Phase 4 as
-#1410 NF-1 / NF-3 planned, so nothing here may resolve against it (#14 C4).
-This is Phase 3 of dotfiles #1410, alongside the two
+dEitY719/dotfiles#1410 NF-1 / NF-3 planned, so nothing here may resolve against it (#14 C4).
+This is Phase 3 of dEitY719/dotfiles#1410, alongside the two
 sibling repos `gh-issue-skills` and `gh-flow-skills`; `packaging-skills` was
 Phase 0 and `harness-skills` was Phase 1 and owns the shared assets.
 
@@ -62,7 +62,7 @@ manifests under a `plugins/` directory.**
 
 This repo owns none. Both belong to `dEitY719/harness-skills`:
 
-**1. Per-harness tool mappings** (`references/*-tools.md` there, dotfiles #1410
+**1. Per-harness tool mappings** (`references/*-tools.md` there, dEitY719/dotfiles#1410
 F-5). Do not create a `references/` directory at this repo's root. If a doc here
 needs a mapping, link to
 `https://github.com/dEitY719/harness-skills/blob/main/references/<harness>-tools.md`.
@@ -85,13 +85,13 @@ which is the whole point.
   in the name. The harness supplies the `gh-pr:` prefix at invocation time.
 - **The old `gh-pr-` / `gh-` prefixes are gone and stay gone.** They stuttered
   against the namespace (`/gh-pr:gh-pr-merge`), so the migration dropped them
-  (#1410 F-4). Do not reintroduce them, and do not shorten the remaining names
+  (dEitY719/dotfiles#1410 F-4). Do not reintroduce them, and do not shorten the remaining names
   further — `merge-emergency`, not `emergency`.
 - **`gh:pr` became `create`, not the empty string.** It is the one skill whose
   old directory name was identical to the plugin name, so the prefix rule had
   nothing left to strip. The name says what the skill does — open a PR — and
   pairs with `gh-issue:create` so the same verb means "file the thing" in both
-  plugins (#1677 §3). Do not rename it to `open`, `pr`, or `pr-create`;
+  plugins (dEitY719/dotfiles#1677 §3). Do not rename it to `open`, `pr`, or `pr-create`;
   `gh-flow-skills` writes `gh-pr:create` into its hooks.
 - **Invocation form in prose is namespaced.** Body text referring to a skill as
   a command writes `/gh-pr:merge`. The old colon form (`gh:pr-merge`) and the
@@ -102,14 +102,14 @@ which is the whole point.
   `gh-verify:review-all`, `gh-verify:post-merge-verify`, `gh-resolve:ci-fail` /
   `:conflict` / `:outdated`, `gh-setup:label-bootstrap`, `gh-issue:create`,
   `gh-flow:issue`, and `session:worktree-teardown` are written here in their
-  final form (#1677 §2). Do not "correct" them back to `gh:pr-merge` /
+  final form (dEitY719/dotfiles#1677 §2). Do not "correct" them back to `gh:pr-merge` /
   `devx:pr-review-all`.
 - **Marker strings are a wire format, not an invocation form.** `create` prints
   `[step:gh-pr-create/<id>] OK` and `commit` prints `[step:gh-pr-commit/<id>] OK`.
   Those lines are matched verbatim by dotfiles'
   `claude/hooks/skill_completion_guard.py` against its `skill_step_catalog.yml`
   keys. Unlike `gh-issue-skills`, these **were** renamed here: `gh-pr` +
-  `create` does not spell the old `gh-pr` key, so dotfiles #1677 F-8 added
+  `create` does not spell the old `gh-pr` key, so dEitY719/dotfiles#1677 F-8 added
   `gh-pr-create` and `gh-pr-commit` as new catalog keys alongside the old
   `gh-pr` / `gh-commit` ones, which still guard the un-deleted dotfiles
   originals until Phase 4. The step IDs inside the markers are unchanged, and
@@ -131,8 +131,8 @@ These are acceptance criteria carried over from dotfiles, not advice:
 - **Every `gh` call carries `GH_HOST` and `--repo`, both resolved from the same
   remote URL.** A bare `gh pr view <N>` follows gh CLI's own
   `gh repo set-default`, not git's `origin`. On a dual-host login (github.com
-  plus GHES) that succeeds silently against the wrong server (dotfiles #1403 /
-  #1407). Never work around a surprising `gh` result by dropping `--repo` or
+  plus GHES) that succeeds silently against the wrong server (dEitY719/dotfiles#1403 /
+  dEitY719/dotfiles#1407). Never work around a surprising `gh` result by dropping `--repo` or
   switching remotes — verify the host first.
 - **`commit` commits only.** It never pushes and never opens a PR. That split
   exists so a human can inspect the diff, squash attempts, and choose the commit
@@ -160,7 +160,7 @@ These are acceptance criteria carried over from dotfiles, not advice:
 
 ## Known migration debt
 
-Items 1 and 2 came across verbatim because #1410's Non-Goals forbid changing
+Items 1 and 2 came across verbatim because dEitY719/dotfiles#1410's Non-Goals forbid changing
 behaviour during a placement-and-naming migration; item 1 is still Phase 4 work
 and item 2 is mitigated but not gone. Item 3 is settled, item 4 is a standing
 decision, and item 5 is owned upstream — all kept here so the "what does this
@@ -227,7 +227,7 @@ repo still need from dotfiles" answer stays in one place:
 ## Emojis
 
 Banned repo-wide, with one exception: the chart / person / robot glyphs of the
-dotfiles ai-metrics footer (#317 F-2 / PR #320 / #367). That footer is a wire
+dotfiles ai-metrics footer (dEitY719/dotfiles#317 F-2 / PR dEitY719/dotfiles#320 / dEitY719/dotfiles#367). That footer is a wire
 format the skills emit, so the eight reference files that specify it have to
 show the real glyphs. They are enumerated in `.github/workflows/validate.yml`
 under `allow-emoji-paths`. Nothing else may carry one.
@@ -254,5 +254,5 @@ The version appears in seven manifests: `.claude-plugin/marketplace.json`,
 `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`,
 `.kimi-plugin/plugin.json`, `.hermes-plugin/plugin.yaml`,
 `gemini-extension.json`, and `package.json`. CI checks that they agree — bump
-all of them together. Versioning is independent per repo (#1410 D-9); this repo
+all of them together. Versioning is independent per repo (dEitY719/dotfiles#1410 D-9); this repo
 does not release in lockstep with its siblings.

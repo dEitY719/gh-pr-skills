@@ -15,8 +15,8 @@ to `Done`. Repeating the sync on an already-`Done` card is harmless.
 Source the shared helper, then call it with the merged PR number:
 
 ```bash
-# helper-fallback NF-1 (#644): silent-skip when helper missing.
-# Defense-in-depth (#724): also detect "sourced but function undefined".
+# helper-fallback NF-1 (dEitY719/dotfiles#644): silent-skip when helper missing.
+# Defense-in-depth (dEitY719/dotfiles#724): also detect "sourced but function undefined".
 _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
 [ -f "$_HELPER" ] || _HELPER="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common/functions/gh_project_status.sh"
 if [ -r "$_HELPER" ]; then
@@ -26,7 +26,7 @@ if [ -r "$_HELPER" ]; then
         printf '[gh-pr-merge-emergency] %s sourced but _gh_project_status_sync undefined — board sync skipped (#724).\n' \
             "$_HELPER" >&2
     else
-        # --repo "$TARGET_REPO" (Step 1) is explicit (#1405): the helper's
+        # --repo "$TARGET_REPO" (Step 1) is explicit (dEitY719/dotfiles#1405): the helper's
         # `gh repo view` fallback reports `gh repo set-default`, not this
         # skill's resolved remote.
         _gh_project_status_sync pr <PR_NUMBER> "Done" --repo "$TARGET_REPO" || true

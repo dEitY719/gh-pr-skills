@@ -32,4 +32,4 @@
 
 - **머지된 PR 들** — 큐 순서(`CLEAN` → `BEHIND` → `UNSTABLE` → `DIRTY`, 동순위 번호 오름차순)대로 **한 번에 하나씩**. 머지는 `gh-pr:merge` 가 전략 인자 없이(기본 rebase) 하고, `BEHIND` / `DIRTY` 는 그 전에 `gh-resolve:outdated` / `:conflict` 가 detached scratch worktree 에서 리베이스합니다 (`gh pr list` 로 큐가 줄었는지 확인).
 - **보고서** — 일반 assistant 텍스트로만 출력(파일로 쓰지 않음). `queue: <n> PR(s)` 와 `approval gate: <판정>` 헤더, PR 당 한 줄과 사유, 마지막 `merged N · skipped N · failed N`.
-- **부수 효과** — 머지 성공한 PR 의 구현 탭이 `idle` 이면 닫힙니다(#1565). train 자체는 GitHub 에 아무것도 쓰지 않고, ai-metrics 코멘트는 호출된 원자 스킬들이 각자 남깁니다.
+- **부수 효과** — 머지 성공한 PR 의 구현 탭이 `idle` 이면 닫힙니다(dEitY719/dotfiles#1565). train 자체는 GitHub 에 아무것도 쓰지 않고, ai-metrics 코멘트는 호출된 원자 스킬들이 각자 남깁니다.

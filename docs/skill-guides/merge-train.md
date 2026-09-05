@@ -37,7 +37,7 @@
 ## 동작 단계
 
 1. **Step 1 — 타깃 바인딩.** `TARGET_REPO` / `TARGET_HOST` / `GH_HOST` 를 **같은 remote URL
-   하나**에서 해석한 뒤에야 `gh` 를 호출한다(#1403/#1407). `owner/repo` 를 명시해도 호스트는 여전히 remote URL 에서 온다.
+   하나**에서 해석한 뒤에야 `gh` 를 호출한다(dEitY719/dotfiles#1403/dEitY719/dotfiles#1407). `owner/repo` 를 명시해도 호스트는 여전히 remote URL 에서 온다.
 2. **Step 2 — 큐 수집과 정렬.** `gh pr list --author @me --state open`(작성자 한정은 선택이
    아니다, D-7) 결과를 공용 필터 `_gh_pr_merge_train_filter_targets` 에 통과시킨다 — draft,
    `reply-pending` 라벨, **11분 quiet period**(D-6) 안의 갱신을 떨어뜨리며, cron 디스패처와
@@ -47,7 +47,7 @@
    `required_approving_review_count` 를, **PR 마다가 아니라 서로 다른 `baseRefName` 마다 한 번씩**
    읽어 캐시한다(base 당 2콜). 한쪽이라도 `>= 1` 이면 게이트 ON, 양쪽 다 "정책 없음"이면 OFF
    (D-5). 판정 기준은 exit code 가 아니라 **HTTP status** — `403`/`404` 는 "정책 없음"이고,
-   진짜 판정 불가(5xx / 401 / 무응답)만 fail-closed 로 게이트를 켠다(#1519).
+   진짜 판정 불가(5xx / 401 / 무응답)만 fail-closed 로 게이트를 켠다(dEitY719/dotfiles#1519).
 4. **Step 3.5 — 리뷰 verdict 게이트.** Step 2 가 이미 들고 있는 `labels` 만으로 판정한다
    (추가 API 콜 없음). `review-blocked` 가 있으면 — 낡은 `review-passed` 가 함께 있어도 —
    `[SKIPPED] review-blocked`. 두 라벨이 **모두 없으면**
@@ -57,9 +57,9 @@
 5. **Step 4 — train 실행, PR 한 번에 하나씩.** 큐 순서대로 (1) 처리 직전 상태 **재조회**
    (F-3 — 앞의 머지가 뒤의 모든 상태를 무효화했다), (2) D-1 라우팅 테이블로 분기,
    (3) 필요하면 원자 스킬에 위임, (4) 재조회 후 재라우팅, (5) `Skill(gh-pr:merge, "<N>")`
-   (전략 인자 없음), (6) 머지 성공 시 그 PR 의 구현 탭이 `idle` 이면 닫는다(#1565).
+   (전략 인자 없음), (6) 머지 성공 시 그 PR 의 구현 탭이 `idle` 이면 닫는다(dEitY719/dotfiles#1565).
    `BEHIND` / `DIRTY` 의 리베이스는 시도마다 만들고 반드시 제거하는 **detached scratch
-   worktree** 안에서 돈다(#1493). 시도는 PR 당 **최대 3회**(F-5), 실패하면 그 PR 만 건너뛰고
+   worktree** 안에서 돈다(dEitY719/dotfiles#1493). 시도는 PR 당 **최대 3회**(F-5), 실패하면 그 PR 만 건너뛰고
    train 은 계속한다(F-6). **두 PR 을 동시에 처리하지 않는다.**
 6. **Step 5 — 보고.** PR 당 한 줄, 반드시 사유를 붙인 `[MERGED]` / `[SKIPPED]` / `[FAILED]`
    보고서(F-9). 헤더에 큐 크기와 `approval gate:` 판정 문자열(`off (no policy on <base>)` /
@@ -82,7 +82,7 @@
 
 `mergeStateStatus` 를 읽기 **전에** 확인하는 단락(short-circuit): `isDraft`, `reply-pending`
 라벨, `review-blocked` 라벨, 두 verdict 라벨의 부재, `review-passed` 의 sha 신선도
-(#1601 — 마커 불일치 / 부재 / 조회 실패가 각각 다른 `[SKIPPED]` 사유). `UNSTABLE` 은 rollup 으로 갈라진다: `FAILURE` / `TIMED_OUT` / `CANCELLED` / `ACTION_REQUIRED`
+(dEitY719/dotfiles#1601 — 마커 불일치 / 부재 / 조회 실패가 각각 다른 `[SKIPPED]` 사유). `UNSTABLE` 은 rollup 으로 갈라진다: `FAILURE` / `TIMED_OUT` / `CANCELLED` / `ACTION_REQUIRED`
 가 있으면 `Skill(gh-resolve:ci-fail, "<N>")`, `IN_PROGRESS` / `QUEUED` / `PENDING` 뿐이면
 **기다린다**(아직 안 끝난 테스트를 "고치러" 가지 않는다), 전부 성공이면 재조회한다.
 폴링은 최대 3회(약 30초 간격)이고 **F-5 시도 횟수를 소모하지 않는다.**

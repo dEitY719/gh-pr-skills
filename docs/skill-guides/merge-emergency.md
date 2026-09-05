@@ -54,7 +54,7 @@ SKILL.md 의 Step 1~7 요약.
 
 1. **Step 1 — 인자 파싱 + 타깃 결정.** `references/github-target.md` 의 바인딩 블록으로
    `TARGET_REPO` / `TARGET_HOST` / `GH_HOST` 를 **같은 remote URL 하나**에서 해석하고,
-   그 다음에야 `gh` 를 호출한다(#1403 / #1407). PR 번호 생략 시 현재 브랜치에서 자동 탐지
+   그 다음에야 `gh` 를 호출한다(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). PR 번호 생략 시 현재 브랜치에서 자동 탐지
    (이때만 `--repo` 없이 호스트 프리픽스만 붙는다 — `gh pr view` 는 PR 인자 없이 `--repo` 를 거부).
    사유가 10자 미만이거나 모호하면 여기서 거부하고 끝난다.
 2. **Step 2 — 사전 안전 게이트(병렬).** PR JSON 과

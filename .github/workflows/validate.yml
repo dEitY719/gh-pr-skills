@@ -1,7 +1,7 @@
 name: validate
 
 # This repo owns no CI logic of its own. It calls the reusable workflow owned by
-# `dEitY719/harness-skills` (dotfiles #1410 D-10), so a new check lands here the
+# `dEitY719/harness-skills` (dEitY719/dotfiles#1410 D-10), so a new check lands here the
 # moment it lands there — no copy to keep in sync.
 
 on:
@@ -18,11 +18,11 @@ jobs:
     uses: dEitY719/harness-skills/.github/workflows/skill-check.yml@main
     with:
       plugin-name: gh-pr
-      # MIGRATION DEBT (dotfiles #1410 Phase 3 / #1677). Four of the eight
+      # MIGRATION DEBT (dEitY719/dotfiles#1410 Phase 3 / dEitY719/dotfiles#1677). Four of the eight
       # SKILL.md files arrived from dotfiles already over the 100-line
       # progressive-disclosure limit: merge 197, merge-train 148, reply 143,
       # review 110 (commit, create, approve, and merge-emergency are at 101).
-      # Phase 3 is a placement-and-naming migration — #1410's Non-Goals forbid
+      # Phase 3 is a placement-and-naming migration — dEitY719/dotfiles#1410's Non-Goals forbid
       # changing skill behaviour on the way across — so the content was copied
       # verbatim and the limit raised here instead of the files being cut down.
       # This number must come back down to 100 in a follow-up that refactors
@@ -30,7 +30,7 @@ jobs:
       max-skill-lines: 197
       # Eight reference files carry the chart / person / robot glyphs of the
       # dotfiles ai-metrics footer. That footer is the single SSOT-approved
-      # emoji exception upstream (#317 F-2 / PR #320 / #367), and a file that
+      # emoji exception upstream (dEitY719/dotfiles#317 F-2 / PR dEitY719/dotfiles#320 / dEitY719/dotfiles#367), and a file that
       # specifies the output has to show the real glyphs. Nothing else in this
       # repo may carry one — see CLAUDE.md -> "Emojis".
       allow-emoji-paths: |
