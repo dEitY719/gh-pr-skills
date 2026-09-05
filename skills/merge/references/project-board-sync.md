@@ -18,8 +18,9 @@ the merge report — the helper logs to stderr and returns 0.
 # helper-fallback NF-1 (#644): silent-skip when helper missing.
 # Defense-in-depth (#724): also detect "sourced but function undefined".
 _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
-[ -f "$_HELPER" ] || { _HELPER="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common/functions/gh_project_status.sh"; export SHELL_COMMON="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; }
+[ -f "$_HELPER" ] || _HELPER="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common/functions/gh_project_status.sh"
 if [ -r "$_HELPER" ]; then
+    export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"
     . "$_HELPER"
     if ! command -v _gh_project_status_sync >/dev/null 2>&1; then
         printf '[gh-pr-merge] %s sourced but _gh_project_status_sync undefined — board sync skipped (#724).\n' \

@@ -18,7 +18,7 @@ n=0
 
 # 1. Step 5 still names the vendored path as its second tier. Renaming one side
 #    only is exactly how this rotted the first time.
-grep -qF "\${CLAUDE_PLUGIN_ROOT:-}/$VENDORED" "$SKILL" || {
+grep -qF "\${CLAUDE_PLUGIN_ROOT:-\$PWD}/$VENDORED" "$SKILL" || {
 	printf 'FAIL  %s no longer points at $CLAUDE_PLUGIN_ROOT/%s\n' "$SKILL" "$VENDORED"
 	fail=1
 }
@@ -31,8 +31,8 @@ DOTFILES_ROOT=/nonexistent
 CLAUDE_PLUGIN_ROOT="$ROOT"
 export HOME DOTFILES_ROOT CLAUDE_PLUGIN_ROOT
 
-PMV_BLOCK="${GH_VERIFY_ROOT:-}/skills/post-merge-verify/references/dispatch.sh.md"
-[ -r "$PMV_BLOCK" ] || PMV_BLOCK="${CLAUDE_PLUGIN_ROOT:-}/$VENDORED"
+PMV_BLOCK="${GH_VERIFY_ROOT:+$GH_VERIFY_ROOT/skills/post-merge-verify/references/dispatch.sh.md}"
+[ -r "$PMV_BLOCK" ] || PMV_BLOCK="${CLAUDE_PLUGIN_ROOT:-$PWD}/$VENDORED"
 
 if [ -r "$PMV_BLOCK" ]; then
 	# 3. Positive signal. A zero-line extraction is the same bug in another mask

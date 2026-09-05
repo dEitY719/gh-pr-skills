@@ -40,7 +40,9 @@ the same remote URL (#1403/#1407). An explicit `owner/repo` positional pins
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
-[ -f "$_SC/functions/gh_pr_merge_train.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
+[ -f "$_SC/functions/gh_pr_merge_train.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_pr_merge_train.sh" ] || { printf '[gh-pr:merge-train] shell-common not found under %s. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' "$_SC" >&2; return 1 2>/dev/null || exit 1; }
+export SHELL_COMMON="$_SC"
 . "$_SC/functions/gh_pr_merge_train.sh"
 GH_HOST="$TARGET_HOST" gh pr list --repo "$TARGET_REPO" --author @me --state open \
   --limit 50 --json number,updatedAt,isDraft,mergeable,mergeStateStatus,baseRefName,title,labels \
@@ -48,18 +50,16 @@ GH_HOST="$TARGET_HOST" gh pr list --repo "$TARGET_REPO" --author @me --state ope
 ```
 
 `--author @me` is not optional (D-7) — never auto-merge a colleague's PR.
-`_gh_pr_merge_train_filter_targets` is the **shared** filter (#1524): it drops
-drafts, every PR carrying the `reply-pending` label, and every PR inside the
-D-6 quiet period — the exact same function
-`shell-common/tools/custom/pr_merge_train_cron.sh` runs, so the two can never
-disagree. **Do not re-implement or paraphrase that filter here** — run it.
+`_gh_pr_merge_train_filter_targets` is the **shared** filter (#1524): it drops drafts,
+every PR carrying the `reply-pending` label, and every PR inside the D-6 quiet period —
+the exact same function `shell-common/tools/custom/pr_merge_train_cron.sh` runs, so the
+two can never disagree. **Do not re-implement or paraphrase that filter here** — run it.
 
 Sort the surviving array `CLEAN` → `BEHIND` → `UNSTABLE` → `DIRTY`, ties by
 ascending PR number (D-2). Ordering, the label, and the quiet-period rationale:
 `references/ordering.md`.
 
-**`gh pr list` failure ends the run** with an empty report — never merge
-without knowing state.
+**`gh pr list` failure ends the run** with an empty report — never merge without state.
 
 ## Step 3: Read the approval policy per base branch
 
