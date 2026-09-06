@@ -22,7 +22,10 @@
 PMV_MISSING=""
 _pmv_need() {
     case "$2" in
-    '' | '<'*'>') PMV_MISSING="${PMV_MISSING:+$PMV_MISSING, }$1" ;;
+    # Any angle bracket at all, not just a well-formed `<foo>`: a half-typed
+    # `<owner/repo` is just as unsubstituted, and no PR number, slug, branch or
+    # remote name this skill produces contains one (PR #33 review, agy).
+    '' | *'<'* | *'>'*) PMV_MISSING="${PMV_MISSING:+$PMV_MISSING, }$1" ;;
     *[!" "]*) ;;
     *) PMV_MISSING="${PMV_MISSING:+$PMV_MISSING, }$1" ;;
     esac
