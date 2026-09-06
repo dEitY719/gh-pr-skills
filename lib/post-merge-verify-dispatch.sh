@@ -75,7 +75,8 @@ PMV_BLOCK="${GH_VERIFY_ROOT:+$GH_VERIFY_ROOT/skills/post-merge-verify/references
 # documentation, not steps.
 PMV_FENCE='```'
 PMV_OK=""
-if [ -r "$PMV_BLOCK" ] && PMV_SH=$(mktemp 2>/dev/null); then
+# `mktemp` with no template is a GNU extension; BSD/macOS needs -t.
+if [ -r "$PMV_BLOCK" ] && PMV_SH=$(mktemp 2>/dev/null || mktemp -t pmv); then
     # The staged file must not outlive this run: the sourced dispatch returns
     # early on most paths and can exit outright, so cleanup is armed first and
     # cleared on success.
