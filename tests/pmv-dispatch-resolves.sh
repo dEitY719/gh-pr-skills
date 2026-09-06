@@ -93,7 +93,7 @@ fi
 # 5. The argument validator, testable now that Step 5 is a real script (#5).
 #    A placeholder, a blank and a whitespace-only value must all be named; a
 #    fully-bound call for an unregistered repo must stay byte-silent.
-out=$(IW_WATCHED_REPOS=/nonexistent/watched.json sh "$DISPATCH" 42 '<owner/repo>' '' ' ' origin 2>&1) || :
+out=$(IW_WATCHED_REPOS=/nonexistent/watched.json sh "$DISPATCH" 42 '<owner/repo' '' ' ' origin 2>&1) || :
 case "$out" in
 	'[WARN]'*TARGET_REPO*HEAD_BRANCH*BASE_BRANCH*) ;;
 	*) printf 'FAIL  validator did not name every unbound value: %s\n' "$out"; fail=1 ;;
