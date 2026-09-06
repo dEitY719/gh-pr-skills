@@ -100,7 +100,7 @@ verification on an internal PC — see
    `references/review-presets.md` — the shared prefix always requires a
    questionable-assumption critique and a closing verdict tag.
 4. Fetch `gh pr diff <N>` + PR metadata. Large diffs reuse
-   `gh-pr-approve`'s subagent delegation pattern.
+   `gh-pr:approve`'s subagent delegation pattern.
 5. Dispatch to the chosen external CLI per
    `references/ai-cli-invocation.md` — stdin gets `(prompt + diff)`.
 6. Stream the external CLI's stdout verbatim to your terminal. Unless
