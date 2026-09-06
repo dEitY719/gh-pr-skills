@@ -23,9 +23,7 @@ Gather a second-opinion review on a GitHub PR from one external AI CLI
 comment by default. **Never** submits `--approve` / `--request-changes` (that is
 `gh-pr:approve`) and **never** replies to individual review comments (that is
 `gh-pr:reply`). Every preset requires a critical stance
-(`references/review-presets.md`). Flags — `--ai <codex|agy|claude|opencode|hermes>`,
-`--review <preset>`, `--user <name>` (claude only), `--no-post-comment`,
-`--paths <path>`, and `<PR#> [remote]` — are tabled in `references/help.md`.
+(`references/review-presets.md`). Arguments and flags: `references/help.md`.
 
 ## Help
 
@@ -34,9 +32,9 @@ output it verbatim, then stop. No API calls.
 
 ## Step 1: Parse Flags + Resolve Target
 
-Delegate to `gh_pr_review_parse` (`shell-common/functions/gh_pr_review.sh`). Argument shape + KR aliases + exit
-codes: `references/parser-contract.md` — it also covers `START_TS`, `PR_NUMBER`, and binding `TARGET_REPO` +
-`TARGET_HOST` from one remote URL. Every `gh` call below then runs as
+Delegate to `gh_pr_review_parse` (`shell-common/functions/gh_pr_review.sh`, vendored at `lib/vendor/shell-common/`).
+Argument shape + KR aliases + exit codes: `references/parser-contract.md` — it also covers `START_TS`,
+`PR_NUMBER`, and binding `TARGET_REPO` + `TARGET_HOST` from one remote URL. Every `gh` call below then runs as
 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`; `--repo` alone carries no host (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
 ## Step 2: Pre-flight
@@ -66,7 +64,7 @@ path in `_gh_pr_review_build_prompt`, so a scoped run never routes through
 large-diff delegation, and a scope matching no file exits 1 rather than
 reviewing an empty diff (dEitY719/dotfiles#1616). Otherwise decide by diff size
 (`gh pr view --json additions,deletions`): `≥ 800` lines → follow
-`../../approve/references/large-diff-delegation.md`; else inline
+`../approve/references/large-diff-delegation.md`; else inline
 `gh pr diff`. Append the diff per `references/ai-cli-invocation.md` and write
 `(prompt + diff)` to `PROMPT_FILE`.
 
@@ -76,9 +74,8 @@ dispatch in the same Bash tool call. Then `rm -f "$PROMPT_FILE"`.
 
 ## Step 5: Dispatch to External CLI
 
-Delegate to `_gh_pr_review_run_ai` (`shell-common/functions/gh_pr_review.sh`).
-Invocation shapes, stdout streaming, non-zero handling:
-`references/ai-cli-invocation.md` § "Step 5 dispatch procedure".
+Delegate to `_gh_pr_review_run_ai` (same file as Step 1). Invocation shapes, stdout
+streaming, non-zero handling: `references/ai-cli-invocation.md` § "Step 5 dispatch procedure".
 
 For `--ai opencode` and `--ai hermes` only: set the Bash tool `timeout`
 parameter of that Step 4+5 call to at least `600000` (ms, 10 min). Never
@@ -87,15 +84,17 @@ dispatcher's own 540s bound can fail it cleanly (issue dEitY719/dotfiles#1506).
 
 ## Step 6: Post PR Comment (default ON)
 
-Delegate to `_gh_pr_review_build_comment_body` +
-`_gh_pr_review_post_comment` (`shell-common/functions/gh_pr_review.sh`).
-SSOT body template, posting decision tree, and token/human-h arithmetic:
-`references/post-comment.md` § "Step 6 delegation + 3-branch decision tree".
+Delegate to `_gh_pr_review_build_comment_body` + `_gh_pr_review_post_comment`. SSOT body
+template, posting decision tree, token/human-h arithmetic: `references/post-comment.md`.
 
 ## Step 7: Report
 
-Print exactly one line on success:
-`[OK] PR #<N> reviewed by <ai> (--review=<preset>) — comment: <URL or skipped>`.
+Success — two lines:
+`[OK] PR #<N> reviewed by <ai> (--review=<preset>) — comment: <URL or skipped>`
+`Next: /gh-pr:reply <N> (address the findings) or /gh-pr:approve <N>`.
+
+Failure — every Step 2 pre-flight `exit 1` prints one line first:
+`[FAIL] PR #<N> not reviewed — <reason>`.
 
 ## Constraints (full rationale: `references/constraints.md`)
 
