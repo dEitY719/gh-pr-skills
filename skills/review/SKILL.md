@@ -32,7 +32,8 @@ output it verbatim, then stop. No API calls.
 
 ## Step 1: Parse Flags + Resolve Target
 
-Delegate to `gh_pr_review_parse` (`shell-common/functions/gh_pr_review.sh`, vendored at `lib/vendor/shell-common/`).
+Delegate to `gh_pr_review_parse` (`functions/gh_pr_review.sh` — the dotfiles `shell-common` checkout takes
+precedence, the vendored `lib/vendor/shell-common/` copy is the fallback; order in `references/parser-contract.md`).
 Argument shape + KR aliases + exit codes: `references/parser-contract.md` — it also covers `START_TS`,
 `PR_NUMBER`, and binding `TARGET_REPO` + `TARGET_HOST` from one remote URL. Every `gh` call below then runs as
 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`; `--repo` alone carries no host (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
@@ -85,7 +86,8 @@ dispatcher's own 540s bound can fail it cleanly (issue dEitY719/dotfiles#1506).
 ## Step 6: Post PR Comment (default ON)
 
 Delegate to `_gh_pr_review_build_comment_body` + `_gh_pr_review_post_comment`. SSOT body
-template, posting decision tree, token/human-h arithmetic: `references/post-comment.md`.
+template, posting decision tree, token/human-h arithmetic: `references/post-comment.md`
+§ "Step 6 delegation + 3-branch decision tree".
 
 ## Step 7: Report
 
