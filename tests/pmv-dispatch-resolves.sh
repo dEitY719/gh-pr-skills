@@ -123,6 +123,42 @@ case "$step5" in
 		fail=1 ;;
 esac
 printf '[{"repo":"o/r","verify_skill":"gh-verify:merged"}]\n' > "$TMP/watched.json"
+
+#    Run the SNIPPET, not just the wrapper (PR #33 review, codex BLOCKER): the
+#    guard that decides whether the wrapper is reached at all lives in SKILL.md,
+#    so a test that only ever calls $DISPATCH cannot see it. Substitute the five
+#    placeholders exactly as the skill does and execute it.
+printf '%s' "$step5" | sed \
+	-e 's|<N>|42|g' -e 's|<owner/repo>|o/r|g' -e 's|<headRefName>|head|g' \
+	-e 's|<baseRefName>|base|g' -e 's|<remote>|origin|g' > "$TMP/step5.sh"
+#    6a. No plugin root and the repo is NOT registered: byte-silent, exit 0. A
+#        blanket [FAIL] here would spam every non-Claude merge of an unwatched
+#        repo, which is the wrapper's documented no-op case.
+if out=$(env -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
+	IW_WATCHED_REPOS=/nonexistent/watched.json sh "$TMP/step5.sh" 2>&1)
+then rc=0
+else rc=$?
+fi
+[ "$rc" -eq 0 ] && [ -z "$out" ] || {
+	printf 'FAIL  Step 5 was not silent for an unregistered repo with no plugin root (rc=%s): %s\n' \
+		"$rc" "$out"
+	fail=1
+}
+#    6b. No plugin root but the repo IS registered: loud [FAIL], still exit 0.
+if out=$(env -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
+	IW_WATCHED_REPOS="$TMP/watched.json" sh "$TMP/step5.sh" 2>&1)
+then rc=0
+else rc=$?
+fi
+[ "$rc" -eq 0 ] || {
+	printf 'FAIL  Step 5 exited %s for a registered repo with no plugin root\n' "$rc"
+	fail=1
+}
+case "$out" in
+	*'[FAIL]'*) ;;
+	*) printf 'FAIL  Step 5 was not loud for a REGISTERED repo with no plugin root: %s\n' "$out"
+		fail=1 ;;
+esac
 out=$(env -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
 	IW_WATCHED_REPOS="$TMP/watched.json" sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
 case "$out" in
