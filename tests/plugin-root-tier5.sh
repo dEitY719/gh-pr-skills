@@ -60,10 +60,15 @@ mkdir -p "$TMP/lib/vendor/shell-common/functions"
 printf '_gh_resolve_host() { printf %%s cwd-owned; }\n' \
 	> "$TMP/lib/vendor/shell-common/functions/gh_host.sh"
 
+# One binding for the tier-1 override both runs below aim away from, so the
+# message assertion cannot drift from the value that produced it.
+NOWHERE=/nonexistent
+TIER1="$NOWHERE/shell-common"
+
 # Pasted into a shell: no override, no plugin root, cwd outside the checkout.
 set +e
 err=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT -u SHELL_COMMON \
-	HOME=/nonexistent DOTFILES_ROOT=/nonexistent sh "$TMP/block.sh" 2>&1 >/dev/null)
+	HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" sh "$TMP/block.sh" 2>&1 >/dev/null)
 rc=$?
 set -e
 [ "$rc" -ne 0 ] || { printf 'FAIL  tier 5 did not stop: rc=0 for %s\n' "$SITE"; fail=1; }
@@ -71,15 +76,15 @@ case "$err" in
 	*"$TMP/lib/vendor/shell-common"*)
 		printf 'FAIL  tier 5 resolved from the cwd a PR could have planted: %s\n' "$err"
 		fail=1 ;;
-	*/nonexistent/shell-common*) ;;
-	*) printf 'FAIL  tier 5 message does not name the path it tried: %s\n' "$err"; fail=1 ;;
+	*"$TIER1"*) ;;
+	*) printf 'FAIL  tier 5 message does not name %s, the path it tried: %s\n' "$TIER1" "$err"; fail=1 ;;
 esac
 
 # Sourced instead of run: `return 1 2>/dev/null || exit 1` must not kill the
 # caller, and SHELL_COMMON must still be unset — never "/lib/vendor/shell-common".
 # shellcheck disable=SC2016  # the inner shell expands these, not this one
 sc=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT -u SHELL_COMMON \
-	HOME=/nonexistent DOTFILES_ROOT=/nonexistent \
+	HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
 	sh -c '. "$1" >/dev/null 2>&1; printf "%s" "${SHELL_COMMON-<unset>}"' \
 	sh "$TMP/block.sh")
 [ "$sc" = "<unset>" ] || {

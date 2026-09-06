@@ -7,6 +7,11 @@
 # that failure needed: the path resolves on a machine with no dotfiles checkout,
 # and the file it resolves to still holds a non-empty first `bash` fence.
 #
+# Since harness-skills#22 there is a third: with no plugin root at all the tier
+# must decline rather than fall back to $PWD. gh-pr:merge runs inside the PR
+# checkout under review, so a pull request can plant its own dispatch.sh.md and
+# have Step 5 source it — case 4 below plants exactly that and requires a miss.
+#
 #   sh tests/pmv-dispatch-resolves.sh
 set -eu
 
@@ -50,7 +55,36 @@ else
 	fail=1
 fi
 
+# 4. The negative half of the same tier (harness-skills#22). With no plugin root
+#    the guard must decline, even when the cwd genuinely holds the file a $PWD
+#    fallback would have found — that cwd is the repo under review.
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT INT TERM
+mkdir -p "$TMP/$(dirname "$VENDORED")"
+cp "$ROOT/$VENDORED" "$TMP/$VENDORED"
+
+unset CLAUDE_PLUGIN_ROOT
+PMV_BLOCK="${GH_VERIFY_ROOT:+$GH_VERIFY_ROOT/skills/post-merge-verify/references/dispatch.sh.md}"
+cd "$TMP"
+[ -r "$PMV_BLOCK" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] || PMV_BLOCK="$CLAUDE_PLUGIN_ROOT/$VENDORED"
+cd "$ROOT"
+
+case "$PMV_BLOCK" in
+	"$TMP"/*)
+		printf 'FAIL  dispatch resolved from the cwd a PR could have planted: %s\n' "$PMV_BLOCK"
+		fail=1 ;;
+	'') ;;
+	*)
+		printf 'FAIL  dispatch resolved to %s with no plugin root — expected no resolution\n' \
+			"$PMV_BLOCK"
+		fail=1 ;;
+esac
+if [ -r "$PMV_BLOCK" ]; then
+	printf 'FAIL  Step 5 would source %s with no plugin root\n' "$PMV_BLOCK"
+	fail=1
+fi
+
 if [ "$fail" -eq 0 ]; then
-	printf 'ok    post-merge dispatch resolves standalone, %s-line bash fence\n' "$n"
+	printf 'ok    post-merge dispatch resolves standalone (%s-line bash fence) and declines a planted cwd copy\n' "$n"
 fi
 exit "$fail"
