@@ -148,7 +148,7 @@ if [ -n "$VERIFY_SKILL" ]; then
     # an unclosed tab starves issue-watcher's budget (dEitY719/dotfiles#1565). Two tiers as
     # everywhere here: GH_VERIFY_ROOT's live gh-verify, else the vendored copy.
     PMV_BLOCK="${GH_VERIFY_ROOT:+$GH_VERIFY_ROOT/skills/post-merge-verify/references/dispatch.sh.md}"
-    [ -r "$PMV_BLOCK" ] || PMV_BLOCK="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md"
+    [ -r "$PMV_BLOCK" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] || PMV_BLOCK="$CLAUDE_PLUGIN_ROOT/lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md"
     # The fence marker is built with printf, never typed, so this block can sit
     # inside a fenced block of its own without closing it. Only the FIRST bash
     # fence is taken — the file's later snippets are documentation, not steps.
