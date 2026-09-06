@@ -94,8 +94,11 @@ positionals, and every failure mode are in `references/post-merge-verify.md`.
 if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then                                            # tier 5
     sh "$CLAUDE_PLUGIN_ROOT/lib/post-merge-verify-dispatch.sh" \
         <N> <owner/repo> <headRefName> <baseRefName> <remote>
-else
-    printf '[FAIL] gh-pr:merge: CLAUDE_PLUGIN_ROOT is unset, so the post-merge verification gate did NOT run. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first, then run /gh-verify:post-merge-verify <N> by hand.\n' >&2
+elif command -v jq >/dev/null 2>&1 && jq -e --arg r <owner/repo> \
+    '(if type == "array" then . else (.repos // []) end) | any(.repo == $r)' \
+    "${IW_WATCHED_REPOS:-$HOME/.agent-factory/avatars/issue-watcher/watched-repos.json}" \
+    >/dev/null 2>&1; then
+    printf '[FAIL] gh-pr:merge: CLAUDE_PLUGIN_ROOT is unset, so the post-merge verification gate did NOT run for this REGISTERED repo. The wrapper ships with the plugin, so GH_VERIFY_ROOT alone cannot reach it: export CLAUDE_PLUGIN_ROOT=<plugin dir> first, then run /gh-verify:post-merge-verify <N> by hand.\n' >&2
 fi
 ```
 
