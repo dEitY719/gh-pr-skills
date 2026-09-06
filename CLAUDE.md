@@ -202,9 +202,11 @@ repo still need from dotfiles" answer stays in one place:
    read through the same two-tier idiom as item 2, with `GH_VERIFY_ROOT` as the
    first tier. Since #5 the staging lives in `lib/post-merge-verify-dispatch.sh`
    — Step 5 calls that script with five positionals instead of pasting an
-   80-line block, so the argument validation is testable. For a repo that IS in the watched-repos registry, a dispatch
-   that will not stage or will not source is now a loud `[FAIL]`, not a
-   `[WARN]`: it is a broken install, not an opt-out. An unregistered repo stays
+   80-line block, so the argument validation is testable, and the step fails
+   loudly rather than silently when `CLAUDE_PLUGIN_ROOT` is unset. For a repo
+   that IS in the watched-repos registry, a dispatch that will not stage or
+   will not source is now a loud `[FAIL]`, not a `[WARN]`: it is a broken
+   install, not an opt-out. An unregistered repo stays
    byte-silent, as designed. `tests/pmv-dispatch-resolves.sh` is the regression
    guard — run `sh tests/pmv-dispatch-resolves.sh` after touching either side of
    that path pair. CI shellchecks it but does not execute it: `validate.yml`

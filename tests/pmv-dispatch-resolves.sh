@@ -101,7 +101,23 @@ esac
 out=$(IW_WATCHED_REPOS=/nonexistent/watched.json sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
 [ -z "$out" ] || { printf 'FAIL  unregistered repo was not silent: %s\n' "$out"; fail=1; }
 
+# 6. The non-Claude harness path (PR #33 review, codex BLOCKER). With no plugin
+#    root the gate must stay LOUD for a registered repo, never degrade to a
+#    silent skip — both halves: Step 5's own guard, and the script's [FAIL]
+#    should the script be reached some other way.
+grep -qF 'CLAUDE_PLUGIN_ROOT is unset' "$ROOT/skills/merge/SKILL.md" || {
+	printf 'FAIL  Step 5 no longer fails loudly when CLAUDE_PLUGIN_ROOT is unset\n'
+	fail=1
+}
+printf '[{"repo":"o/r","verify_skill":"gh-verify:merged"}]\n' > "$TMP/watched.json"
+out=$(env -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
+	IW_WATCHED_REPOS="$TMP/watched.json" sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
+case "$out" in
+	'[FAIL]'*) ;;
+	*) printf 'FAIL  registered repo with no plugin root was not loud: %s\n' "$out"; fail=1 ;;
+esac
+
 if [ "$fail" -eq 0 ]; then
-	printf 'ok    post-merge dispatch resolves standalone (%s-line bash fence), declines a planted cwd copy, and validates its five arguments\n' "$n"
+	printf 'ok    post-merge dispatch resolves standalone (%s-line bash fence), declines a planted cwd copy, validates its five arguments, and stays loud with no plugin root\n' "$n"
 fi
 exit "$fail"
