@@ -91,12 +91,12 @@ no-op for any repo outside the issue-watcher registry; contract, the five
 positionals, and every failure mode are in `references/post-merge-verify.md`.
 
 ```bash
-[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                                # tier 5
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then                                            # tier 5
+    sh "$CLAUDE_PLUGIN_ROOT/lib/post-merge-verify-dispatch.sh" \
+        <N> <owner/repo> <headRefName> <baseRefName> <remote>
+else
     printf '[FAIL] gh-pr:merge: CLAUDE_PLUGIN_ROOT is unset, so the post-merge verification gate did NOT run. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first, then run /gh-verify:post-merge-verify <N> by hand.\n' >&2
-    return 1 2>/dev/null || exit 1
-}
-sh "$CLAUDE_PLUGIN_ROOT/lib/post-merge-verify-dispatch.sh" \
-    <N> <owner/repo> <headRefName> <baseRefName> <remote>
+fi
 ```
 
 ## Constraints

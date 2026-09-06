@@ -209,9 +209,13 @@ repo still need from dotfiles" answer stays in one place:
    install, not an opt-out. An unregistered repo stays
    byte-silent, as designed. `tests/pmv-dispatch-resolves.sh` is the regression
    guard — run `sh tests/pmv-dispatch-resolves.sh` after touching either side of
-   that path pair. CI shellchecks it but does not execute it: `validate.yml`
-   owns no CI logic of its own, so a test *runner* has to land in
-   `harness-skills`' reusable `skill-check.yml` before any repo here gets one.
+   that path pair. CI now executes it: `validate.yml`'s repo-local `tests` job
+   runs every `tests/*.sh`, on the same footing as `harness-skills`'
+   `plugin-root-selfcheck` (PR #33 review, codex BLOCKER — before it, the
+   guards were shellchecked but never run, so the logic they cover could
+   regress unchecked). That job is the interim: a shared runner still belongs
+   in `harness-skills`' reusable `skill-check.yml` so all fifteen repos get one,
+   and this job should fold into it when that lands.
 4. **Two dotfiles files are still cited, deliberately un-vendored.**
    `shell-common/tools/custom/pr_merge_train_cron.sh` (`merge-train`'s
    unattended trigger) and `shell-common/functions/gh_audit_builtin_workflows.sh`

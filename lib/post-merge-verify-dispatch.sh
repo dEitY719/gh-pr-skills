@@ -89,8 +89,17 @@ if [ -r "$PMV_BLOCK" ] && PMV_SH=$(mktemp 2>/dev/null || mktemp -t pmv); then
         "$PMV_BLOCK" >"$PMV_SH"
     # An empty extraction is the same bug masked (right file, wrong fence) and
     # an unparseable body a third — PMV_OK is earned, never assumed.
+    #
+    # Sourced in a SUBSHELL: the dispatch block is written to be sourced by
+    # Step 5 itself and calls `exit` on several of its own early-return paths.
+    # Sourced flat, that `exit` terminates THIS wrapper — nonzero, past the
+    # `exit 0` below — breaking the "always exits 0" contract at the one moment
+    # it matters, after the merge has already landed (PR #33 review, codex
+    # BLOCKER). A subshell inherits every PR_NUMBER/TARGET_REPO/... value the
+    # block reads by name, and the block's side effects are all external (gh
+    # calls), so nothing is lost by containing it.
     # shellcheck source=/dev/null
-    if [ -s "$PMV_SH" ]; then . "$PMV_SH" && PMV_OK=1; fi
+    if [ -s "$PMV_SH" ]; then ( . "$PMV_SH" ) && PMV_OK=1; fi
     rm -f "$PMV_SH"
     trap - EXIT INT TERM
 fi

@@ -109,12 +109,56 @@ grep -qF 'CLAUDE_PLUGIN_ROOT is unset' "$ROOT/skills/merge/SKILL.md" || {
 	printf 'FAIL  Step 5 no longer fails loudly when CLAUDE_PLUGIN_ROOT is unset\n'
 	fail=1
 }
+#    Loud, but never FAILING: Step 5 runs after the merge has already landed,
+#    so a non-Claude harness must not see successful housekeeping report a
+#    nonzero status (PR #33 review, codex BLOCKER). Extract Step 5's bash fence
+#    and require it to carry no nonzero `return`/`exit`.
+step5=$(awk '/^```bash$/ { b = 1; buf = ""; next }
+	/^```$/ { if (b && buf ~ /post-merge-verify-dispatch\.sh/) { printf "%s", buf; exit } b = 0; next }
+	b { buf = buf $0 "\n" }' "$ROOT/skills/merge/SKILL.md")
+case "$step5" in
+	'') printf 'FAIL  could not find Step 5 dispatch block in skills/merge/SKILL.md\n'; fail=1 ;;
+	*'return 1'* | *'exit 1'*)
+		printf 'FAIL  Step 5 exits nonzero after a completed merge:\n%s\n' "$step5"
+		fail=1 ;;
+esac
 printf '[{"repo":"o/r","verify_skill":"gh-verify:merged"}]\n' > "$TMP/watched.json"
 out=$(env -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
 	IW_WATCHED_REPOS="$TMP/watched.json" sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
 case "$out" in
 	'[FAIL]'*) ;;
 	*) printf 'FAIL  registered repo with no plugin root was not loud: %s\n' "$out"; fail=1 ;;
+esac
+
+# 7. The wrapper always exits 0, even when the dispatch it sources calls `exit`
+#    (PR #33 review, codex BLOCKER). The real dispatch block returns early and
+#    can exit outright; sourced flat that would terminate the wrapper nonzero,
+#    after the merge has already landed. Plant a block that exits 3 and require
+#    both a zero status and the [FAIL] line — the exit must be contained, not
+#    silently treated as a successful source.
+mkdir -p "$TMP/root/lib/vendor/gh-verify/post-merge-verify"
+cat > "$TMP/root/$VENDORED" <<'PLANT'
+```bash
+printf 'planted dispatch ran\n'
+exit 3
+```
+PLANT
+if out=$(env -u GH_VERIFY_ROOT CLAUDE_PLUGIN_ROOT="$TMP/root" \
+	IW_WATCHED_REPOS="$TMP/watched.json" sh "$DISPATCH" 42 o/r head base origin 2>&1)
+then rc=0
+else rc=$?
+fi
+[ "$rc" -eq 0 ] || {
+	printf 'FAIL  a dispatch that exited 3 propagated out of the wrapper (rc=%s)\n' "$rc"
+	fail=1
+}
+case "$out" in
+	*'planted dispatch ran'*) ;;
+	*) printf 'FAIL  planted dispatch never ran: %s\n' "$out"; fail=1 ;;
+esac
+case "$out" in
+	*'[FAIL]'*) ;;
+	*) printf 'FAIL  a dispatch that exited nonzero was reported as a good source: %s\n' "$out"; fail=1 ;;
 esac
 
 if [ "$fail" -eq 0 ]; then
