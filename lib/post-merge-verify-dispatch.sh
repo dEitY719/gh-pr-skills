@@ -26,7 +26,11 @@ _pmv_need() {
     # `<owner/repo` is just as unsubstituted, and no PR number, slug, branch or
     # remote name this skill produces contains one (PR #33 review, agy).
     '' | *'<'* | *'>'*) PMV_MISSING="${PMV_MISSING:+$PMV_MISSING, }$1" ;;
-    *[!" "]*) ;;
+    # `[![:space:]]`, not `[!" "]`: a tab- or newline-only argument contains a
+    # non-SPACE character and so passed the old test as "bound", which is the
+    # same silent half-bound dispatch the space case exists to stop (PR #33
+    # review, codex BLOCKER; agy FOLLOW-UP).
+    *[![:space:]]*) ;;
     *) PMV_MISSING="${PMV_MISSING:+$PMV_MISSING, }$1" ;;
     esac
 }
@@ -88,7 +92,13 @@ if [ -r "$PMV_BLOCK" ] && PMV_SH=$(mktemp 2>/dev/null || mktemp -t pmv); then
         '$0 == f "bash" && !b { b = 1; next } $0 == f && b { exit } b' \
         "$PMV_BLOCK" >"$PMV_SH"
     # An empty extraction is the same bug masked (right file, wrong fence) and
-    # an unparseable body a third — PMV_OK is earned, never assumed.
+    # an unparseable body a third — PMV_OK is earned, never assumed. It is
+    # earned by STAGING, though, not by the dispatch's own exit status: PMV_OK
+    # gates the "[FAIL] broken install" line below, and a dispatch that ran but
+    # returned nonzero for its own reasons is the opposite of a broken install
+    # (PR #33 review, agy BLOCKER). `sh -n` is what separates the two — a body
+    # that will not parse is the "would not source" case the [FAIL] means; a
+    # body that parses will source, whatever it then returns.
     #
     # Sourced in a SUBSHELL: the dispatch block is written to be sourced by
     # Step 5 itself and calls `exit` on several of its own early-return paths.
@@ -98,8 +108,12 @@ if [ -r "$PMV_BLOCK" ] && PMV_SH=$(mktemp 2>/dev/null || mktemp -t pmv); then
     # BLOCKER). A subshell inherits every PR_NUMBER/TARGET_REPO/... value the
     # block reads by name, and the block's side effects are all external (gh
     # calls), so nothing is lost by containing it.
-    # shellcheck source=/dev/null
-    if [ -s "$PMV_SH" ]; then ( . "$PMV_SH" ) && PMV_OK=1; fi
+    if [ -s "$PMV_SH" ] && sh -n "$PMV_SH" 2>/dev/null; then
+        PMV_OK=1
+        # shellcheck source=/dev/null
+        ( . "$PMV_SH" ) || printf '[WARN] gh-pr:merge: post-merge verification dispatched for %s but returned nonzero. The gate is soft-fail and the merge already landed, so nothing was undone; re-run /gh-verify:post-merge-verify %s by hand if the housekeeping matters.\n' \
+            "$TARGET_REPO" "$PR_NUMBER"
+    fi
     rm -f "$PMV_SH"
     trap - EXIT INT TERM
 fi

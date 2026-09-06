@@ -21,6 +21,7 @@ VENDORED=lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md
 DISPATCH="$ROOT/lib/post-merge-verify-dispatch.sh"
 fail=0
 n=0
+TMP0=$(mktemp -d)
 
 # 1. The dispatch script still names the vendored path as its second tier, and
 #    Step 5 still calls the script. Renaming one side only is exactly how this
@@ -56,6 +57,17 @@ if [ -r "$PMV_BLOCK" ]; then
 			"$PMV_BLOCK" "$n"
 		fail=1
 	}
+	#    The wrapper gates PMV_OK on `sh -n` parsing the extracted body, and the
+	#    wrapper itself is /bin/sh. A bash-only construct landing in the vendored
+	#    block would therefore turn every merge of a registered repo into the
+	#    broken-install [FAIL] — silently, since the block is only ever exercised
+	#    on a real merge. Assert the real body parses under sh.
+	awk -v f="$F" '$0 == f "bash" && !b { b = 1; next } $0 == f && b { exit } b' \
+		"$PMV_BLOCK" > "$TMP0/real.sh"
+	sh -n "$TMP0/real.sh" 2>/dev/null || {
+		printf 'FAIL  the vendored dispatch body does not parse under /bin/sh, so the gate would always report a broken install\n'
+		fail=1
+	}
 else
 	printf 'FAIL  dispatch unreadable on a standalone install: %s\n' "$PMV_BLOCK"
 	fail=1
@@ -65,7 +77,7 @@ fi
 #    the guard must decline, even when the cwd genuinely holds the file a $PWD
 #    fallback would have found — that cwd is the repo under review.
 TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT INT TERM
+trap 'rm -rf "$TMP" "$TMP0"' EXIT INT TERM
 mkdir -p "$TMP/$(dirname "$VENDORED")"
 cp "$ROOT/$VENDORED" "$TMP/$VENDORED"
 
@@ -100,6 +112,14 @@ case "$out" in
 esac
 out=$(IW_WATCHED_REPOS=/nonexistent/watched.json sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
 [ -z "$out" ] || { printf 'FAIL  unregistered repo was not silent: %s\n' "$out"; fail=1; }
+#    Whitespace means every whitespace, not just SPACE: a tab- or newline-only
+#    argument is exactly as unbound (PR #33 review, codex BLOCKER).
+out=$(IW_WATCHED_REPOS=/nonexistent/watched.json sh "$DISPATCH" \
+	42 "$(printf '\t')" "$(printf '\n')" base origin 2>&1) || :
+case "$out" in
+	'[WARN]'*TARGET_REPO*HEAD_BRANCH*) ;;
+	*) printf 'FAIL  tab/newline-only arguments were treated as bound: %s\n' "$out"; fail=1 ;;
+esac
 
 # 6. The non-Claude harness path (PR #33 review, codex BLOCKER). With no plugin
 #    root the gate must stay LOUD for a registered repo, never degrade to a
@@ -170,8 +190,12 @@ esac
 #    (PR #33 review, codex BLOCKER). The real dispatch block returns early and
 #    can exit outright; sourced flat that would terminate the wrapper nonzero,
 #    after the merge has already landed. Plant a block that exits 3 and require
-#    both a zero status and the [FAIL] line — the exit must be contained, not
-#    silently treated as a successful source.
+#    a zero status from the wrapper — the exit must be contained.
+#
+#    It must ALSO not be reported as a broken install (PR #33 review, agy
+#    BLOCKER): the dispatch demonstrably ran, so [FAIL] — which means "did not
+#    stage or would not source" — would be a lie. A nonzero return earns its own
+#    [WARN] instead.
 mkdir -p "$TMP/root/lib/vendor/gh-verify/post-merge-verify"
 cat > "$TMP/root/$VENDORED" <<'PLANT'
 ```bash
@@ -193,8 +217,36 @@ case "$out" in
 	*) printf 'FAIL  planted dispatch never ran: %s\n' "$out"; fail=1 ;;
 esac
 case "$out" in
+	*'[FAIL]'*)
+		printf 'FAIL  a dispatch that RAN but returned nonzero was called a broken install: %s\n' "$out"
+		fail=1 ;;
+	*'[WARN]'*) ;;
+	*) printf 'FAIL  a dispatch returning nonzero was silently treated as success: %s\n' "$out"
+		fail=1 ;;
+esac
+
+# 8. The other half of that split: a body that will not PARSE is the genuine
+#    "would not source" case, and must still be the loud [FAIL] — otherwise the
+#    fix for agy's BLOCKER would have swallowed the broken install it exists to
+#    catch.
+cat > "$TMP/root/$VENDORED" <<'PLANT'
+```bash
+printf 'unterminated
+```
+PLANT
+if out=$(env -u GH_VERIFY_ROOT CLAUDE_PLUGIN_ROOT="$TMP/root" \
+	IW_WATCHED_REPOS="$TMP/watched.json" sh "$DISPATCH" 42 o/r head base origin 2>&1)
+then rc=0
+else rc=$?
+fi
+[ "$rc" -eq 0 ] || {
+	printf 'FAIL  an unparseable dispatch propagated out of the wrapper (rc=%s)\n' "$rc"
+	fail=1
+}
+case "$out" in
 	*'[FAIL]'*) ;;
-	*) printf 'FAIL  a dispatch that exited nonzero was reported as a good source: %s\n' "$out"; fail=1 ;;
+	*) printf 'FAIL  an unparseable dispatch was not reported as a broken install: %s\n' "$out"
+		fail=1 ;;
 esac
 
 if [ "$fail" -eq 0 ]; then
