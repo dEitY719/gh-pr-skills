@@ -18,7 +18,8 @@ the merge report — the helper logs to stderr and returns 0.
 # helper-fallback NF-1 (dEitY719/dotfiles#644): silent-skip when helper missing.
 # Defense-in-depth (dEitY719/dotfiles#724): also detect "sourced but function undefined".
 _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
-[ -f "$_HELPER" ] || _HELPER="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common/functions/gh_project_status.sh"
+[ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
+    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh"
 if [ -r "$_HELPER" ]; then
     export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"
     . "$_HELPER"

@@ -27,7 +27,8 @@ That host comes from the `[remote]` positional's URL (`$REMOTE`, default
 # `command not found` (rc 127) gets absorbed by `|| true`, and the board
 # sync silently no-ops — exactly the failure surfaced in dEitY719/dotfiles#724.
 _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
-[ -f "$_HELPER" ] || _HELPER="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common/functions/gh_project_status.sh"
+[ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
+    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh"
 if [ -r "$_HELPER" ]; then
     export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"
     . "$_HELPER"

@@ -24,14 +24,22 @@ re-resolve them.
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
-[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common"
-[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] || {
-    printf '[gh-pr:merge] shell-common not found under %s. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+if [ ! -f "$_SC/functions/gh_pr_edit_safe.sh" ]; then
+    [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
+        printf '[gh-pr:merge] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+            "$_SC" >&2
+        return 1 2>/dev/null || exit 1
+    }
+    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
+fi
+unset -f _gh_pr_edit_safe_label 2>/dev/null || :
+[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] && . "$_SC/functions/gh_pr_edit_safe.sh"
+command -v _gh_pr_edit_safe_label >/dev/null 2>&1 || {                               # tier 5
+    printf '[gh-pr:merge] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
         "$_SC" >&2
     return 1 2>/dev/null || exit 1
 }
 export SHELL_COMMON="$_SC"
-. "$_SC/functions/gh_pr_edit_safe.sh"
 
 if _rpc_err=$(_gh_pr_drop_label "$PR_NUMBER" review-passed \
         "$TARGET_REPO" "$TARGET_HOST" 2>&1); then
