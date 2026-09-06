@@ -34,5 +34,8 @@ was deleted rather than left as dead policy).
   guard (unchanged by dEitY719/dotfiles#1513).
 - `shell-common/functions/gh_audit_builtin_workflows.sh` — audits that
   the "Pull request linked to issue" builtin is OFF, so the guard isn't
-  invalidated by an async overwrite.
+  invalidated by an async overwrite. **Author-machine only**: it is not among
+  the functions vendored under `lib/vendor/shell-common/`, so a marketplace
+  install cannot reach it. Nothing here sources or executes it — it is a
+  manual pointer (CLAUDE.md → "Known migration debt" item 4).
 - `docs/.ssot/github-project-board.md` — column semantics SSOT.

@@ -166,10 +166,12 @@ and item 2 is mitigated but not gone. Item 3 is settled, item 4 is a standing
 decision, and item 5 is owned upstream — all kept here so the "what does this
 repo still need from dotfiles" answer stays in one place:
 
-1. **Four `SKILL.md` files exceed the 100-line progressive-disclosure limit**
-   (`merge` 197, `merge-train` 148, `reply` 143, `review` 110). CI is pinned to
+1. **`SKILL.md` files exceed the 100-line progressive-disclosure limit** —
+   `merge-train` 152, `reply` 146, `merge` 116, `review` 110. CI is pinned to
    197 to admit them. The fix is to extract detail into each skill's
-   `references/`, not to raise the pin.
+   `references/`, not to raise the pin. `merge` came down from 197 (#5) by
+   moving its Step 5 dispatch into `lib/post-merge-verify-dispatch.sh`; drop
+   the pin to the new ceiling once the remaining three follow.
 2. **Several skills source dotfiles' `shell-common/functions/*.sh`** —
    `gh_project_status.sh`, `gh_pr_review.sh`, `gh_host.sh`,
    `gh_pr_merge_train.sh`, `gh_pr_edit_safe.sh`, and others. #3 / PR #4 made
@@ -198,7 +200,9 @@ repo still need from dotfiles" answer stays in one place:
    `lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md` (SSOT:
    `gh-verify-skills` `skills/post-merge-verify/references/dispatch.sh.md`) and
    read through the same two-tier idiom as item 2, with `GH_VERIFY_ROOT` as the
-   first tier. For a repo that IS in the watched-repos registry, a dispatch
+   first tier. Since #5 the staging lives in `lib/post-merge-verify-dispatch.sh`
+   — Step 5 calls that script with five positionals instead of pasting an
+   80-line block, so the argument validation is testable. For a repo that IS in the watched-repos registry, a dispatch
    that will not stage or will not source is now a loud `[FAIL]`, not a
    `[WARN]`: it is a broken install, not an opt-out. An unregistered repo stays
    byte-silent, as designed. `tests/pmv-dispatch-resolves.sh` is the regression

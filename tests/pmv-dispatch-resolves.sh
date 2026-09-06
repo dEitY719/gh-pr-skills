@@ -1,30 +1,36 @@
 #!/bin/sh
 # Regression guard for #13.
 #
-# gh-pr:merge Step 5 sources its post-merge verification dispatch from a file it
-# resolves at run time. When that path went stale the `[ -r ]` guard skipped a
-# 394-line gate on every merge and said nothing. This asserts the two things
+# lib/post-merge-verify-dispatch.sh (run by gh-pr:merge Step 5) sources its
+# post-merge verification dispatch from a file it resolves at run time. When
+# that path went stale the `[ -r ]` guard skipped a 394-line gate on every merge
+# and said nothing. This asserts the two things
 # that failure needed: the path resolves on a machine with no dotfiles checkout,
 # and the file it resolves to still holds a non-empty first `bash` fence.
 #
 # Since harness-skills#22 there is a third: with no plugin root at all the tier
 # must decline rather than fall back to $PWD. gh-pr:merge runs inside the PR
 # checkout under review, so a pull request can plant its own dispatch.sh.md and
-# have Step 5 source it — case 4 below plants exactly that and requires a miss.
+# have the script source it — case 4 below plants exactly that and requires a miss.
 #
 #   sh tests/pmv-dispatch-resolves.sh
 set -eu
 
 ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 VENDORED=lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md
-SKILL="$ROOT/skills/merge/SKILL.md"
+DISPATCH="$ROOT/lib/post-merge-verify-dispatch.sh"
 fail=0
 n=0
 
-# 1. Step 5 still names the vendored path as its second tier. Renaming one side
-#    only is exactly how this rotted the first time.
-grep -qF "\$CLAUDE_PLUGIN_ROOT/$VENDORED" "$SKILL" || {
-	printf 'FAIL  %s no longer points at $CLAUDE_PLUGIN_ROOT/%s\n' "$SKILL" "$VENDORED"
+# 1. The dispatch script still names the vendored path as its second tier, and
+#    Step 5 still calls the script. Renaming one side only is exactly how this
+#    rotted the first time.
+grep -qF "\$CLAUDE_PLUGIN_ROOT/$VENDORED" "$DISPATCH" || {
+	printf 'FAIL  %s no longer points at $CLAUDE_PLUGIN_ROOT/%s\n' "$DISPATCH" "$VENDORED"
+	fail=1
+}
+grep -qF 'lib/post-merge-verify-dispatch.sh' "$ROOT/skills/merge/SKILL.md" || {
+	printf 'FAIL  skills/merge/SKILL.md Step 5 no longer calls lib/post-merge-verify-dispatch.sh\n'
 	fail=1
 }
 
@@ -80,11 +86,22 @@ case "$PMV_BLOCK" in
 		fail=1 ;;
 esac
 if [ -r "$PMV_BLOCK" ]; then
-	printf 'FAIL  Step 5 would source %s with no plugin root\n' "$PMV_BLOCK"
+	printf 'FAIL  the dispatch script would source %s with no plugin root\n' "$PMV_BLOCK"
 	fail=1
 fi
 
+# 5. The argument validator, testable now that Step 5 is a real script (#5).
+#    A placeholder, a blank and a whitespace-only value must all be named; a
+#    fully-bound call for an unregistered repo must stay byte-silent.
+out=$(IW_WATCHED_REPOS=/nonexistent/watched.json sh "$DISPATCH" 42 '<owner/repo>' '' ' ' origin 2>&1) || :
+case "$out" in
+	'[WARN]'*TARGET_REPO*HEAD_BRANCH*BASE_BRANCH*) ;;
+	*) printf 'FAIL  validator did not name every unbound value: %s\n' "$out"; fail=1 ;;
+esac
+out=$(IW_WATCHED_REPOS=/nonexistent/watched.json sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
+[ -z "$out" ] || { printf 'FAIL  unregistered repo was not silent: %s\n' "$out"; fail=1; }
+
 if [ "$fail" -eq 0 ]; then
-	printf 'ok    post-merge dispatch resolves standalone (%s-line bash fence) and declines a planted cwd copy\n' "$n"
+	printf 'ok    post-merge dispatch resolves standalone (%s-line bash fence), declines a planted cwd copy, and validates its five arguments\n' "$n"
 fi
 exit "$fail"
