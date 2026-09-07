@@ -67,39 +67,26 @@ ascending PR number (D-2). Ordering, the label, and the quiet-period rationale:
 
 ## Step 3: Read the approval policy per base branch
 
-Read `required_approving_review_count` from **both** rulesets and classic
-branch protection per `references/approval-gate.md`, **once per distinct
-`baseRefName`**, cached per base — two calls per base, never per PR. Either
-source requiring `>= 1` → gate on, unapproved PRs `[SKIPPED]`; both reporting
-no policy → off (D-5). Classify by **HTTP status, not exit code**: a `403`/`404`
-is "no policy", not a failed lookup, and only a genuinely undetermined answer
-stays fail-closed (dEitY719/dotfiles#1519). Even with the gate off, a non-empty non-`APPROVED`
-`reviewDecision` is `[SKIPPED]` before `gh-pr:merge` is called — it would
-refuse, and NF-2 forbids clearing that.
+Apply the decision table in `references/approval-gate.md`: read
+`required_approving_review_count` from **both** rulesets and classic branch
+protection, once per distinct `baseRefName`, cached per base — two calls per
+base, never per PR. Classify each source by HTTP status, not exit code; only
+a genuinely undetermined answer stays fail-closed. Even with the gate off, a
+non-empty non-`APPROVED` `reviewDecision` is `[SKIPPED]` before `gh-pr:merge`
+is called — it would refuse, and NF-2 forbids clearing that.
 
 ## Step 3.5: Apply the review verdict gate
 
 Over the PRs Step 2 let through — **not** a new API call, the `labels` field
-is already in hand — run the decision table in `references/review-verdict-gate.md`:
-`review-blocked` (even alongside a stale `review-passed`) is
-`[SKIPPED] review-blocked — reviewer verdict is blocking`; neither label is
-`[SKIPPED] review not verified — no review-passed label`; `review-passed`
-alone stays in the queue. Ask with
+is already in hand — apply the decision table in
+`references/review-verdict-gate.md` with
 `_gh_pr_merge_train_has_review_blocked_label` /
-`_gh_pr_merge_train_has_review_passed_label` (same file Step 2 sourced) — **do
-not** re-derive the `jq` here, and **never** parse a review comment body: the
-verdict is decided by `gh-verify:review-all`, which is the labels' only writer.
-
-**Absence is "not verified", not "passed"** — that is the whole gate (dEitY719/dotfiles#1527 /
-dEitY719/dotfiles#1564). Neither outcome spends an F-5 attempt and neither is ever `[FAILED]`.
-There is deliberately no staleness window here, unlike `reply-pending`'s.
-
-This pass is label-presence only, on purpose — it costs no API call. It
-cannot yet tell a `review-passed` label issued for the current head apart
-from a stale one; that sha-freshness check (dEitY719/dotfiles#1601) happens once per PR, right
-before it is actually acted on, at Step 4's F-3 re-query
-(`references/routing-table.md`) — the same point that already re-derives
-everything else Step 2/3.5 could not have seen coming.
+`_gh_pr_merge_train_has_review_passed_label` (same file Step 2 sourced).
+Label presence only: absence is "not verified", not "passed". **Never**
+re-derive the `jq` or parse a review comment body — `gh-verify:review-all` is
+the labels' sole writer. The sha-freshness check against a stale
+`review-passed` happens later, at Step 4's F-3 re-query
+(`references/routing-table.md`).
 
 ## Step 4: Run the train — one PR at a time
 
@@ -110,14 +97,11 @@ invalidated everything behind it), route through the D-1 table
 Gate off with an empty `reviewDecision` first runs one
 `Skill(gh-pr:approve, "<N> <remote> --self-record")` and reads the board back as
 its verdict — no approval, no merge.
-After a **successful** merge, close that PR's implementation tab when its herdr
-agent is `idle` — the block in `references/train-loop.md` → "Closing the merged
-PR's implementation tab". A merged PR whose tab stays open keeps counting toward
-issue-watcher's `_IW_MAX_PER_REPO` budget and starves the pipeline (dEitY719/dotfiles#1565).
-The `BEHIND` / `DIRTY` rows rebase inside a **detached scratch worktree** the
-train creates and unconditionally removes per attempt (dEitY719/dotfiles#1493). Attempts are
-capped at 3 per PR (F-5); a failure skips that PR and the train continues
-(F-6). Never process two PRs concurrently.
+After a **successful** merge, close that PR's implementation tab per
+`references/train-loop.md` → "Closing the merged PR's implementation tab" —
+a merged PR whose tab stays open starves issue-watcher's pipeline budget.
+Attempts are capped at 3 per PR (F-5); a failure skips that PR and the train
+continues (F-6). Never process two PRs concurrently.
 
 ## Step 5: Report
 
