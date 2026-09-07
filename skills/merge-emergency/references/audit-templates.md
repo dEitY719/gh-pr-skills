@@ -175,3 +175,30 @@ Do NOT add labels/milestones unless `GH_HOST="$TARGET_HOST" gh label list --repo
 confirms an `incident` label already exists; if it does, apply it.
 
 Capture the issue URL + number from the command output for Step 7's report.
+
+## Step 7 — refusal report shapes
+
+Every stop merges nothing and prints exactly one line. Lead with the verdict
+token so a scanning reader can tell a refusal from the `[OK]` report without
+reading the rest — the same split `skills/merge/references/strategy-selection.md`
+uses:
+
+```
+[FAIL] PR #<N> not merged — reason too vague ("<reason>"); cite an incident ID or concrete user impact.
+[FAIL] PR #<N> not merged — PR is <state>; emergency merges only an OPEN, non-draft PR.
+[FAIL] PR #<N> not merged — branch has conflicts; resolve with /gh-resolve:conflict first.
+[FAIL] PR #<N> not merged — required check <name> is <status>; emergency bypasses approval, not CI.
+[FAIL] PR #<N> not merged — confirmation declined.
+[FAIL] PR #<N> not merged — no admin rights on <repo>; ask an admin rather than retrying with --merge/--rebase.
+```
+
+The Step 2 soft warnings (base `BEHIND`, no approving review) are **not**
+refusals: they print `[WARN] <what>` and the run continues to Step 3, where the
+user sees them in the confirmation prompt.
+
+A failure *after* the merge lands is not a `[FAIL]` either — the merge is done
+and the audit tail is what is incomplete. Step 5's incident issue is
+non-negotiable, so a failure there prints
+`[FAIL] PR #<N> merged, but the incident issue could not be filed — file it manually: <title>`
+and the run stops there; Step 6's board sync is soft and prints
+`[WARN] board sync failed` inside the otherwise normal `[OK]` report.
