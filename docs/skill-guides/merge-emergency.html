@@ -349,8 +349,11 @@
       </li>
       <li data-n="7">
         <h4>보고</h4>
-        <p>머지 SHA, 감사 코멘트 URL, incident 이슈 번호와 URL, 사유, 그리고
-        <code>[WARN] Add retro notes to incident issue within 72h.</code></p>
+        <p><code>[OK] Emergency-merged PR #&lt;N&gt;</code> 판정 줄로 시작해 머지 SHA, 감사 코멘트 URL,
+        incident 이슈 번호와 URL, 사유, 그리고
+        <code>[WARN] Add retro notes to incident issue within 72h.</code> 가 이어진다.
+        거부는 <code>[FAIL] PR #&lt;N&gt; not merged — &lt;이유&gt;</code> 한 줄로만 보고하며 아무것도
+        머지하지 않는다 — 정지별 문구는 <code>references/audit-templates.md</code>.</p>
       </li>
     </ol>
 

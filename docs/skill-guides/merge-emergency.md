@@ -75,8 +75,11 @@ SKILL.md 의 Step 1~7 요약.
    ai-metrics 푸터는 이슈 본문에 필수로 붙인다(soft-fail 없음, `GH_DISABLE_AI_METRICS=1` 은 존중).
 6. **Step 6 — 프로젝트 보드 동기화.** `references/project-board-sync.md` 의 헬퍼로 카드를
    `Done` 으로 옮긴다. 보드가 없거나 동기화가 실패해도 감사 보고를 막지 않는다.
-7. **Step 7 — 보고.** 머지 SHA, 감사 코멘트 URL, incident 이슈 번호/URL, 사유,
-   그리고 `[WARN] Add retro notes to incident issue within 72h.`
+7. **Step 7 — 보고.** `[OK] Emergency-merged PR #<N>` 판정 줄로 시작해 머지 SHA,
+   감사 코멘트 URL, incident 이슈 번호/URL, 사유, 그리고
+   `[WARN] Add retro notes to incident issue within 72h.` 를 출력한다. 거부는
+   `[FAIL] PR #<N> not merged — <이유>` 한 줄로만 보고하며 아무것도 머지하지
+   않는다(정지별 문구는 `references/audit-templates.md`).
 
 ### 감사 산출물의 실제 형태
 

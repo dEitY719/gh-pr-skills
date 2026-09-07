@@ -32,4 +32,4 @@
 | incident 이슈 | Issues (`incident: emergency merge of PR #<N> — ...`) | 머지 SHA + 인용 사유 + 72시간 회고 체크리스트 + ai-metrics 푸터 |
 | 보드 카드 | 프로젝트 보드 `Done` | 보드 미부착/실패 시 조용히 건너뜀 |
 
-보고에는 머지 SHA, 감사 코멘트 URL, incident 이슈 번호와 URL, 사유, `[WARN] Add retro notes to incident issue within 72h.` 가 출력됩니다.
+보고는 `[OK] Emergency-merged PR #<N>` 판정 줄로 시작해 머지 SHA, 감사 코멘트 URL, incident 이슈 번호와 URL, 사유, `[WARN] Add retro notes to incident issue within 72h.` 가 이어집니다. 거부(모호한 사유, Step 2 하드 스톱, 확인 거절, admin 권한 없음)는 `[FAIL] PR #<N> not merged — <이유>` 한 줄만 출력하고 아무것도 머지하지 않습니다 — 정지별 문구는 `references/audit-templates.md`.

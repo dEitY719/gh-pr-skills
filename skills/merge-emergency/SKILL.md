@@ -80,13 +80,16 @@ Sync failure never blocks the audit report.
 ## Step 7: Report
 
 ```
-Emergency-merged PR #<N>
+[OK] Emergency-merged PR #<N>
   Merge SHA:       <sha>
   Audit comment:   <url>
   Incident issue:  #<M> (<url>)
   Reason:          <reason>
   [WARN] Add retro notes to incident issue within 72h.
 ```
+
+Every refusal instead prints one `[FAIL] PR #<N> not merged — <why>` line and
+merges nothing; the wording per stop is in `references/audit-templates.md`.
 
 ## Constraints
 
