@@ -253,7 +253,7 @@ an explicit refspec (`HEAD:refs/heads/<head>`), because a detached HEAD has no
 upstream to infer. That contract is the atoms' own — see their
 `references/preflight.md` / `references/rebase-flow.md`.
 
-### Teardown — the one exception
+### Teardown — the one exception (dEitY719/dotfiles#1493)
 
 Tear down once the atom returns, in every case **except** one:
 `gh-resolve:conflict` stopping at one of its own documented stop points
