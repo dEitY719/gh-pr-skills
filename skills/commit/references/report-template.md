@@ -15,9 +15,9 @@ was written. The `[SKIP]` reasons are the ones `references/board-sync.md`
 already enumerates: no projectV2 board, helper unavailable, or a Status already
 outside `Backlog`.
 
-The `Board sync:` row mirrors `gh-pr:create`'s and serves the same purpose — a
-defense-in-depth visual checklist (issue dEitY719/dotfiles#747). Its absence from a
-transcript is the regression signal that Step 5 was silently skipped.
+The `Board sync:` row mirrors `gh-pr:create`'s row (issue dEitY719/dotfiles#747) — its
+absence from a transcript is the regression signal that Step 5 was silently
+skipped.
 
 `Next:` is `/gh-pr:commit` again, not `/gh-pr:create`, when the Constraints
 split rule left uncommitted changes behind.

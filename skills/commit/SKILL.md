@@ -84,9 +84,8 @@ skip it entirely when no issue footer was written. After both blocks, emit
 ## Step 6: Verify
 
 After commit succeeds, run `git status`, print the report in
-[`references/report-template.md`](references/report-template.md) (verdict token,
-`Board sync:` row, `Next:` hint), then emit the closing step-skip-guard marker:
-`printf '[step:gh-pr-commit/report] OK\n'`.
+[`references/report-template.md`](references/report-template.md), then emit the
+closing step-skip-guard marker: `printf '[step:gh-pr-commit/report] OK\n'`.
 
 ## Constraints
 
