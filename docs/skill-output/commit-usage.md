@@ -30,8 +30,10 @@
 
 - **커밋 1개** — `git log -1` 로 확인. `<type>(<scope>): <summary>` 제목, 왜를 설명하는 본문,
   이슈가 해결됐다면 `Closes #N` 또는 `Fixes #N` 푸터와 `Co-Authored-By` 푸터. `--amend` 가 아닌 새 커밋이다.
-- **stdout 보고** — `Committed <short-hash>: <subject line>`(연결된 이슈가 있으면 둘째 줄에
-  이슈 번호). 단계 마커 `[step:gh-pr-commit/stage-commit] OK`,
+- **stdout 보고** — `references/report-template.md` 형식: `[OK] Committed <short-hash>:
+  <subject line>`, 이슈가 연결됐으면 `[OK] Closes #N` 과 `[OK] Board sync: ...` 줄,
+  마지막에 `Next: /gh-pr:create`. 중단 시에는 `[FAIL] <reason>`. 단계 마커
+  `[step:gh-pr-commit/stage-commit] OK`,
   `[step:gh-pr-commit/metrics-board-sync] OK`, `[step:gh-pr-commit/report] OK`.
 - **연결된 이슈 위 ai-metrics 코멘트** — 이슈 번호가 있고 `GH_DISABLE_AI_METRICS=1` 이 아닐 때만.
   실패해도 커밋을 막지 않는 soft-fail 이다.

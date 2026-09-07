@@ -73,8 +73,10 @@ Step 1 이 작업 트리 상태를 무조건 조회하므로 "뭘 바꿨나요?"
    `In progress` 로 옮긴다(`references/board-sync.md`). 두 블록 뒤에
    `[step:gh-pr-commit/metrics-board-sync] OK` 마커를 출력한다.
 6. **Step 6 — 검증.** `git status` 를 다시 실행하고
-   `Committed <short-hash>: <subject line>` 를 보고한다(연결된 이슈가 있으면 둘째
-   줄에 이슈 번호). 마지막으로 `[step:gh-pr-commit/report] OK` 마커를 출력한다.
+   `references/report-template.md` 형식으로 보고한다: `[OK] Committed <short-hash>:
+   <subject line>`, 이슈가 연결됐으면 `[OK] Closes #N` 과 `[OK] Board sync: ...` 줄,
+   그리고 `Next: /gh-pr:create` 힌트. 중단은 `[FAIL] <reason>` 으로 보고한다.
+   마지막으로 `[step:gh-pr-commit/report] OK` 마커를 출력한다.
 
 ## 주의사항과 제약
 
