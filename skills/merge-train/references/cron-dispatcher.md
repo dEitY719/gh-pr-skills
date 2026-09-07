@@ -1,5 +1,10 @@
 # gh-pr:merge-train — The cron dispatcher (D-8, NF-1)
 
+`pr_merge_train_cron.sh` is dotfiles-only, not vendored into this plugin —
+it lives at `shell-common/tools/custom/pr_merge_train_cron.sh` on the author's
+machine. A marketplace install of this plugin gets `/gh-pr:merge-train` fine;
+this unattended trigger is optional and requires a dotfiles checkout.
+
 ```
 cron -> shell-common/tools/custom/pr_merge_train_cron.sh   (thin dispatcher, 1 tick)
           |- 1. flock                    — one tick at a time
