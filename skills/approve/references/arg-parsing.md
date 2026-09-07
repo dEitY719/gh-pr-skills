@@ -17,6 +17,9 @@ Reject unknown flags, `--self-record` with `--admin-merge`, and legacy
 `--self-ok` with:
 `--self-ok is not supported; GitHub blocks self-approval server-side.`
 
+Help is detected only at arg #1 (see SKILL.md), so `--self-ok -h` is parsed
+as unsupported `--self-ok` plus extra args, not as a help request.
+
 ## GitHub target (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407)
 
 Bind host and repo from **one and the same** remote URL, before any `gh` call:
