@@ -24,7 +24,8 @@ verbatim, then stop. No API calls.
 ## Role
 
 Process every code-review comment on a PR: judge validity, fix valid ones,
-reply to each with the outcome.
+reply to each with the outcome — every comment, bot comments included, gets
+an explicit reply; never skip one.
 
 ## Step 1: Resolve Target PR + Repo
 
@@ -111,10 +112,11 @@ gate outcome line, commit SHAs, skipped comments, and the lingering
 
 ## Constraints
 
-Read `references/constraints.md`. Non-negotiables: never promote the card to
-`Approved` (owned by `gh-pr:approve`, dEitY719/dotfiles#1350), never resolve
-threads programmatically, never `--amend` / `--no-verify` / force-push, and
-route label/body edits through `_gh_pr_edit_safe_*`.
+Read `references/constraints.md`. Non-negotiables: never skip a reply (bot
+comments included), never promote the card to `Approved` (owned by
+`gh-pr:approve`, dEitY719/dotfiles#1350), never resolve threads
+programmatically, never `--amend` / `--no-verify` / force-push, and route
+label/body edits through `_gh_pr_edit_safe_*`.
 
 ## Related Skills
 
