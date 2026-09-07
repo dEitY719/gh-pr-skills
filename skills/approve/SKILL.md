@@ -79,11 +79,9 @@ sync the card per `references/board-approved-sync.sh.md` (`--self-record` needs 
 ## Step 5: Verify and Report
 
 Re-fetch `reviewDecision` + `mergeStateStatus`; for `--admin-merge`, also `state`
-and `mergeCommit`. Print the report in `references/approval-templates.md` →
-"Final report format" — verdict line, blocker/follow-up counts, issue links,
-merge state, the Step 4.5 board line, PR URL, the conflict warning
-(`mergeable: CONFLICTING` or `rebaseable: false`), and the `Next:` line. For
-`--self-record`, confirm `reviewDecision` did not become `APPROVED`.
+and `mergeCommit`. Print the report per "Final report format" in
+`references/approval-templates.md`. For `--self-record`, confirm
+`reviewDecision` did not become `APPROVED`.
 
 ## Constraints
 
