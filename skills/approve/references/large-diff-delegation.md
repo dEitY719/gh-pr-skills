@@ -7,10 +7,17 @@ in the same session.
 
 ## Threshold (single source of truth)
 
-`THRESHOLD_LINES = 800` — the sum of `additions + deletions` from
+`THRESHOLD_LINES = 4000` — the sum of `additions + deletions` from
 `GH_HOST="$TARGET_HOST" gh pr view <N> --repo "$TARGET_REPO" --json additions,deletions`.
 PRs at or above this threshold are delegated; below it, the inline path
 runs unchanged.
+
+Raised from the original 800 (dEitY719/dotfiles#403): an 800-line diff is a
+few tens of thousands of tokens, well inside a current model's context
+window, so that threshold was paying the subagent round-trip and fidelity
+loss for PRs that never needed the context headroom. 4000 still catches the
+diffs that actually crowd the main context (generated code, vendored dumps,
+mass renames).
 
 The number is a starting point. Tune it in this file when PR-size
 distribution data justifies it. Do **not** hardcode the threshold

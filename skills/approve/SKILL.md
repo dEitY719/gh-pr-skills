@@ -20,10 +20,8 @@ metadata:
 ## Help
 
 If arg #1 is `-h`, `--help`, or `help`, read `references/help.md` and output it
-verbatim, then stop. Help is detected only at arg #1, so `--self-ok -h` is parsed
-as unsupported `--self-ok` plus extra args. Positionals (`<PR#> [remote]`) and
-flags (`--self-record`, `--admin-merge`, `--squash`/`--rebase`/`--merge`) are
-tabled in that same file.
+verbatim, then stop. Positionals (`<PR#> [remote]`) and flags (`--self-record`,
+`--admin-merge`, `--squash`/`--rebase`/`--merge`) are tabled in that same file.
 
 ## Step 1: Resolve + Pre-flight Gate (parallel)
 
@@ -81,14 +79,15 @@ sync the card per `references/board-approved-sync.sh.md` (`--self-record` needs 
 ## Step 5: Verify and Report
 
 Re-fetch `reviewDecision` + `mergeStateStatus`; for `--admin-merge`, also `state`
-and `mergeCommit`. Report status, blocker/follow-up counts, issue links, merge
-state, the Step 4.5 board line, and PR URL — plus the conflict warning if the PR had `mergeable: CONFLICTING` or `rebaseable: false`. For `--self-record`, confirm `reviewDecision` did not become `APPROVED`.
+and `mergeCommit`. Print the report in `references/approval-templates.md` →
+"Final report format" — verdict line, blocker/follow-up counts, issue links,
+merge state, the Step 4.5 board line, PR URL, the conflict warning
+(`mergeable: CONFLICTING` or `rebaseable: false`), and the `Next:` line. For
+`--self-record`, confirm `reviewDecision` did not become `APPROVED`.
 
 ## Constraints
 
-- Never approve without reading the diff, nor approve your own PR — GitHub blocks
-  self-approval server-side and no token or flag can bypass it. Never accept
-  `--self-ok`; it describes an impossible operation.
+- Never approve without reading the diff; self-PRs follow `references/self-pr-handling.md`.
 - Never fabricate follow-ups. Each issue must represent a defensible concern.
 - Never merge a colleague's PR. `--admin-merge` is self-PR only.
 - No labels/milestones unless `gh label list` confirms the label exists.
