@@ -389,7 +389,9 @@
             <p><code>git status</code> 를 다시 실행하고 <code>references/report-template.md</code> 형식으로
             <code>[OK] Committed &lt;short-hash&gt;: &lt;subject line&gt;</code> 를 보고한다. 연결된 이슈가 있으면
             <code>[OK] Closes #N</code> 과 <code>[OK] Board sync: ...</code> 줄이 붙고, 마지막 줄은
-            <code>Next: /gh-pr:create</code>. 중단은 <code>[FAIL] &lt;reason&gt;</code> 으로 보고한다.</p>
+            <code>Next:</code> 힌트다 — 보통 <code>/gh-pr:create</code> 지만, 분할 규칙 때문에 커밋되지 않은
+            변경이 남았다면 <code>/gh-pr:commit</code> 이다. 중단은 <code>[FAIL] &lt;reason&gt;</code> 과
+            <code>Next: &lt;해소 방법&gt;</code> 으로 보고하며, 완료가 아니므로 아래 마커는 출력하지 않는다.</p>
             <span class="marker">[step:gh-pr-commit/report] OK</span>
           </div>
         </div>

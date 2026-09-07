@@ -32,9 +32,11 @@
   이슈가 해결됐다면 `Closes #N` 또는 `Fixes #N` 푸터와 `Co-Authored-By` 푸터. `--amend` 가 아닌 새 커밋이다.
 - **stdout 보고** — `references/report-template.md` 형식: `[OK] Committed <short-hash>:
   <subject line>`, 이슈가 연결됐으면 `[OK] Closes #N` 과 `[OK] Board sync: ...` 줄,
-  마지막에 `Next: /gh-pr:create`. 중단 시에는 `[FAIL] <reason>`. 단계 마커
+  마지막에 `Next:` 힌트 — 보통 `/gh-pr:create`, 분할로 커밋되지 않은 변경이 남았으면
+  `/gh-pr:commit`. 중단 시에는 `[FAIL] <reason>` + `Next: <해소 방법>`. 단계 마커
   `[step:gh-pr-commit/stage-commit] OK`,
-  `[step:gh-pr-commit/metrics-board-sync] OK`, `[step:gh-pr-commit/report] OK`.
+  `[step:gh-pr-commit/metrics-board-sync] OK`, `[step:gh-pr-commit/report] OK`
+  (`[FAIL]` 로 중단하면 report 마커는 출력되지 않는다).
 - **연결된 이슈 위 ai-metrics 코멘트** — 이슈 번호가 있고 `GH_DISABLE_AI_METRICS=1` 이 아닐 때만.
   실패해도 커밋을 막지 않는 soft-fail 이다.
 - **프로젝트 보드** — 커밋 메시지에 `Closes|Fixes #N` 이 실제로 쓰였을 때만, 그리고 카드의

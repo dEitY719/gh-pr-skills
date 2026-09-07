@@ -27,8 +27,15 @@ hook that failed:
 
 ```
 [FAIL] <reason>
-Next: <the single command that clears it>
+Next: <what clears it>
 ```
 
+`Next:` here is whatever unblocks the stop, not necessarily one command — a
+secret-looking file in the diff needs the file removed from the change set
+first, and a declined split needs the user to say how to divide it.
+
 Nothing is committed on a `[FAIL]`, and the working tree is left as it was
-found. `--no-verify` is never the way out of a failing hook (Step 4).
+found. `--no-verify` is never the way out of a failing hook (Step 4). A `[FAIL]`
+is a stop, not a completed step, so `[step:gh-pr-commit/report] OK` is **not**
+emitted with it — the step-skip guard exists to catch a skipped step, not to
+certify a refused one.

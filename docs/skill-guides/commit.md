@@ -75,8 +75,10 @@ Step 1 이 작업 트리 상태를 무조건 조회하므로 "뭘 바꿨나요?"
 6. **Step 6 — 검증.** `git status` 를 다시 실행하고
    `references/report-template.md` 형식으로 보고한다: `[OK] Committed <short-hash>:
    <subject line>`, 이슈가 연결됐으면 `[OK] Closes #N` 과 `[OK] Board sync: ...` 줄,
-   그리고 `Next: /gh-pr:create` 힌트. 중단은 `[FAIL] <reason>` 으로 보고한다.
-   마지막으로 `[step:gh-pr-commit/report] OK` 마커를 출력한다.
+   그리고 `Next:` 힌트 — 보통 `/gh-pr:create` 지만, 분할 규칙 때문에 커밋되지 않은
+   변경이 남았다면 `/gh-pr:commit` 이다. 중단은 `[FAIL] <reason>` + `Next: <해소 방법>`
+   으로 보고하며, 이때는 완료가 아니므로 마커를 출력하지 않는다. 정상 완료에서만
+   마지막에 `[step:gh-pr-commit/report] OK` 마커를 출력한다.
 
 ## 주의사항과 제약
 
