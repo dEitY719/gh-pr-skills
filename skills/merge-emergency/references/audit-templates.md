@@ -178,19 +178,17 @@ Capture the issue URL + number from the command output for Step 7's report.
 
 ## Step 7 — refusal report shapes
 
-Every stop merges nothing and prints exactly one line. Lead with the verdict
-token so a scanning reader can tell a refusal from the `[OK]` report without
-reading the rest — the same split `skills/merge/references/strategy-selection.md`
-uses:
+Every stop merges nothing and prints exactly one `[FAIL] PR #<N> not merged —
+<reason>` line, as `skills/merge/references/strategy-selection.md` does:
 
-```
-[FAIL] PR #<N> not merged — reason too vague ("<reason>"); cite an incident ID or concrete user impact.
-[FAIL] PR #<N> not merged — PR is <state>; emergency merges only an OPEN, non-draft PR.
-[FAIL] PR #<N> not merged — branch has conflicts; resolve with /gh-resolve:conflict first.
-[FAIL] PR #<N> not merged — required check <name> is <status>; emergency bypasses approval, not CI.
-[FAIL] PR #<N> not merged — confirmation declined.
-[FAIL] PR #<N> not merged — no admin rights on <repo>; ask an admin rather than retrying with --merge/--rebase.
-```
+| Stop | `<reason>` |
+|---|---|
+| reason too vague | `reason too vague ("<reason>"); cite an incident ID or concrete user impact.` |
+| Step 2 hard stop — state/draft | `PR is <state>; emergency merges only an OPEN, non-draft PR.` |
+| Step 2 hard stop — conflicts | `branch has conflicts; resolve with /gh-resolve:conflict first.` |
+| Step 2 hard stop — required check | `required check <name> is <status>; emergency bypasses approval, not CI.` |
+| Step 3 confirmation declined | `confirmation declined.` |
+| Step 4 admin merge failed | `no admin rights on <repo>; ask an admin rather than retrying with --merge/--rebase.` |
 
 The Step 2 soft warnings (base `BEHIND`, no approving review) are **not**
 refusals: they print `[WARN] <what>` and the run continues to Step 3, where the
