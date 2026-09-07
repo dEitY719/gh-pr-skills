@@ -279,7 +279,7 @@
         </div>
         <div class="card result">
           <h3><svg class="ic-pos" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>stdout 보고</h3>
-          <p><code>Committed &lt;short-hash&gt;: &lt;subject line&gt;</code> — 연결된 이슈가 있으면 둘째 줄에 이슈 번호.</p>
+          <p><code>[OK] Committed &lt;short-hash&gt;: &lt;subject line&gt;</code> — 연결된 이슈가 있으면 <code>[OK] Closes #N</code> 과 <code>[OK] Board sync: ...</code> 줄이 붙고, 마지막 줄은 <code>Next: /gh-pr:create</code>. 중단 시에는 <code>[FAIL] &lt;reason&gt;</code>.</p>
           <div class="markers">
             <span class="marker">[step:gh-pr-commit/stage-commit] OK</span>
             <span class="marker">[step:gh-pr-commit/metrics-board-sync] OK</span>

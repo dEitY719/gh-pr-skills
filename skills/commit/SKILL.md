@@ -33,11 +33,10 @@ GitHub auto-close and project-board automation (see issue dEitY719/dotfiles#392)
 
 Record `START_TS=$(date +%s)` immediately for elapsed-time tracking in Step 5.
 
-Runs **unconditionally** on every invocation, even bare `/gh-pr:commit` with no
-conversation context — the working-tree state is the source of truth, so do
-NOT ask "what did you change?". In a single message run: `git status` (never
-`-uall`), `git diff` (staged + unstaged), `git diff --staged` if anything is
-staged, and `git log --oneline -20` (to mimic the repo's commit style).
+Runs **unconditionally** — the working tree is the source of truth. In a single
+message run: `git status` (never `-uall`), `git diff` (staged + unstaged),
+`git diff --staged` if anything is staged, and `git log --oneline -20` (to
+mimic the repo's commit style).
 
 In that same message, parse `[issue-number] [remote]` (dEitY719/dotfiles#1405) and bind the
 GitHub target for Step 5: read `references/github-target.md` and paste its
@@ -64,7 +63,7 @@ or spans unrelated areas.
 
 - Stage only relevant files by name — avoid `git add -A`/`.` to keep secrets
   and unrelated changes out. **Never stage secret-looking files** (`.env`,
-  `credentials.json`, keys); if the diff touches such files, stop and warn.
+  `credentials.json`, keys); if the diff touches one, stop with a `[FAIL]` report.
 - **NEVER** `--amend` unless explicitly asked. **NEVER** `--no-verify` /
   `--no-gpg-sign`: if a hook fails, fix the cause, re-stage, new commit.
 - See `references/commit-message-format.md` for the exact HEREDOC command.
@@ -84,9 +83,9 @@ skip it entirely when no issue footer was written. After both blocks, emit
 
 ## Step 6: Verify
 
-After commit succeeds, run `git status` and report
-`Committed <short-hash>: <subject line>` (issue number on a second line if one
-was linked), then emit the closing step-skip-guard marker:
+After commit succeeds, run `git status`, print the report in
+[`references/report-template.md`](references/report-template.md) (verdict token,
+`Board sync:` row, `Next:` hint), then emit the closing step-skip-guard marker:
 `printf '[step:gh-pr-commit/report] OK\n'`.
 
 ## Constraints

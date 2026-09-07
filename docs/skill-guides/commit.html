@@ -386,8 +386,10 @@
           <div class="dot">6</div>
           <div class="body">
             <h3>검증</h3>
-            <p><code>git status</code> 를 다시 실행하고 <code>Committed &lt;short-hash&gt;: &lt;subject line&gt;</code> 를
-            보고한다. 연결된 이슈가 있으면 둘째 줄에 이슈 번호가 붙는다.</p>
+            <p><code>git status</code> 를 다시 실행하고 <code>references/report-template.md</code> 형식으로
+            <code>[OK] Committed &lt;short-hash&gt;: &lt;subject line&gt;</code> 를 보고한다. 연결된 이슈가 있으면
+            <code>[OK] Closes #N</code> 과 <code>[OK] Board sync: ...</code> 줄이 붙고, 마지막 줄은
+            <code>Next: /gh-pr:create</code>. 중단은 <code>[FAIL] &lt;reason&gt;</code> 으로 보고한다.</p>
             <span class="marker">[step:gh-pr-commit/report] OK</span>
           </div>
         </div>
