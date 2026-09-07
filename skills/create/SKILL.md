@@ -8,8 +8,8 @@ license: MIT
 allowed-tools: Bash, Read, Grep
 metadata:
   model_recommendation:
-    tier: haiku
-    reason: "gh pr create wrap with body draft; structured commit-range bundling + bounded lint/board mutations"
+    tier: sonnet
+    reason: "not a gh pr create wrapper: stacked-PR base detection with three distinct aborts, branch-state recovery (not-on-base / nothing-to-pr / auto-branch), and a body that must theme-group every commit in the range"
     claude: prefer
     non_claude: advisory-only
 ---
