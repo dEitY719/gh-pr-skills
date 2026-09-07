@@ -70,16 +70,20 @@ ascending PR number (D-2). Ordering, the label, and the quiet-period rationale:
 Apply the decision table in `references/approval-gate.md`: read
 `required_approving_review_count` from **both** rulesets and classic branch
 protection, once per distinct `baseRefName`, cached per base — two calls per
-base, never per PR. Classify each source by HTTP status, not exit code; only
-a genuinely undetermined answer stays fail-closed. Even with the gate off, a
-non-empty non-`APPROVED` `reviewDecision` is `[SKIPPED]` before `gh-pr:merge`
-is called — it would refuse, and NF-2 forbids clearing that.
+base, never per PR. Either source requiring `>= 1` → gate on; both reporting
+no policy → off (D-5). Classify each source by HTTP status, not exit code;
+only a genuinely undetermined answer stays fail-closed. Even with the gate
+off, a non-empty non-`APPROVED` `reviewDecision` is `[SKIPPED]` before
+`gh-pr:merge` is called — it would refuse, and NF-2 forbids clearing that.
 
 ## Step 3.5: Apply the review verdict gate
 
 Over the PRs Step 2 let through — **not** a new API call, the `labels` field
 is already in hand — apply the decision table in
-`references/review-verdict-gate.md` with
+`references/review-verdict-gate.md`: `review-blocked` (even alongside a
+stale `review-passed`) is `[SKIPPED] review-blocked — reviewer verdict is
+blocking`; neither label is `[SKIPPED] review not verified — no
+review-passed label`; `review-passed` alone stays in the queue. Check with
 `_gh_pr_merge_train_has_review_blocked_label` /
 `_gh_pr_merge_train_has_review_passed_label` (same file Step 2 sourced).
 Label presence only: absence is "not verified", not "passed". **Never**
