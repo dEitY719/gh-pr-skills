@@ -125,12 +125,14 @@ BLOCKER 가 미해결로 남았나"를 묻는 것이므로, 아직 답하지 않
    --repo "$TARGET_REPO" --json headRefOid -q .headRefOid)` — **push 이후**에
    읽는다. 먼저 읽으면 방금 push 한 커밋이 아니라 그 이전 head 에 신선도
    마커가 찍힌다.
-1. **drop** — `PUSHED_FIXES > 0` 이면 `review-passed` 를 먼저 뗀다
+1. **drop (already done by `SKILL.md` Step 6 — do not repeat it here)** —
+   `PUSHED_FIXES > 0` 이면 `review-passed` 를 먼저 뗀다
    (`references/verdict-label-removal.sh.md`). 게이트보다 **앞**이어야 한다 —
-   뒤로 가면 방금 붙인 라벨을 지운다. `SKILL.md` Step 6 은 이 드롭을 게이트
-   호출보다 먼저 이미 실행한다 — 여기 다시 적은 것은 별도 실행이 아니라 이
-   문서를 직접 여는 독자를 위한 **같은 단계의 재확인**이다. 라벨이 이미
-   없는 상태에서 다시 떼는 것은 soft-fail no-op 이라 두 번 걸려도 안전하다.
+   뒤로 가면 방금 붙인 라벨을 지운다. `SKILL.md` Step 6 이 이 단계를 게이트
+   호출보다 먼저 이미 실행하므로, 이 문서를 따라 순서대로 실행 중이라면
+   **건너뛴다**. 이 항목은 실행 목록이 아니라 이 문서를 단독으로 읽는
+   독자를 위한 순서 설명이다 — 다만 라벨이 이미 없는 상태에서 다시 떼는
+   것 자체는 soft-fail no-op 이라 실수로 두 번 걸려도 안전하다.
 2. **history + evidence** — Step 2 에서 이미 받아 둔 PR 코멘트를 재사용해
    (API 추가 호출 없음) 과거 pass 들의 origin 이력과 외부 리뷰 근거를 구한다.
    dEitY719/dotfiles#1639 이후 두 리더는 **본문 텍스트가 아니라 원본 코멘트 JSON 배열**
