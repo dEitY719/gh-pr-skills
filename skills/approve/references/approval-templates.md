@@ -202,13 +202,31 @@ Next: /gh-pr:merge <N>
 Next: /gh-pr:reply <N>
 ```
 
-**Self-authored PR** (analysis-only / `--self-record` / `--admin-merge`):
+**Self-authored PR — analysis-only / `--self-record`:**
 
 ```
 [SKIP] PR #<N> self-authored — no review submitted (<mode>)
   reviewDecision: <unchanged; --self-record confirms it did not become APPROVED>
   URL: <pr-url>
-Next: request an external reviewer, or /gh-pr:merge-emergency
+Next: get an external review, or re-run with --self-record / --admin-merge
+```
+
+**Self-authored PR — `--admin-merge`:** the merge already ran (or a BLOCKER
+stopped it before this report), so `state` and `mergeCommit` replace
+`reviewDecision`/`Next: merge`:
+
+```
+[OK] PR #<N> merged --admin (<strategy>)
+  state: MERGED
+  mergeCommit: <sha>
+  URL: <pr-url>
+```
+
+```
+[FAIL] PR #<N> not merged — <count> blocker(s), admin merge withheld
+  Blockers: <short titles>
+  URL: <pr-url>
+Next: fix blockers, then re-run --admin-merge
 ```
 
 Append a `Conflict:` row when the PR had `mergeable: CONFLICTING` or
