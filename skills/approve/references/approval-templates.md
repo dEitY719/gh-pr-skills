@@ -176,6 +176,44 @@ Follow-up issues:
 - #<B> — <one-line summary>
 ```
 
+## Final report format
+
+Lead with an explicit verdict line, then the structured key-values.
+
+**4a / 4b (approved):**
+
+```
+[OK] PR #<N> approved (4a clean LGTM | 4b with follow-ups)
+  Follow-ups:  <count> — #<A>, #<B>
+  reviewDecision: APPROVED
+  mergeStateStatus: <status>
+  Board: <Step 4.5 board line>
+  URL: <pr-url>
+Next: /gh-pr:merge <N>
+```
+
+**4c (changes requested):**
+
+```
+[FAIL] PR #<N> changes requested — <count> blocker(s)
+  Blockers: <short titles>
+  reviewDecision: CHANGES_REQUESTED
+  URL: <pr-url>
+Next: /gh-pr:reply <N>
+```
+
+**Self-authored PR** (analysis-only / `--self-record` / `--admin-merge`):
+
+```
+[SKIP] PR #<N> self-authored — no review submitted (<mode>)
+  reviewDecision: <unchanged; --self-record confirms it did not become APPROVED>
+  URL: <pr-url>
+Next: request an external reviewer, or /gh-pr:merge-emergency
+```
+
+Append a `Conflict:` row when the PR had `mergeable: CONFLICTING` or
+`rebaseable: false`.
+
 ## Language matching
 
 Scan the PR body + most recent 3 human comments. Reply in the dominant language. Korean PR → Korean review. Mixed → match the PR body.
