@@ -24,9 +24,7 @@ verbatim, then stop. No API calls.
 ## Role
 
 Process every code-review comment on a PR: judge validity, fix valid ones,
-reply to each with the outcome. **Politeness rule** — reviewers (humans and
-bots alike) must see an explicit response on every thread. Silent fixes are
-not acceptable; silent declines are worse.
+reply to each with the outcome.
 
 ## Step 1: Resolve Target PR + Repo
 
@@ -83,46 +81,25 @@ the consolidated table reply. Reply in the reviewer's language.
 ## Step 6: Push the Fix Commits + Sync Board + Set Verdict Labels
 
 If any fixes were committed: `git push` (never force-push unless the user
-asked) and report new commit SHAs alongside the reply summary. Set
-`PUSHED_FIXES` to the count of new SHAs on the remote branch; no fixes /
-skipped push → `PUSHED_FIXES=0`. If `PUSHED_FIXES > 0`, push the PR card
-back to `In review` per `references/board-sync-in-review.sh.md` (soft-fail;
-no-op when `PUSHED_FIXES == 0`).
+asked) and report new commit SHAs. Set `PUSHED_FIXES` to the count of new
+SHAs on the remote branch; no fixes / skipped push → `PUSHED_FIXES=0`.
 
-Still under `PUSHED_FIXES > 0`, invalidate the stale review verdict per
-`references/verdict-label-removal.sh.md` (soft-fail): drop `review-passed`
-unconditionally — the reviewed commit is no longer head.
+If `PUSHED_FIXES > 0`: sync the board back to `In review`
+(`references/board-sync-in-review.sh.md`, soft-fail), then drop the now-stale
+`review-passed` (`references/verdict-label-removal.sh.md`, soft-fail) — the
+reviewed commit is no longer head. Both run before the gate below.
 
-Then, **after Step 5 has replied to every comment and regardless of
-`PUSHED_FIXES`**, run the `review-passed` gate of
-`references/review-passed-gate.md` (soft-fail): read `HEAD_SHA` (`gh pr view`
-`--json headRefOid`, *after* any push). First recover the PR's origin history
-and its external-review evidence from the Step 2 comment fetch (no extra API
-call — pass the **raw `/issues/<N>/comments` JSON**, not `--jq '.[].body'`
-output, so `.user.login` survives) with
-`_gh_pr_reply_history_origins "$ME"` / `_gh_pr_reply_history_has_review "$ME"`,
-where `ME` is the login this pipeline authenticates as
-(`ME="${GH_PR_REPLY_TRUSTED_LOGIN:-${ME:-$(GH_HOST="$TARGET_HOST" gh api user -q .login)}}"`)
-— a marker from any other commenter is forged and ignored (dEitY719/dotfiles#1639);
-merge `ORIGINS` over that history (`_gh_pr_reply_origins_merge`) and post the
-merged stream back as the ledger comment (`_gh_pr_reply_post_origins_ledger`,
-before the gate and whatever it decides); a PR with no external-review
-evidence is left unlabelled. Then pipe the merged stream into
-`_gh_pr_reply_apply_review_passed "$PR_NUMBER" "$TARGET_REPO" "$TARGET_HOST"
-"$HEAD_SHA" "$EVIDENCE"`. It applies `review-passed` — freshness marker
-included — when no BLOCKER-severity item is left unresolved, and applies
-nothing when one is.
-Since dEitY719/dotfiles#1636 this skill decides that **on its own judgment, with no external AI
-CLI re-call**; `gh-verify:review-all` owns `review-blocked` and never writes
-`review-passed`. Never hand-write either label: the gate helper is the only
-path (see `references/constraints.md` for the NF-2 relaxation and its
-rationale).
+Then, unconditionally and only after Step 5 has replied to every comment: run
+the `review-passed` gate exactly as `references/review-passed-gate.md`
+specifies — it is the SSOT for `HEAD_SHA`/`ME` resolution, the raw-JSON
+requirement, the origin-history merge, and the five-call pipeline order
+(soft-fail; `gh-verify:review-all` owns `review-blocked` and never writes
+`review-passed`; see `references/constraints.md` for the NF-2 rationale).
+Never hand-write either label.
 
 Then **unconditionally** run the same removal block Step 2.5 does —
-`references/reply-pending-label-removal.sh.md`. Between the two call sites the
-label is cleared on every exit short of a crash, which is the point:
-`gh-verify:review-all`'s `defer` branch adds it and `gh-pr:merge-train` skips any
-PR carrying it, so a label left on wedges the PR out of the train (dEitY719/dotfiles#1524).
+`references/reply-pending-label-removal.sh.md` — so a label left on cannot
+wedge the PR out of `gh-pr:merge-train` (dEitY719/dotfiles#1524).
 
 ## Step 7: Report
 
@@ -134,11 +111,10 @@ gate outcome line, commit SHAs, skipped comments, and the lingering
 
 ## Constraints
 
-Read `references/constraints.md`. Non-negotiables: never skip a reply (bot
-comments included), never promote the card to `Approved` (owned by
-`gh-pr:approve`, dEitY719/dotfiles#1350), never resolve threads programmatically, never
-`--amend` / `--no-verify` / force-push, and route label/body edits through
-`_gh_pr_edit_safe_*`.
+Read `references/constraints.md`. Non-negotiables: never promote the card to
+`Approved` (owned by `gh-pr:approve`, dEitY719/dotfiles#1350), never resolve
+threads programmatically, never `--amend` / `--no-verify` / force-push, and
+route label/body edits through `_gh_pr_edit_safe_*`.
 
 ## Related Skills
 

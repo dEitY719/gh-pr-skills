@@ -121,6 +121,10 @@ BLOCKER 가 미해결로 남았나"를 묻는 것이므로, 아직 답하지 않
 
 순서가 전부 load-bearing 이다. 그대로 지킨다:
 
+0. **head** — `HEAD_SHA=$(GH_HOST="$TARGET_HOST" gh pr view "$PR_NUMBER"
+   --repo "$TARGET_REPO" --json headRefOid -q .headRefOid)` — **push 이후**에
+   읽는다. 먼저 읽으면 방금 push 한 커밋이 아니라 그 이전 head 에 신선도
+   마커가 찍힌다.
 1. **drop** — `PUSHED_FIXES > 0` 이면 `review-passed` 를 먼저 뗀다
    (`references/verdict-label-removal.sh.md`). 게이트보다 **앞**이어야 한다 —
    뒤로 가면 방금 붙인 라벨을 지운다.
@@ -137,6 +141,10 @@ BLOCKER 가 미해결로 남았나"를 묻는 것이므로, 아직 답하지 않
 5. **gate + apply** — 병합 결과와 근거 플래그를 게이트에 넘긴다.
 
 ```bash
+# push 이후의 head. 신선도 마커(#1601)가 대조하는 값이라 순서가 바뀌면 안 된다.
+HEAD_SHA=$(GH_HOST="$TARGET_HOST" gh pr view "$PR_NUMBER" --repo "$TARGET_REPO" \
+    --json headRefOid -q .headRefOid)
+
 # 이 파이프라인이 인증하는 단 하나의 신원. Step 2 의 중복 제거가 이미 "현재
 # 사용자" 를 알아야 하므로 보통 그때 한 번 구해 둔 값을 재사용한다.
 # GH_PR_REPLY_TRUSTED_LOGIN 은 리뷰/답변 파이프라인이 서로 다른 계정으로
