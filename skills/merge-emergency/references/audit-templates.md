@@ -194,8 +194,12 @@ The Step 2 soft warnings (base `BEHIND`, no approving review) are **not**
 refusals: they print `[WARN] <what>` and the run continues to Step 3, where the
 user sees them in the confirmation prompt.
 
-A failure *after* the merge lands is not a `[FAIL]` either — the merge is done
-and the audit tail is what is incomplete. Step 5's incident issue is
+Step 1 may fail before a PR number exists at all (no argument, and no PR on the
+current branch). There is no `#<N>` to name then, so the line degrades to
+`[FAIL] not merged — <reason>` and the run stops before any `gh` call.
+
+A failure *after* the merge lands never says `not merged` — the merge is done;
+what is incomplete is the audit tail. Step 5's incident issue is
 non-negotiable, so a failure there prints
 `[FAIL] PR #<N> merged, but the incident issue could not be filed — file it manually: <title>`
 and the run stops there; Step 6's board sync is soft and prints

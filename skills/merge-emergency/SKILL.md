@@ -89,7 +89,9 @@ Sync failure never blocks the audit report.
 ```
 
 Every refusal instead prints one `[FAIL] PR #<N> not merged — <why>` line and
-merges nothing; the wording per stop is in `references/audit-templates.md`.
+merges nothing; a failure *after* the merge lands never says `not merged` —
+Step 5's is `[FAIL] PR #<N> merged, but the incident issue could not be filed`.
+Per-stop wording: `references/audit-templates.md`.
 
 ## Constraints
 
