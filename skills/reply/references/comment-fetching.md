@@ -64,9 +64,18 @@ Algorithm:
 3. Look at that latest comment.
    - If its `user.login` is not the current user and not Claude, process
      the thread.
-   - Otherwise, if its body contains an `<!-- ai-review:<ai>:<sha> -->`
-     marker (`grep -qE '<!-- ai-review:[^:]+:[^ ]+ -->'`), it is a review
-     origin, never an answer — process the thread anyway.
+   - Otherwise, if its body contains a **complete** `<!-- ai-review:<ai>:<sha> -->`
+     … `<!-- /ai-review:<ai>:<sha> -->` pair with matching `<ai>`/`<sha>`
+     (`grep -qzE '<!-- ai-review:([^:]+):([^ ]+) -->.*<!-- /ai-review:\1:\2 -->'`
+     over the raw body), it is a review origin, never an answer — process
+     the thread anyway. A **bare open tag alone is not enough**: a reply that
+     quotes or excerpts one finding line from a review may carry the opening
+     marker without the closing one, and matching on the open tag alone would
+     misclassify that reply as a fresh review origin and reprocess it forever
+     (agy review on PR #45, BLOCKER). Requiring the matched open+close pair —
+     the same shape `devx_pr_review_all_lane_block` already extracts a lane's
+     block by — means only a comment that reproduces the review verbatim in
+     full satisfies it, which a reply excerpt won't.
    - Otherwise skip the thread.
 
 Exception: if the user explicitly asks to re-process, ignore this filter and
