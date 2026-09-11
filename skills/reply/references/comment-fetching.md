@@ -45,15 +45,27 @@ saved rather than discarded once Step 2's dedup pass over it is done.
 ## Deduplication rule
 
 Skip a thread only if the **latest** comment in the thread is authored by
-the current user or by Claude. This allows the skill to respond when a
-reviewer leaves a follow-up comment after a previous Claude reply.
+the current user or by Claude **and is itself a reply, not a review
+origin**. This allows the skill to respond when a reviewer leaves a
+follow-up comment after a previous Claude reply.
+
+`user.login == ME` alone is not sufficient to mean "already answered": in a
+single-account pipeline where the same GitHub account both posts reviews
+(`gh-pr:review` / `gh-verify:review-all`) and answers them (`gh-pr:reply`),
+the `<!-- ai-review:<ai>:<sha> -->` comment a review lane posts is *authored
+by ME* but is the finding itself, not an answer to it (issue #44).
 
 Algorithm:
 1. Build threads by chaining `in_reply_to_id` from each comment back to its
    root (comments with `in_reply_to_id == null`).
 2. For each thread, sort descendants by `created_at`.
-3. Look at the last (most recent) comment. If its `user.login` is the
-   current user or Claude, skip the thread. Otherwise process it.
+3. Look at the last (most recent) comment.
+   - If its body contains an `<!-- ai-review:<ai>:<sha> -->` marker
+     (`grep -qE '<!-- ai-review:[^:]+:[^ ]+ -->'`), it is a review origin,
+     never an answer — process the thread regardless of author.
+   - Otherwise, if its `user.login` is the current user or Claude, skip
+     the thread.
+   - Otherwise process it.
 
 Exception: if the user explicitly asks to re-process, ignore this filter and
 reply to everything fresh.
