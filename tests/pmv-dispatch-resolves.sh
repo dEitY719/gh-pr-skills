@@ -214,6 +214,54 @@ case "$out" in
 		fail=1 ;;
 esac
 
+# 6e. The VENDORED copy still carries the current loader convention.
+#
+#     Nothing in this repo compared lib/vendor/gh-verify/ against its upstream,
+#     and that absence is why it drifted: the copy sat on the pre-#36 form
+#     (`[ -r "$LIB" ] || WARN`) for a fortnight after gh-verify-skills fixed it,
+#     while being the exact path gh-pr:merge Step 5 takes whenever
+#     $GH_VERIFY_ROOT is unset — so the corrected convention was reaching every
+#     skill in this repo except the one that runs.
+#
+#     A real content diff is not available here: the SSOT lives in another repo
+#     and CI has no network. What IS checkable offline is that the copy still
+#     spells the convention the SSOT now spells, which is precisely the axis it
+#     drifted on. `scripts/sync-shell-common-vendor.sh` upstream does not cover
+#     this tree — it keys on a `# SSOT: dEitY719/dotfiles` banner and this file
+#     is a `<!-- SSOT: dEitY719/gh-verify-skills -->` one — so this is the whole
+#     guard, not a supplement to one.
+VENDORED_MD="$ROOT/lib/vendor/gh-verify/post-merge-verify/dispatch.sh.md"
+[ -f "$VENDORED_MD" ] || { printf 'FAIL  %s is gone\n' "$VENDORED_MD"; fail=1; }
+if [ -f "$VENDORED_MD" ]; then
+	# The pre-#36 shapes, each of which the SSOT has replaced.
+	if hits=$(grep -nE '^\s*if \[ ! -r "\$PMV_(NAME|LOOKUP)_LIB" \]|command -v (herdr_agent_name|herdr_agent_tab_for_cwd) >/dev/null' \
+		"$VENDORED_MD"); then
+		printf 'FAIL  the vendored dispatch is back on the pre-harness-skills#36 proof — re-copy from the SSOT:\n'
+		printf '%s\n' "$hits" | sed 's/^/        /'
+		fail=1
+	fi
+	# ...and the three things #36/#37 added. Named individually so a partial
+	# re-copy says which half is missing rather than "it differs".
+	for needle in \
+		'unalias herdr_agent_name' \
+		'export SHELL_COMMON="$_SC"' \
+		'[ "$(command -v herdr_agent_name 2>/dev/null)" != herdr_agent_name ]' \
+		'unset SHELL_COMMON'
+	do
+		grep -qF -- "$needle" "$VENDORED_MD" || {
+			printf 'FAIL  the vendored dispatch is missing %s — it predates harness-skills#36/#37\n' "$needle"
+			fail=1
+		}
+	done
+	# The banner has to say which upstream commit this is, or the next person
+	# re-copying has nothing to diff against. There is no sync script to
+	# record it for them.
+	grep -qE '^<!-- Source commit: [0-9a-f]{40} ' "$VENDORED_MD" || {
+		printf 'FAIL  the vendored dispatch banner names no source commit\n'
+		fail=1
+	}
+fi
+
 # 7. The wrapper always exits 0, even when the dispatch it sources calls `exit`
 #    (PR #33 review, codex BLOCKER). The real dispatch block returns early and
 #    can exit outright; sourced flat that would terminate the wrapper nonzero,
@@ -278,6 +326,7 @@ case "$out" in
 esac
 
 if [ "$fail" -eq 0 ]; then
-	printf 'ok    post-merge dispatch resolves standalone (%s-line bash fence), declines a planted cwd copy, validates its five arguments, and stays loud with no plugin root\n' "$n"
+	printf 'ok    vendored dispatch carries the harness-skills#36/#37 convention and names its source commit\n'
+printf 'ok    post-merge dispatch resolves standalone (%s-line bash fence), declines a planted cwd copy, validates its five arguments, and stays loud with no plugin root\n' "$n"
 fi
 exit "$fail"

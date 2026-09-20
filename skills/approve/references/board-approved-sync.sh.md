@@ -67,31 +67,34 @@ card came from.
 # --repo "$TARGET_REPO" is explicit (dEitY719/dotfiles#1405): without it the helper falls back
 # to `gh repo view`, which answers `gh repo set-default`, not this skill's
 # resolved remote.
-_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
+_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
 [ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh"
-if [ -r "$_HELPER" ]; then
-    export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"
-    . "$_HELPER"
-    if ! command -v _gh_project_status_sync >/dev/null 2>&1; then
-        printf '[gh-pr-approve] %s sourced but _gh_project_status_sync undefined — board sync skipped (#724).\n' \
-            "$_HELPER" >&2
-    else
-        _rc=0
-        if [ "${BOARD_BYPASS:-0}" = "1" ]; then
-            printf '[gh-pr-approve] self-record: bypassing #393 fail-closed guard for PR #%s (operator intent).\n' \
-                "$PR_NUMBER" >&2
-            _GH_PROJECT_STATUS_GUARD_APPROVED_BYPASS=1 \
-                _gh_project_status_sync pr "$PR_NUMBER" "Approved" --only-from "Backlog,In progress,In review" --repo "$TARGET_REPO" || _rc=$?
-        else
+    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
+_sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                              # save
+unset -f _gh_project_status_sync 2>/dev/null || :
+unalias _gh_project_status_sync 2>/dev/null || :
+export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"                     # before the load
+[ -r "$_HELPER" ] && . "$_HELPER"
+if [ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]; then
+    _rc=0
+    if [ "${BOARD_BYPASS:-0}" = "1" ]; then
+        printf '[gh-pr-approve] self-record: bypassing #393 fail-closed guard for PR #%s (operator intent).\n' \
+            "$PR_NUMBER" >&2
+        _GH_PROJECT_STATUS_GUARD_APPROVED_BYPASS=1 \
             _gh_project_status_sync pr "$PR_NUMBER" "Approved" --only-from "Backlog,In progress,In review" --repo "$TARGET_REPO" || _rc=$?
-        fi
-        if [ "$_rc" -ne 0 ]; then
-            printf '[gh-pr-approve] board sync rc=%s — continuing (soft-fail).\n' "$_rc" >&2
-        fi
+    else
+        _gh_project_status_sync pr "$PR_NUMBER" "Approved" --only-from "Backlog,In progress,In review" --repo "$TARGET_REPO" || _rc=$?
     fi
+    if [ "$_rc" -ne 0 ]; then
+        printf '[gh-pr-approve] board sync rc=%s — continuing (soft-fail).\n' "$_rc" >&2
+    fi
+else                                                                                 # tier 5, soft
+    if [ -n "$_sc_was" ]; then export SHELL_COMMON="$_sc_prev"; else unset SHELL_COMMON; fi
+    printf '[gh-pr-approve] no usable shell-common at %s — board sync skipped; the verdict itself is unaffected.\n' \
+        "$_HELPER" >&2
 fi
-# helper missing → board sync silently skipped (NF-1, dEitY719/dotfiles#644).
+unset _sc_was _sc_prev
+# A helper that is missing or defines nothing takes the warn-and-skip arm above.
 ```
 
 Helper returns `0` on the happy path *and* on a silent no-op (repo has no
