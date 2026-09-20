@@ -139,7 +139,91 @@ sc=$(cd "$TMP" && env -u SHELL_COMMON HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
 	fail=1
 }
 
+# 5. The SOFT warn-and-skip loader (harness-skills#60, harness-skills PR #61).
+#    Six board-sync blocks here use it. Same proof and same export ordering as
+#    above; what differs is the failure arm, which RESTORES SHELL_COMMON rather
+#    than unsetting it — a soft block returns to its caller and is normally not
+#    the first loader in the run, so an unconditional unset would let an
+#    OPTIONAL step's failure knock out the value every required
+#    ${SHELL_COMMON:-...} after it reads.
+SOFT_SITES="skills/approve/references/board-approved-sync.sh.md
+skills/commit/references/board-sync.md
+skills/create/references/project-board-sync.md
+skills/merge/references/project-board-sync.md
+skills/merge-emergency/references/project-board-sync.md
+skills/reply/references/board-sync-in-review.sh.md"
+
+# 5a. Mechanical, all six: the six steps in order. The whole sequence, not "X
+#     before Y", so a dropped or duplicated step is caught too.
+for f in $SOFT_SITES; do
+	[ -f "$ROOT/$f" ] || { printf 'FAIL  %s is listed as a soft loader but does not exist\n' "$f"; fail=1; continue; }
+	seq=$(sed -E \
+		-e 's/^[[:space:]]*_sc_was=\$\{SHELL_COMMON\+set\} _sc_prev="\$\{SHELL_COMMON-\}".*$/SAVE/' \
+		-e 's/^[[:space:]]*unset -f _gh_project_status_sync 2>\/dev\/null \|\| :$/UNSETF/' \
+		-e 's/^[[:space:]]*unalias _gh_project_status_sync 2>\/dev\/null \|\| :$/UNALIAS/' \
+		-e 's/^[[:space:]]*export SHELL_COMMON="\$\{_HELPER%.*$/EXPORT/' \
+		-e 's/^[[:space:]]*\[ -r "\$_HELPER" \] && \. "\$_HELPER"$/LOAD/' \
+		-e 's/^[[:space:]]*(if )?\[ "\$\(command -v _gh_project_status_sync 2>\/dev\/null\)" !?= _gh_project_status_sync \].*$/PROOF/' \
+		-e 's/^[[:space:]]*if \[ -n "\$_sc_was" \]; then export SHELL_COMMON="\$_sc_prev"; else unset SHELL_COMMON; fi$/RESTORE/' \
+		"$ROOT/$f" | grep -E '^(SAVE|UNSETF|UNALIAS|EXPORT|LOAD|PROOF|RESTORE)$' | tr '\n' ' ') || :
+	want='SAVE UNSETF UNALIAS EXPORT LOAD PROOF RESTORE '
+	[ "$seq" = "$want" ] || {
+		printf 'FAIL  %s soft-loader steps are out of order or incomplete\n' "$f"
+		printf '        want: %s\n        got:  %s\n' "$want" "${seq:-<none>}"
+		fail=1
+	}
+done
+
+# 5b. Behavioural, on one real site. commit/board-sync.md is the flattest of
+#     the six, so what runs here is the shipped text rather than a paraphrase.
+soft=$(awk '/^_HELPER="\$\{SHELL_COMMON:-/ { p = 1 } p { print } /^unset _sc_was _sc_prev$/ { exit }' \
+	"$ROOT/skills/commit/references/board-sync.md" | sed 's/<ISSUE_NUMBER>/1/')
+case "$soft" in
+	*RESTORE*|'') printf 'FAIL  could not extract the soft block from commit/board-sync.md\n'; fail=1 ;;
+esac
+printf '%s\nprintf "LEFT=%%s\\n" "${SHELL_COMMON-UNSET}"\n' "$soft" > "$TMP/soft.sh"
+
+#     It must WARN and CONTINUE — exit 0, no silent skip, and the path named.
+#     Before the conversion a missing helper fell straight through the outer
+#     `if [ -r ]` and said nothing at all, which is the silent skip the soft
+#     form's own contract (condition 4) forbids.
+set +e
+out=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT -u SHELL_COMMON HOME="$NOWHERE" \
+	sh "$TMP/soft.sh" 2>&1)
+rc=$?
+set -e
+[ "$rc" -eq 0 ] || { printf 'FAIL  the soft loader stopped the run instead of skipping the step (rc=%s)\n' "$rc"; fail=1; }
+case "$out" in
+	*"board sync skipped"*) ;;
+	*) printf 'FAIL  the soft loader skipped silently — no warning: %s\n' "$out"; fail=1 ;;
+esac
+case "$out" in
+	*"$NOWHERE/dotfiles/shell-common/functions/gh_project_status.sh"*) ;;
+	*) printf 'FAIL  the soft warning does not name the path it tried: %s\n' "$out"; fail=1 ;;
+esac
+
+#     Handed a value an earlier hard block proved, it must hand it back. A tree
+#     without the board helper, so the block is forced down its failure arm
+#     rather than loading from tier 1 and never reaching the restore.
+mkdir -p "$TMP/proven/functions"
+out=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT HOME="$NOWHERE" \
+	SHELL_COMMON="$TMP/proven" sh "$TMP/soft.sh" 2>/dev/null) || :
+case "$out" in
+	"LEFT=$TMP/proven") ;;
+	*) printf 'FAIL  the soft failure arm destroyed an earlier block\x27s proven SHELL_COMMON: %s\n' "$out"; fail=1 ;;
+esac
+
+#     Handed nothing, it must leave nothing — the half that keeps a tree which
+#     failed to load from being exported (gh-resolve-skills#8).
+out=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT -u SHELL_COMMON HOME="$NOWHERE" \
+	sh "$TMP/soft.sh" 2>/dev/null) || :
+[ "$out" = "LEFT=UNSET" ] || {
+	printf 'FAIL  the soft failure arm left a tree exported: %s\n' "$out"
+	fail=1
+}
+
 if [ "$fail" -eq 0 ]; then
 	printf 'ok    no caller-controlled defaults; %s stops at tier 5 against a planted cwd copy, against a PATH imposter, and exports nothing either way\n' "$SITE"
+	printf 'ok    6 soft board-sync loaders: six steps in order, warn-and-continue naming the path, and a failure arm that restores rather than clears\n'
 fi
 exit "$fail"

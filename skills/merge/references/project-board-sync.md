@@ -15,23 +15,28 @@ the merge report — the helper logs to stderr and returns 0.
 ## (1) PR card → `Done`
 
 ```bash
-# helper-fallback NF-1 (dEitY719/dotfiles#644): silent-skip when helper missing.
-# Defense-in-depth (dEitY719/dotfiles#724): also detect "sourced but function undefined".
-_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
+# Soft warn-and-skip loader (harness-skills#60). A missing helper, or one that
+# sources but defines nothing (dEitY719/dotfiles#724), skips the board sync with
+# ONE warning naming the path — no longer silently (dEitY719/dotfiles#644 NF-1's
+# silence hid a broken install).
+_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
 [ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh"
-if [ -r "$_HELPER" ]; then
-    export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"
-    . "$_HELPER"
-    if ! command -v _gh_project_status_sync >/dev/null 2>&1; then
-        printf '[gh-pr-merge] %s sourced but _gh_project_status_sync undefined — board sync skipped (#724).\n' \
-            "$_HELPER" >&2
-    else
-        # --repo is explicit (dEitY719/dotfiles#1405) — the helper's auto-detect answers
-        # `gh repo set-default`, not the remote Step 1 resolved.
-        _gh_project_status_sync pr "$PR_NUMBER" "Done" --repo "$TARGET_REPO" || true
-    fi
+    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
+_sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                              # save
+unset -f _gh_project_status_sync 2>/dev/null || :
+unalias _gh_project_status_sync 2>/dev/null || :
+export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"                     # before the load
+[ -r "$_HELPER" ] && . "$_HELPER"
+if [ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]; then
+    # --repo is explicit (dEitY719/dotfiles#1405) — the helper's auto-detect answers
+    # `gh repo set-default`, not the remote Step 1 resolved.
+    _gh_project_status_sync pr "$PR_NUMBER" "Done" --repo "$TARGET_REPO" || true
+else                                                                                 # tier 5, soft
+    if [ -n "$_sc_was" ]; then export SHELL_COMMON="$_sc_prev"; else unset SHELL_COMMON; fi
+    printf '[gh-pr-merge] no usable shell-common at %s — board sync skipped; the merge itself is unaffected.\n' \
+        "$_HELPER" >&2
 fi
+unset _sc_was _sc_prev
 ```
 
 `Done` is the terminal PR state after merge, regardless of which

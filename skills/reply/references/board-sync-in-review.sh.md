@@ -17,26 +17,29 @@ Soft-fail — warn on any error, never block the Step 7 report.
 
 ```bash
 if [ "${PUSHED_FIXES:-0}" -gt 0 ]; then
-    # helper-fallback NF-1 (dEitY719/dotfiles#644): silent-skip when helper missing.
-    # Defense-in-depth (dEitY719/dotfiles#724): also detect "sourced but function undefined".
-    _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh"
+    # Soft warn-and-skip loader (harness-skills#60). A missing helper, or one
+    # that sources but defines nothing (dEitY719/dotfiles#724), skips the board
+    # sync with ONE warning naming the path — no longer silently.
+    _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
     [ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-        || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh"
-    if [ -r "$_HELPER" ]; then
-        export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"
-        . "$_HELPER"
-        if ! command -v _gh_project_status_sync >/dev/null 2>&1; then
-            printf '[gh-pr-reply] %s sourced but _gh_project_status_sync undefined — board sync skipped (#724).\n' \
-                "$_HELPER" >&2
-        elif _gh_project_status_sync pr "$PR_NUMBER" "In review" \
-                --only-from "In progress,Changes requested" \
-                --repo "$TARGET_REPO"; then
-            echo "[OK] PR 카드 \`In review\` 로 복귀됨"
-        else
-            echo "[WARN] 보드 sync 실패 — 카드 수동 이동 필요할 수 있음"
-        fi
+        || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
+    _sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                          # save
+    unset -f _gh_project_status_sync 2>/dev/null || :
+    unalias _gh_project_status_sync 2>/dev/null || :
+    export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"                 # before the load
+    [ -r "$_HELPER" ] && . "$_HELPER"
+    if [ "$(command -v _gh_project_status_sync 2>/dev/null)" != _gh_project_status_sync ]; then # tier 5, soft
+        if [ -n "$_sc_was" ]; then export SHELL_COMMON="$_sc_prev"; else unset SHELL_COMMON; fi
+        printf '[gh-pr-reply] no usable shell-common at %s — board sync skipped; the replies themselves are unaffected.\n' \
+            "$_HELPER" >&2
+    elif _gh_project_status_sync pr "$PR_NUMBER" "In review" \
+            --only-from "In progress,Changes requested" \
+            --repo "$TARGET_REPO"; then
+        echo "[OK] PR 카드 \`In review\` 로 복귀됨"
+    else
+        echo "[WARN] 보드 sync 실패 — 카드 수동 이동 필요할 수 있음"
     fi
-    # helper missing → board sync silently skipped (NF-1).
+    unset _sc_was _sc_prev
 fi
 ```
 
