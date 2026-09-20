@@ -125,8 +125,8 @@ esac
 #    root the gate must stay LOUD for a registered repo, never degrade to a
 #    silent skip — both halves: Step 5's own guard, and the script's [FAIL]
 #    should the script be reached some other way.
-grep -qF 'CLAUDE_PLUGIN_ROOT is unset' "$ROOT/skills/merge/SKILL.md" || {
-	printf 'FAIL  Step 5 no longer fails loudly when CLAUDE_PLUGIN_ROOT is unset\n'
+grep -qF 'CLAUDE_PLUGIN_ROOT (%s)' "$ROOT/skills/merge/SKILL.md" || {
+	printf 'FAIL  Step 5 no longer names the plugin root it tried when the gate cannot run\n'
 	fail=1
 }
 #    Loud, but never FAILING: Step 5 runs after the merge has already landed,
@@ -184,6 +184,34 @@ out=$(env -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
 case "$out" in
 	'[FAIL]'*) ;;
 	*) printf 'FAIL  registered repo with no plugin root was not loud: %s\n' "$out"; fail=1 ;;
+esac
+
+#    6c. The portability half (#37). CLAUDE_PLUGIN_ROOT is a CONTRACT, not a
+#        Claude Code feature: Claude Code fills it, and on the other five
+#        harnesses the agent exports it from the directory it read SKILL.md at
+#        (harness-skills references/plugin-root.md, "The decision"). So the gate
+#        is reachable off Claude Code — prove it by honouring the contract and
+#        watching the real wrapper run, which is what nothing tested before.
+mkdir -p "$TMP/planted/lib"
+printf '#!/bin/sh\nprintf "dispatched %%s\\n" "$*"\n' \
+	> "$TMP/planted/lib/post-merge-verify-dispatch.sh"
+out=$(env -u GH_VERIFY_ROOT CLAUDE_PLUGIN_ROOT="$TMP/planted" \
+	IW_WATCHED_REPOS="$TMP/watched.json" sh "$TMP/step5.sh" 2>&1) || :
+[ "$out" = "dispatched 42 o/r head base origin" ] || {
+	printf 'FAIL  Step 5 did not reach the wrapper with CLAUDE_PLUGIN_ROOT exported by hand: %s\n' "$out"
+	fail=1
+}
+
+#    6d. ...and the guard is a PROOF, not just a non-empty test. A plugin root
+#        that does not actually hold the wrapper used to fall into `sh <missing>`
+#        — a shell-level "No such file", no [FAIL], and the registered-repo gate
+#        silently skipped. A broken install has to stay loud.
+out=$(env -u GH_VERIFY_ROOT CLAUDE_PLUGIN_ROOT="$TMP/empty-root" \
+	IW_WATCHED_REPOS="$TMP/watched.json" sh "$TMP/step5.sh" 2>&1) || :
+case "$out" in
+	*'[FAIL]'*"$TMP/empty-root"*) ;;
+	*) printf 'FAIL  a plugin root without the wrapper was not a loud [FAIL] naming it: %s\n' "$out"
+		fail=1 ;;
 esac
 
 # 7. The wrapper always exits 0, even when the dispatch it sources calls `exit`

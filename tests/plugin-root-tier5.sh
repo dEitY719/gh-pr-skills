@@ -15,6 +15,11 @@
 #      review, so a pull request that adds lib/vendor/shell-common to its own
 #      tree gets it sourced by the reviewer's tooling.
 #
+#      Three spellings of that cwd default, not one (harness-skills#35): a
+#      $PWD-only alternation passed the dot and command-substitution forms,
+#      which name the same caller-controlled directory — and the dot form is
+#      the one that actually shipped, in claudecode-skills#5.
+#
 #      This file states the pattern in prose rather than quoting it, so the
 #      gate needs no self-exclusion here. Only the convention's own page
 #      carries one, because it has to show the literal.
@@ -37,7 +42,7 @@ fail=0
 #    not match it.
 cd "$ROOT"
 hits=$(git ls-files -z \
-	| xargs -0 grep -nE '\$\{[A-Za-z_][A-Za-z0-9_]*:?-(\$PWD)?\}/' || :)
+	| xargs -0 grep -nE '\$\{[A-Za-z_][A-Za-z0-9_]*:?-(\$PWD|\$\(pwd\)|\.)?\}/' || :)
 if [ -n "$hits" ]; then
 	printf 'FAIL  caller-controlled-default path splice still present:\n%s\n' "$hits"
 	fail=1
@@ -48,8 +53,14 @@ fi
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT INT TERM
 F=$(printf '\140\140\140')
+# Stop at the proof's closing brace, NOT at `export SHELL_COMMON=`: since
+# harness-skills#37 the export sits ABOVE the load, so the old stop condition
+# would have cut the block off before the load and the proof it is here to
+# exercise — and a truncated block cannot reach tier 5, which this test would
+# then report as a tier-5 failure for the wrong reason.
 awk -v f="$F" '$0 == f "bash" && !b { b = 1; next } $0 == f && b { exit }
-	b { print } b && /^export SHELL_COMMON=/ { exit }' \
+	!b { next } { print }
+	/^\[ "\$\(command -v / { p = 1 } p && $0 == "}" { exit }' \
 	"$ROOT/$SITE" > "$TMP/block.sh"
 [ -s "$TMP/block.sh" ] || { printf 'FAIL  no bash fence extracted from %s\n' "$SITE"; exit 1; }
 
@@ -92,7 +103,43 @@ sc=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT -u SHELL_COMMON \
 	fail=1
 }
 
+# 3. The proof compares command -v's OUTPUT to the bare name (harness-skills#36).
+#    A tier-2 root whose helper loads but defines nothing must still stop, even
+#    with a PATH executable of that exact name in the way: `command -v` answers
+#    "is this name runnable", and the exit-status form it replaced passed that
+#    in every shell. Anything less and a stray binary silently certifies a
+#    shell-common that never defined the function.
+mkdir -p "$TMP/root/lib/vendor/shell-common/functions" "$TMP/bin"
+: > "$TMP/root/lib/vendor/shell-common/functions/gh_host.sh"
+printf '#!/bin/sh\nprintf imposter\n' > "$TMP/bin/_gh_resolve_host"
+chmod +x "$TMP/bin/_gh_resolve_host"
+set +e
+err=$(cd "$TMP" && env -u SHELL_COMMON HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
+	CLAUDE_PLUGIN_ROOT="$TMP/root" PATH="$TMP/bin:$PATH" sh "$TMP/block.sh" 2>&1 >/dev/null)
+rc=$?
+set -e
+[ "$rc" -ne 0 ] || {
+	printf 'FAIL  a PATH executable named _gh_resolve_host satisfied the load proof\n'
+	fail=1
+}
+
+# 4. That failure leaves SHELL_COMMON unset, although the block exports it
+#    BEFORE the load (harness-skills#37). The export has to come first — every
+#    vendored helper resolves its siblings through ${SHELL_COMMON:-...} while it
+#    sources — so the tier-5 arm's `unset` is what keeps the observable contract
+#    "set if and only if a helper proved out". Without it this is the poisoned
+#    export of gh-resolve-skills#8, reached from the other side.
+# shellcheck disable=SC2016  # the inner shell expands these, not this one
+sc=$(cd "$TMP" && env -u SHELL_COMMON HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
+	CLAUDE_PLUGIN_ROOT="$TMP/root" PATH="$TMP/bin:$PATH" \
+	sh -c '. "$1" >/dev/null 2>&1; printf "%s" "${SHELL_COMMON-<unset>}"' \
+	sh "$TMP/block.sh")
+[ "$sc" = "<unset>" ] || {
+	printf 'FAIL  a tree that failed the proof stayed exported as SHELL_COMMON: %s\n' "$sc"
+	fail=1
+}
+
 if [ "$fail" -eq 0 ]; then
-	printf 'ok    no caller-controlled defaults; %s stops at tier 5 against a planted cwd copy and exports nothing\n' "$SITE"
+	printf 'ok    no caller-controlled defaults; %s stops at tier 5 against a planted cwd copy, against a PATH imposter, and exports nothing either way\n' "$SITE"
 fi
 exit "$fail"

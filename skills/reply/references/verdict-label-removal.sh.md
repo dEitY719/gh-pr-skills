@@ -53,7 +53,7 @@ DECLINE 된 BLOCKER 도 라벨을 풀어 줬다는 뜻이다. dEitY719/dotfiles#
 stderr 로 넘어온다.
 
 ```bash
-_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
 if [ ! -f "$_SC/functions/gh_pr_edit_safe.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:reply] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
@@ -63,14 +63,16 @@ if [ ! -f "$_SC/functions/gh_pr_edit_safe.sh" ]; then
     _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
 fi
 unset -f _gh_pr_edit_safe_label 2>/dev/null || :
+unalias _gh_pr_edit_safe_label 2>/dev/null || :
+export SHELL_COMMON="$_SC"                                                           # before the load
 [ -f "$_SC/functions/gh_pr_edit_safe.sh" ] && . "$_SC/functions/gh_pr_edit_safe.sh"
-command -v _gh_pr_edit_safe_label >/dev/null 2>&1 || {                               # tier 5
+[ "$(command -v _gh_pr_edit_safe_label 2>/dev/null)" = _gh_pr_edit_safe_label ] || { # tier 5
+    unset SHELL_COMMON
     printf '[gh-pr:reply] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
         "$_SC" >&2
     return 1 2>/dev/null || exit 1
 }
-export SHELL_COMMON="$_SC"
-_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
 if [ ! -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:reply] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
@@ -80,13 +82,15 @@ if [ ! -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ]; then
     _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
 fi
 unset -f _gh_pr_reply_origin_line 2>/dev/null || :
+unalias _gh_pr_reply_origin_line 2>/dev/null || :
+export SHELL_COMMON="$_SC"                                                           # before the load
 [ -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ] && . "$_SC/functions/gh_pr_reply_targeted_review.sh"
-command -v _gh_pr_reply_origin_line >/dev/null 2>&1 || {                             # tier 5
+[ "$(command -v _gh_pr_reply_origin_line 2>/dev/null)" = _gh_pr_reply_origin_line ] || { # tier 5
+    unset SHELL_COMMON
     printf '[gh-pr:reply] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
         "$_SC" >&2
     return 1 2>/dev/null || exit 1
 }
-export SHELL_COMMON="$_SC"
 
 if [ "$PUSHED_FIXES" -gt 0 ]; then
     if _vl_err=$(_gh_pr_drop_label "$PR_NUMBER" review-passed \

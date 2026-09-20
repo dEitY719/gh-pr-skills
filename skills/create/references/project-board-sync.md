@@ -53,7 +53,7 @@ if [ "$hook_skip" -eq 0 ]; then
                 # by default (dEitY719/dotfiles#1405). Source gh_host.sh explicitly:
                 # gh_project_status.sh only sources it on the GH_HOST-unset
                 # path, which Step 1a-0's export already bypassed.
-                _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+                _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                   # tier 1
                 if [ ! -f "$_SC/functions/gh_host.sh" ]; then
                     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                            # tier 5
                         printf '[gh-pr:create] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
@@ -63,13 +63,15 @@ if [ "$hook_skip" -eq 0 ]; then
                     _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                # tier 2
                 fi
                 unset -f _gh_resolve_host 2>/dev/null || :
+                unalias _gh_resolve_host 2>/dev/null || :
+                export SHELL_COMMON="$_SC"                                           # before the load
                 [ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
-                command -v _gh_resolve_host >/dev/null 2>&1 || {                     # tier 5
+                [ "$(command -v _gh_resolve_host 2>/dev/null)" = _gh_resolve_host ] || { # tier 5
+                    unset SHELL_COMMON
                     printf '[gh-pr:create] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
                         "$_SC" >&2
                     return 1 2>/dev/null || exit 1
                 }
-                export SHELL_COMMON="$_SC"
                 GH_REPO=$(_gh_parse_owner_repo_url "$(git remote get-url "${REMOTE:-origin}")" 2>/dev/null || true)
             fi
             _gh_project_status_sync pr "$PR_NUMBER" "In review" --repo "$GH_REPO" || true

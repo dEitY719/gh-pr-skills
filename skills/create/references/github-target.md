@@ -22,7 +22,7 @@ inherit it:
 
 ```bash
 REMOTE="${REMOTE:-origin}"
-_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
+_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"                                  # tier 1
 if [ ! -f "$_SC/functions/gh_host.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:create] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
@@ -32,13 +32,15 @@ if [ ! -f "$_SC/functions/gh_host.sh" ]; then
     _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
 fi
 unset -f _gh_resolve_host 2>/dev/null || :
+unalias _gh_resolve_host 2>/dev/null || :
+export SHELL_COMMON="$_SC"                                                           # before the load
 [ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
-command -v _gh_resolve_host >/dev/null 2>&1 || {                                     # tier 5
+[ "$(command -v _gh_resolve_host 2>/dev/null)" = _gh_resolve_host ] || {             # tier 5
+    unset SHELL_COMMON
     printf '[gh-pr:create] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
         "$_SC" >&2
     return 1 2>/dev/null || exit 1
 }
-export SHELL_COMMON="$_SC"
 REMOTE_URL=$(git remote get-url "$REMOTE")
 GH_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")
 TARGET_HOST=$(_gh_host_from_url "$REMOTE_URL") || TARGET_HOST=$(_gh_resolve_host)
