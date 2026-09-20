@@ -12,6 +12,32 @@ re-queries GitHub:
 | 4 | base ref | ditto `baseRefName` — never a hardcoded `main` |
 | 5 | remote | the `[remote]` positional, default `origin` |
 
+## Finding the wrapper (plugin-root tiers)
+
+The wrapper ships **inside this plugin**, so Step 5 has to resolve the plugin
+root before it can run anything. A block pasted into a shell has no self-path,
+so it gets tiers 2 and 5 and nothing else — the ladder and the reasoning are
+in
+[`harness-skills` `references/plugin-root.md`](https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md).
+
+| Tier | What |
+|---|---|
+| 2 | `$CLAUDE_PLUGIN_ROOT`, guarded non-empty, **then proved** with `[ -f <root>/lib/post-merge-verify-dispatch.sh ]` |
+| 5 | stop — `[FAIL]` for a registered repo, silence for an unregistered one |
+
+`CLAUDE_PLUGIN_ROOT` is a **contract, not a Claude Code feature**. Claude Code
+fills it; on Codex, Gemini CLI, Antigravity, Kimi, Hermes and OpenCode the
+agent exports it itself, to the directory it read `SKILL.md` from. That is what
+makes this gate reachable off Claude Code (#37) — there is no sixth fallback,
+and `GH_VERIFY_ROOT` is not one: it points at a `gh-verify` checkout, while the
+wrapper is a file of *this* plugin.
+
+The `[ -f ]` is not decoration. Without it a plugin root that does not hold the
+wrapper ran `sh <missing path>`, which prints a shell-level `No such file` and
+never reaches the `[FAIL]` — the registered-repo gate silently skipped, which
+is precisely the outcome the row below forbids. `tests/pmv-dispatch-resolves.sh`
+cases 6c/6d cover both directions.
+
 ## The registry gate
 
 The script is a **no-op for any repo missing** from

@@ -39,7 +39,7 @@
 Step 3 에서 코멘트 하나를 분류할 때마다 출처를 함께 남긴다:
 
 ```bash
-_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
 if [ ! -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:reply] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
@@ -49,13 +49,15 @@ if [ ! -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ]; then
     _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
 fi
 unset -f _gh_pr_reply_origin_line 2>/dev/null || :
+unalias _gh_pr_reply_origin_line 2>/dev/null || :
+export SHELL_COMMON="$_SC"                                                           # before the load
 [ -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ] && . "$_SC/functions/gh_pr_reply_targeted_review.sh"
-command -v _gh_pr_reply_origin_line >/dev/null 2>&1 || {                             # tier 5
+[ "$(command -v _gh_pr_reply_origin_line 2>/dev/null)" = _gh_pr_reply_origin_line ] || { # tier 5
+    unset SHELL_COMMON
     printf '[gh-pr:reply] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
         "$_SC" >&2
     return 1 2>/dev/null || exit 1
 }
-export SHELL_COMMON="$_SC"
 
 ORIGINS=$(
     _gh_pr_reply_origin_line codex '[BLOCKER]'   ACCEPT

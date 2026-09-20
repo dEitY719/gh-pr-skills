@@ -120,6 +120,14 @@ which is the whole point.
   which `references/` file to read and when. Four files arrived over that limit
   and CI is currently pinned to `max-skill-lines: 197` to admit them — see
   "Known migration debt" below. Do not add lines to those four.
+- **Plugin-root resolution is one convention, owned upstream.** Every block
+  that loads a vendored helper uses the canonical tier ladder verbatim from
+  [`harness-skills` `references/plugin-root.md`](https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md):
+  tier 1 override, guarded tier 2 `$CLAUDE_PLUGIN_ROOT`, no cwd tier, tier 5
+  stops loudly. `export SHELL_COMMON` goes **before** the load and the tier-5
+  arm `unset`s it; the proof is `unset -f` + `unalias` + `.` + comparing
+  `command -v`'s *output* to the bare name. Do not adapt the shape locally —
+  change it upstream and re-roll. `tests/plugin-root-tier5.sh` is the guard.
 - **The large-diff threshold has one home.** `approve` Step 2 and `review`
   Step 4 branch on the same number, and it has to move for both at once or the
   pair desyncs (#6 finding B2). It is declared once, in

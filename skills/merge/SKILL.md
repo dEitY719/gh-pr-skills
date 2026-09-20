@@ -86,19 +86,21 @@ GH_HOST="$TARGET_HOST" gh pr view <N> --repo "$TARGET_REPO" --json mergeCommit -
 
 Print **only** the compact report (format in `references/strategy-selection.md` → "Final report format").
 
-**After** the report has printed, run the post-merge verification gate. It is a
-no-op for any repo outside the issue-watcher registry; contract, the five
-positionals, and every failure mode are in `references/post-merge-verify.md`.
+**After** the report has printed, run the post-merge verification gate — a no-op
+for any repo outside the issue-watcher registry. Contract, the five positionals,
+the plugin-root tiers and every failure mode: `references/post-merge-verify.md`.
 
 ```bash
-if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then                                            # tier 5
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
+    [ -f "$CLAUDE_PLUGIN_ROOT/lib/post-merge-verify-dispatch.sh" ]; then             # proof
     sh "$CLAUDE_PLUGIN_ROOT/lib/post-merge-verify-dispatch.sh" \
         <N> <owner/repo> <headRefName> <baseRefName> <remote>
 elif command -v jq >/dev/null 2>&1 && jq -e --arg r <owner/repo> \
     '(if type == "array" then . else (.repos // []) end) | any(.repo == $r)' \
     "${IW_WATCHED_REPOS:-$HOME/.agent-factory/avatars/issue-watcher/watched-repos.json}" \
     >/dev/null 2>&1; then
-    printf '[FAIL] gh-pr:merge: CLAUDE_PLUGIN_ROOT is unset, so the post-merge verification gate did NOT run for this REGISTERED repo. The wrapper ships with the plugin, so GH_VERIFY_ROOT alone cannot reach it: export CLAUDE_PLUGIN_ROOT=<plugin dir> first, then run /gh-verify:post-merge-verify <N> by hand.\n' >&2
+    printf '[FAIL] gh-pr:merge: no lib/post-merge-verify-dispatch.sh under CLAUDE_PLUGIN_ROOT (%s), so the post-merge verification gate did NOT run for this REGISTERED repo. CLAUDE_PLUGIN_ROOT is a contract, not a Claude Code feature: Claude Code fills it, and on Codex / Gemini CLI / Antigravity / Kimi / Hermes / OpenCode you export it yourself, to the directory you read this SKILL.md from. GH_VERIFY_ROOT cannot stand in — the wrapper ships inside THIS plugin. Then re-run, or run /gh-verify:post-merge-verify <N> by hand.\n' \
+        "${CLAUDE_PLUGIN_ROOT:-<unset>}" >&2                                         # tier 5
 fi
 ```
 
