@@ -120,6 +120,14 @@ which is the whole point.
   which `references/` file to read and when. Four files arrived over that limit
   and CI is currently pinned to `max-skill-lines: 197` to admit them — see
   "Known migration debt" below. Do not add lines to those four.
+- **The large-diff threshold has one home.** `approve` Step 2 and `review`
+  Step 4 branch on the same number, and it has to move for both at once or the
+  pair desyncs (#6 finding B2). It is declared once, in
+  `skills/approve/references/large-diff-delegation.md`; every file that branches
+  on it cites that path instead of writing the number. The published Pages
+  guides under `docs/skill-guides/` do render it — a stat card exists to show a
+  number — so they move with it. `tests/large-diff-threshold.sh` enforces both
+  halves (#36).
 - **Description budget.** CI sums every skill description and fails past 5,440
   characters — Codex's context budget. The current total is 1,814. Keep new
   descriptions tight anyway.

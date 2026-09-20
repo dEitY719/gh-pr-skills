@@ -64,8 +64,8 @@ Decide path: if `--paths <path>` (repeatable) was given, always take the
 path in `_gh_pr_review_build_prompt`, so a scoped run never routes through
 large-diff delegation, and a scope matching no file exits 1 rather than
 reviewing an empty diff (dEitY719/dotfiles#1616). Otherwise decide by diff size
-(`gh pr view --json additions,deletions`): `≥ 800` lines → follow
-`../approve/references/large-diff-delegation.md`; else inline
+(`gh pr view --json additions,deletions`): at or above the threshold in
+`../approve/references/large-diff-delegation.md` → follow it; else inline
 `gh pr diff`. Append the diff per `references/ai-cli-invocation.md` and write
 `(prompt + diff)` to `PROMPT_FILE`.
 
