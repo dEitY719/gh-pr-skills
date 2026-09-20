@@ -1,7 +1,7 @@
 #!/bin/sh
 # VENDORED — do not edit here.
 # SSOT: dEitY719/dotfiles shell-common/functions/gh_pr_review.sh
-# Synced 2026-09-05T14:06Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# Synced 2026-09-20T06:39Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
 # shell-common/functions/gh_pr_review.sh
 # gh-pr-review — synchronous PR review delegation to an external AI CLI.
@@ -472,7 +472,6 @@ _gh_pr_review_run_ai() {
     fi
     local _rc=0
     local _prompt_content
-    local _agy_stream
     local _opencode_workdir
     local _opencode_prompt
     # Issue #1506: opencode / hermes routinely run 8-10 minutes and had no
@@ -505,58 +504,24 @@ _gh_pr_review_run_ai() {
         codex exec --color=never <"$prompt_file" 2>"$_stderr_file" || _rc=$?
         ;;
     agy)
-        # Issue #1761: this used to be `agy --print "$prompt"`, which put the
-        # whole prompt in one argv value — capped by the kernel at
-        # MAX_ARG_STRLEN (131072B). A 62-file PR (131746B) tripped the guard
-        # and the lane produced no review at all. `--input-format stream-json`
-        # reads the prompt as one NDJSON message on stdin instead, so there is
-        # no argv ceiling; it requires `--output-format stream-json`, so the
-        # review text has to be lifted back out of the reply stream.
-        # Shapes below were verified against the real CLI, not just `agy --help`:
-        #   in   {"event":"user","message":{"content":"<prompt>"}}
-        #   out  {"event":"init",...}
-        #        {"event":"step_update",...}   (one per turn / tool step)
-        #        {"event":"result","result":{"status":"SUCCESS",
-        #                                    "response":"<review text>"}}
-        # `--print` still needs a value even in stream-json mode (Go's flag
-        # parser rejects a bare `--print` with "flag needs an argument"), so it
-        # is passed empty and the stdin message carries the prompt.
+        # Transport (stream-json on stdin, and the reason for every flag)
+        # lives in functions/agy_run.sh — issues #1761 and #1767 both came
+        # from this being hand-copied per call site. `response` is what plain
+        # `agy --print` used to write to stdout, so everything downstream
+        # (tee -> AI_OUT -> comment body) sees the same review text, and the
+        # helper returns agy's own exit code, which the summary prints
+        # verbatim as "exit $_rc".
+        #
         # `2>` before `<` is deliberate: redirections apply left to right, so
         # with `<` first an unreadable $prompt_file is reported before stderr
         # is redirected and the summary below gets "<no stderr>" (bash; zsh
         # reports to the original stderr either way). Do not reorder.
-        if ! _prompt_content=$(jq -Rs '{event: "user", message: {content: .}}' \
-            2>"$_stderr_file" <"$prompt_file"); then
-            _rc=1
-        else
-            # `printf` is a shell builtin, so the prompt reaches agy through a
-            # pipe and never through argv — that is the whole point of #1761.
-            _agy_stream=$(printf '%s\n' "$_prompt_content" |
-                agy --print '' --input-format stream-json \
-                    --output-format stream-json 2>>"$_stderr_file") || _rc=$?
-            # One jq pass over the buffered stream, not two (PR #1765 agy
-            # FOLLOW-UP): status, response and error come out of the same
-            # program. `response` is what plain `agy --print` used to write
-            # to stdout, so everything downstream (tee -> AI_OUT -> comment
-            # body) keeps seeing exactly the same review text.
-            # The exit code alone is NOT the success signal (PR #1765 codex
-            # BLOCKER): the stream carries its own `result.status`, and a
-            # non-SUCCESS result that still exited 0 would post an empty
-            # review as if the lane had passed. `halt_error` routes the
-            # non-SUCCESS cause — reported in `result.error` on *stdout*,
-            # not stderr — into $_stderr_file so the failure summary below
-            # has something to work with, and `jq -e` turns "no result event
-            # at all" into a failure instead of silent empty output.
-            # `_rc` keeps agy's own exit code when it already failed: the
-            # summary prints it verbatim as "exit $_rc".
-            printf '%s\n' "$_agy_stream" |
-                jq -er 'select(.event == "result")
-                        | if .result.status == "SUCCESS" then .result.response // ""
-                          else "agy result status=\(.result.status // "?"): \(.result.error // "no error reported")\n"
-                               | halt_error(1)
-                          end' \
-                    2>>"$_stderr_file" || { [ "$_rc" -ne 0 ] || _rc=1; }
-        fi
+        # Auto-sourced with the rest of functions/ in a real shell; the
+        # explicit source is for standalone `. gh_pr_review.sh` (skills, bats).
+        # shellcheck disable=SC1090
+        command -v _agy_run_stream >/dev/null 2>&1 ||
+            . "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/agy_run.sh"
+        _agy_run_stream 2>>"$_stderr_file" <"$prompt_file" || _rc=$?
         ;;
     claude)
         if [ -n "$cfg_dir" ]; then
