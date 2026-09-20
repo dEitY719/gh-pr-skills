@@ -69,7 +69,8 @@
    FOLLOW-UP / PRAISE 분류 규칙, 필수 assumption check 한 줄, 필수 verdict 한 줄이
    들어 있다.
 4. **Step 4 — 리뷰 재료 수집.** `--paths` 가 있으면 크기와 무관하게 인라인
-   `gh pr diff` 경로를 쓴다. 없으면 `additions + deletions` 가 800줄 이상일 때
+   `gh pr diff` 경로를 쓴다. 없으면 `additions + deletions` 가
+   `skills/approve/references/large-diff-delegation.md` 의 임계값(단일 출처) 이상일 때
    large-diff 위임 경로로, 미만이면 인라인으로 간다. 프롬프트와 diff 를
    `PROMPT_FILE` 에 쓰고 쓰기와 Step 5 dispatch 를 같은 Bash 호출에서 처리한 뒤
    파일을 지운다.

@@ -50,8 +50,8 @@ help 은 **arg #1 에서만** 감지된다 — `--self-ok -h` 는 help 이 아�
    **정지**: `state != OPEN`, draft, required check 실패. **경고 후 진행**:
    `mergeable: CONFLICTING` 또는 `rebaseable: false` — 경고 블록이 리뷰 본문 앞에 붙고
    최종 보고에도 포함된다.
-2. **Step 2 — 리뷰 재료 수집.** `additions + deletions` 가 800줄
-   (`references/large-diff-delegation.md` 의 단일 출처) 이상이면 Explore 서브에이전트에
+2. **Step 2 — 리뷰 재료 수집.** `additions + deletions` 가
+   `references/large-diff-delegation.md` 의 임계값(단일 출처) 이상이면 Explore 서브에이전트에
    위임해 BLOCKER/FOLLOW-UP/PRAISE 요약만 받는다. 미만이면 인라인 경로로 diff, 커밋 JSON,
    그리고 **세 개의 코멘트 엔드포인트**(inline / issue / review)를 전부 읽는다. 하나라도
    빠뜨리면 봇 피드백을 놓친다.

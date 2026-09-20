@@ -12,10 +12,29 @@ in the same session.
 PRs at or above this threshold are delegated; below it, the inline path
 runs unchanged.
 
-The number is a starting point. Tune it in this file when PR-size
-distribution data justifies it. Do **not** hardcode the threshold
-anywhere else (issue dEitY719/dotfiles#403 acceptance criterion: single source of
-truth in references/).
+This file is the **only** place the number may appear. `gh-pr:review`
+Step 4 and its `references/ai-cli-invocation.md` branch on the same
+threshold and cite this file rather than restating it, because the two
+skills have to move together — changing one alone desyncs the pair
+(dEitY719/gh-pr-skills#6 finding B2, dEitY719/gh-pr-skills#36).
+`tests/large-diff-threshold.sh` fails if a second copy appears.
+Original acceptance criterion: dEitY719/dotfiles#403, single source of truth
+in `references/`.
+
+The value was carried over from dEitY719/dotfiles#403 as a starting point, to be
+tuned here once PR-size distribution data existed. It now does, and it
+holds: across the 121 merged PRs of the `dEitY719/*-skills` family
+(2026-09), `additions + deletions` runs p50 139, p75 422, **p90 781**,
+p95 1176, max 5253. It sits on the p90 knee — 12 of 121 PRs (9.9%)
+delegate. That is the intended shape: the inline path stays on the hot
+path for the nine PRs in ten that cannot crowd the context, and the
+long tail that can is the part that pays the dispatch. Re-measure
+before moving it:
+
+```sh
+gh pr list -R <repo> --state merged --limit 100 \
+  --json additions,deletions --jq '.[] | .additions + .deletions'
+```
 
 ## When to delegate
 
