@@ -48,10 +48,8 @@ and the on-the-base-branch recovery (F-2); its "Outcomes" section defines
 
 ## Steps 2-3: Analyze ALL Commits + Resolve Issue
 
-The PR body must reflect **every commit** in the range, not just the latest:
-read `git log <base>..HEAD` and group by theme (a 5-commit PR mentions all 5).
-Issue precedence, same as `gh-pr:commit`: (1) explicit `/gh-pr:create <N>`, (2) recent
-conversation `#N`, (3) range commit footers, (4) none → omit the link.
+Read "Commit coverage and issue precedence" in `references/pr-body-template.md`
+before drafting: the every-commit rule and the issue-number precedence chain.
 
 ## Step 4 + 4.5: Draft Body, then Lint Guard (pre-push)
 
@@ -72,9 +70,7 @@ Read `references/push-and-create.md` for the upstream-state push policy and the
 
 ## Step 6: Apply Labels
 
-Derive labels from conventional-commit types in `git log <base>..HEAD` and PR
-scope; apply only labels that already exist (`GH_HOST="$TARGET_HOST" gh label
-list --repo "$GH_REPO"`) — never create new ones. Mapping + safe-apply loop:
+Derive and apply labels per "Label derivation (Step 6)" in
 `references/pr-body-template.md`. After it (all-missing no-op included), emit `printf '[step:gh-pr-create/labels] OK\n'`.
 
 ## Step 7: Sync Project Board Status

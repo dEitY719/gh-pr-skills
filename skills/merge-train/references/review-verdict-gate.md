@@ -317,3 +317,22 @@ in the `gh-setup-skills` sibling repo (`skills/label-bootstrap/references/gh-lab
 - `routing-table.md` — the F-3 per-PR re-check that closes the mid-run race
 - `ordering.md` — the `reply-pending` label's lifecycle, the *timing* signal
   this *content* signal sits beside
+
+## Step 3.5 of SKILL.md, in full
+
+Step 3.5 of `SKILL.md` is now a pointer at this file. Its full wording — the
+self-reference below included — was:
+
+Over the PRs Step 2 let through — **not** a new API call, the `labels` field
+is already in hand — apply the decision table in
+`references/review-verdict-gate.md`: `review-blocked` (even alongside a
+stale `review-passed`) is `[SKIPPED] review-blocked — reviewer verdict is
+blocking`; neither label is `[SKIPPED] review not verified — no
+review-passed label`; `review-passed` alone stays in the queue. Check with
+`_gh_pr_merge_train_has_review_blocked_label` /
+`_gh_pr_merge_train_has_review_passed_label` (same file Step 2 sourced).
+Label presence only: absence is "not verified", not "passed". **Never**
+re-derive the `jq` or parse a review comment body — `gh-verify:review-all` is
+the labels' sole writer. The sha-freshness check against a stale
+`review-passed` happens later, at Step 4's F-3 re-query
+(`references/routing-table.md`).

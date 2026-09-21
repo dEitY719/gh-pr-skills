@@ -176,6 +176,19 @@ confirms an `incident` label already exists; if it does, apply it.
 
 Capture the issue URL + number from the command output for Step 7's report.
 
+## Step 7 — success report
+
+Step 7 prints exactly this and nothing else:
+
+```
+[OK] Emergency-merged PR #<N>
+  Merge SHA:       <sha>
+  Audit comment:   <url>
+  Incident issue:  #<M> (<url>)
+  Reason:          <reason>
+  [WARN] Add retro notes to incident issue within 72h.
+```
+
 ## Step 7 — refusal report shapes
 
 Every stop merges nothing and prints exactly one `[FAIL] PR #<N> not merged —

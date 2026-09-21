@@ -42,13 +42,8 @@ Argument shape + KR aliases + exit codes: `references/parser-contract.md` — it
 
 Run these checks before expensive work:
 
-- PR state must be `OPEN` AND not draft → else exit 1 `PR #<N> is <state>; aborting`.
-- `command -v <ai-bin>` for the chosen `--ai` → else exit 1 `Required CLI '<name>' not found in PATH`.
-- `--ai opencode` and `--ai hermes` each require `_dotfiles_setup_mode == internal`; otherwise
-  exit 1 `--ai <name> is internal-PC only (~/.dotfiles-setup-mode != internal)`.
-- `gh auth status` returns 0 → else exit 1 with the gh error line.
-
-CI status is not a gate; self-authored PRs are allowed because no decision is submitted.
+Read `references/preflight.md` and apply every gate it lists — PR state, the
+`--ai` binary, the internal-PC restriction, `gh auth status`, and what is not a gate.
 
 ## Step 3: Load Review Preset
 
@@ -59,19 +54,9 @@ Normalized enum: `default` / `quick` / `thorough` / `security` /
 
 ## Step 4: Fetch Review Material
 
-Decide path: if `--paths <path>` (repeatable) was given, always take the
-**inline** `gh pr diff` path regardless of PR size — the diff is filtered by
-path in `_gh_pr_review_build_prompt`, so a scoped run never routes through
-large-diff delegation, and a scope matching no file exits 1 rather than
-reviewing an empty diff (dEitY719/dotfiles#1616). Otherwise decide by diff size
-(`gh pr view --json additions,deletions`): at or above the threshold in
-`../approve/references/large-diff-delegation.md` → follow it; else inline
-`gh pr diff`. Append the diff per `references/ai-cli-invocation.md` and write
-`(prompt + diff)` to `PROMPT_FILE`.
-
-Never hardcode or reuse a `PROMPT_FILE`; derive it from
-`_gh_pr_review_mktemp_prompt "$ai" "$PR_NUMBER"` and do the write plus Step 5
-dispatch in the same Bash tool call. Then `rm -f "$PROMPT_FILE"`.
+Read `references/review-material.md` and follow it: the `--paths` inline rule,
+the diff-size branch on the threshold in
+`../approve/references/large-diff-delegation.md`, and the `PROMPT_FILE` rule.
 
 ## Step 5: Dispatch to External CLI
 

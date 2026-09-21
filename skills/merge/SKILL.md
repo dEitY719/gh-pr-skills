@@ -26,30 +26,14 @@ If arg #1 is `-h`/`--help`/`help`, output `references/help.md` verbatim and stop
 
 Record `START_TS=$(date +%s)` immediately for elapsed-time tracking in Step 4.
 
-- `pr-number` — required, positive integer. Missing/invalid → usage pointer, stop.
-- `strategy` — default `rebase`; one of `rebase`/`squash`/`merge`. Other → print allowed values, stop.
-- `remote` — default `origin`. Bind `TARGET_REPO` **and** `TARGET_HOST` from
-  that one remote URL and `export GH_HOST` per `references/github-target.md`
-  (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). Missing remote → list `git remote -v`, stop (no silent fallback).
+Argument rules — defaults, the refusal for each, and the `TARGET_REPO` / `TARGET_HOST` / `GH_HOST` binding: `references/arg-parsing.md`.
 
 ## Step 2: Pre-flight (parallel)
 
 Run in one message: `GH_HOST="$TARGET_HOST" gh pr view <N> --repo "$TARGET_REPO" --json number,state,isDraft,mergeable,mergeStateStatus,reviewDecision,baseRefName,headRefName,url`
 and `GH_HOST="$TARGET_HOST" gh pr checks <N> --repo "$TARGET_REPO" --required`.
 
-Then detect base-branch protection via
-`GH_HOST="$TARGET_HOST" gh api "repos/$TARGET_REPO/branches/<baseRefName>/protection"` (exit 0 →
-present; 403/404 → absent). The exact protection-vs-`reviewDecision` behavior
-table is in `references/strategy-selection.md` → "Branch protection detection".
-
-**Hard stops** (full table in `references/strategy-selection.md` →
-"Hard-stop decisions"): `state != OPEN`; `isDraft`; `mergeable ==
-CONFLICTING`; `mergeStateStatus ∈ {BEHIND, BLOCKED, DIRTY}`; any required
-check FAILURE/pending; `reviewDecision != APPROVED` → suggest
-`/gh-pr:merge-emergency`. Conditional exception: protection **absent**
-**AND** `reviewDecision == ""` → accept and print
-`INFO: No branch protection on <baseRefName> — accepting empty reviewDecision.`
-(a non-empty non-APPROVED value still stops).
+Read `references/preflight-hard-stops.md` before merging: base-branch protection detection, every hard stop, and the one conditional exception, verbatim.
 
 The projectV2 board Status is **not** a merge gate (dEitY719/dotfiles#1513) — do not read it
 here. Rationale + the retired Step 2-B in `references/board-policy.md`.
@@ -67,16 +51,7 @@ strategies.
 
 ## Step 4: Post-merge Housekeeping
 
-Four independent soft-fail side effects, in this order. Each reference file
-holds the snippet to paste verbatim plus its own rationale; none of them can
-block or alter the Step 5 report.
-
-| What | Reference | Failure mode |
-|---|---|---|
-| PR card → `Done`, then linked Issue cards → `Done` | `references/project-board-sync.md` | silent return without a projectV2 board; failures hit stderr |
-| herdr idle-tab hint for the merged branch's local worktree | `references/herdr-tab-notify.sh.md` | read-only; silent skip with no worktree, no `herdr`, or a non-idle agent |
-| drop the now-readerless `review-passed` label | `references/review-passed-cleanup.sh.md` | one `[WARN]` line (dEitY719/dotfiles#1636) |
-| ai-metrics PR comment | `references/ai-metrics-comment.sh.md` | one `[WARN]` line; skipped entirely when `GH_DISABLE_AI_METRICS=1` |
+Read `references/post-merge-housekeeping.md` and run the four soft-fail side effects it tables, in order; paste each linked snippet verbatim.
 
 ## Step 5: Fetch Merge SHA + Report
 

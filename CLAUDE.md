@@ -116,10 +116,11 @@ which is the whole point.
   NF-4 requires the new keys' `required` lists to match the old ones exactly.
   The `<!-- ai-metrics -->` footer markers are likewise an interop format shared
   with `gh-issue-skills`, not something to renamespace.
-- **Progressive disclosure.** `SKILL.md` should stay under 100 lines and name
-  which `references/` file to read and when. Four files arrived over that limit
-  and CI is currently pinned to `max-skill-lines: 197` to admit them — see
-  "Known migration debt" below. Do not add lines to those four.
+- **Progressive disclosure.** `SKILL.md` stays under 100 lines and names
+  which `references/` file to read and when. All eight are inside the shared
+  default and CI enforces it with no pin: #51 retired the `max-skill-lines: 197`
+  migration debt. Do not add lines that push one back over, and do not
+  reintroduce a pin — extract to `references/` instead.
 - **Plugin-root resolution is one convention, owned upstream.** Every block
   that loads a vendored helper uses the canonical tier ladder verbatim from
   [`harness-skills` `references/plugin-root.md`](https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md):
@@ -177,17 +178,17 @@ These are acceptance criteria carried over from dotfiles, not advice:
 ## Known migration debt
 
 Items 1 and 2 came across verbatim because dEitY719/dotfiles#1410's Non-Goals forbid changing
-behaviour during a placement-and-naming migration; item 1 is still Phase 4 work
+behaviour during a placement-and-naming migration; item 1 is settled (#51)
 and item 2 is mitigated but not gone. Item 3 is settled, item 4 is a standing
 decision, and item 5 is owned upstream — all kept here so the "what does this
 repo still need from dotfiles" answer stays in one place:
 
-1. **`SKILL.md` files exceed the 100-line progressive-disclosure limit** —
-   `merge-train` 152, `reply` 146, `merge` 116, `review` 110. CI is pinned to
-   197 to admit them. The fix is to extract detail into each skill's
-   `references/`, not to raise the pin. `merge` came down from 197 (#5) by
-   moving its Step 5 dispatch into `lib/post-merge-verify-dispatch.sh`; drop
-   the pin to the new ceiling once the remaining three follow.
+1. **`SKILL.md` files exceeded the 100-line progressive-disclosure limit —
+   settled (#51).** All eight are now under 100 lines: the detail moved
+   verbatim into each skill's `references/`, and the `max-skill-lines: 197` pin
+   is gone, so CI enforces the shared default. `merge` had already come down
+   from 197 (#5) by moving its Step 5 dispatch into
+   `lib/post-merge-verify-dispatch.sh`. Do not raise the limit again.
 2. **Several skills source dotfiles' `shell-common/functions/*.sh`** —
    `gh_project_status.sh`, `gh_pr_review.sh`, `gh_host.sh`,
    `gh_pr_merge_train.sh`, `gh_pr_edit_safe.sh`, and others. #3 / PR #4 made

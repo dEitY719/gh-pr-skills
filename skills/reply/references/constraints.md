@@ -45,3 +45,11 @@
     ever. A failed label write leaves the PR unlabelled, and unlabelled still
     reads downstream as "not verified", never as a pass. `review-blocked` is
     still issued only by an external reviewer's verdict.
+
+## Non-negotiables (the short form SKILL.md carries)
+
+Read `references/constraints.md`. Non-negotiables: never skip a reply (bot
+comments included), never promote the card to `Approved` (owned by
+`gh-pr:approve`, dEitY719/dotfiles#1350), never resolve threads
+programmatically, never `--amend` / `--no-verify` / force-push, and route
+label/body edits through `_gh_pr_edit_safe_*`.

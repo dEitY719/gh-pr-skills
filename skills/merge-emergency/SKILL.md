@@ -30,9 +30,7 @@ incident issue exist to make overuse visible.
 
 Record `START_TS=$(date +%s)` for Step 5 elapsed time. Positional: `<PR> <reason> [remote]`.
 
-- `remote` — default `origin`; bind `TARGET_REPO` + `TARGET_HOST` from that URL and export `GH_HOST` per `references/github-target.md` (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407) **first**, before any `gh` call below; missing → `git remote -v` and stop.
-- `PR` — required; omitted → `GH_HOST="$TARGET_HOST" gh pr view --json number` on current branch, else stop. No `--repo` here: `gh` rejects it without a PR argument (`references/github-target.md` → "Exception").
-- `reason` — **required**, ≥10 chars, citing an incident/ticket ID or concrete user impact; vague (`"urgent"`, `"fix"`) → refuse. Examples: `references/help.md`.
+Argument rules for each positional — the `remote` binding order, the `--repo` exception, and the reason-quality refusal: `references/arg-parsing.md`.
 
 Capture `ME=$(GH_HOST="$TARGET_HOST" gh api user -q .login)`, `NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)`.
 
@@ -79,14 +77,7 @@ Sync failure never blocks the audit report.
 
 ## Step 7: Report
 
-```
-[OK] Emergency-merged PR #<N>
-  Merge SHA:       <sha>
-  Audit comment:   <url>
-  Incident issue:  #<M> (<url>)
-  Reason:          <reason>
-  [WARN] Add retro notes to incident issue within 72h.
-```
+Print the `[OK]` report exactly as `references/audit-templates.md` -> "Step 7 — success report" spells it.
 
 Every refusal instead prints one `[FAIL] PR #<N> not merged — <why>` line and
 merges nothing; a failure *after* the merge lands never says `not merged` —

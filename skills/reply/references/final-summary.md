@@ -75,3 +75,11 @@ Soft-fail: if the `gh pr view` call errors (network blip, missing
 scope), skip the nudge silently — the main summary already printed.
 Validated on PR `dev-team-404/AgentToolbox#655` — the lingering CR
 state was the exact gap that the run surfaced.
+
+## Step 7 report — what SKILL.md delegates here
+
+Print the summary table per `references/final-summary.md` (Accepted / Declined /
+Answered counts, the per-reviewer/severity breakdown, the `review-passed`
+gate outcome line, commit SHAs, skipped comments, and the lingering
+`CHANGES_REQUESTED` nudge). Then post the ai-metrics PR comment per
+`references/ai-metrics-comment.sh.md` (soft-fail; skip when `GH_DISABLE_AI_METRICS=1`).
