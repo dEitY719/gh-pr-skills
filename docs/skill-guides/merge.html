@@ -249,7 +249,7 @@
       <div class="grid grid-3">
         <div class="card"><div class="eyebrow">정지 조건 갈래</div><h3 style="margin:8px 0 4px;"><span data-count="4">4</span></h3><p class="text-secondary" style="font-size:0.92rem;">미승인 / CI 실패 / draft / conflict</p></div>
         <div class="card"><div class="eyebrow">머지 전략</div><h3 style="margin:8px 0 4px;"><span data-count="3">3</span></h3><p class="text-secondary" style="font-size:0.92rem;">rebase(기본) / squash / merge &mdash; 실패해도 서로 바꾸지 않는다</p></div>
-        <div class="card"><div class="eyebrow">SKILL.md 길이</div><h3 style="margin:8px 0 4px;"><span data-count="197" data-suffix="줄">197줄</span></h3><p class="text-secondary" style="font-size:0.92rem;">이 플러그인 최장, 100줄 한도 초과 &mdash; 알려진 부채</p></div>
+        <div class="card"><div class="eyebrow">SKILL.md 길이</div><h3 style="margin:8px 0 4px;"><span data-count="96" data-suffix="줄">96줄</span></h3><p class="text-secondary" style="font-size:0.92rem;">100줄 한도 이내 &mdash; 마이그레이션 부채 해소(#51)</p></div>
       </div>
     </div>
   </section>
@@ -384,11 +384,10 @@
         </div>
       </details>
       <details>
-        <summary><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.8"/></svg>부채 2 &mdash; SKILL.md 가 197줄로 100줄 한도를 넘긴다<svg class="caret" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5l5 5-5 5"/></svg></summary>
+        <summary><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.8"/></svg>부채 2 &mdash; SKILL.md 길이: 해소됨(#51)<svg class="caret" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5l5 5-5 5"/></svg></summary>
         <div class="details-body">
-          <p><code>skills/merge/SKILL.md</code> 는 197줄로 이 플러그인에서 가장 길고,
-            100줄 progressive-disclosure 한도를 넘긴다. CI 는 <code>max-skill-lines: 197</code> 로 고정해 이를 허용하고 있다.</p>
-          <p>해결책은 한도를 올리는 것이 아니라 세부를 <code>references/</code> 로 빼는 것이다.</p>
+          <p>세부를 <code>references/</code> 로 옮겨 <code>skills/merge/SKILL.md</code> 는 96줄이 되었고,
+            CI 의 <code>max-skill-lines: 197</code> 고정은 제거되어 공용 기본값(100줄)이 적용된다.</p>
         </div>
       </details>
 

@@ -3,6 +3,8 @@
 Read from `SKILL.md` Step 6, after the fix commits have been pushed and
 `PUSHED_FIXES` is set. Run the blocks below in the order given.
 
+`references/...` and `../...` paths below are relative to `skills/reply/`, the same way SKILL.md writes them.
+
 If `PUSHED_FIXES > 0`: sync the board back to `In review`
 (`references/board-sync-in-review.sh.md`, soft-fail), then drop the now-stale
 `review-passed` (`references/verdict-label-removal.sh.md`, soft-fail) — the
