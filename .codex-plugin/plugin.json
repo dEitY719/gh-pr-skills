@@ -1,6 +1,6 @@
 {
   "name": "gh-pr",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "GitHub commit-to-merge lifecycle: commit, open a PR, second-opinion AI review, per-comment replies, approve, merge, audited emergency override, serial merge train.",
   "author": {
     "name": "dEitY719",

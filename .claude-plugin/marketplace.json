@@ -10,7 +10,7 @@
     {
       "name": "gh-pr",
       "description": "Drive one change from a commit to a merged PR: commit it, open the PR, get a second-opinion AI review, reply to every review comment, approve, and merge — with an audited emergency override and a serial merge train",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "source": "./",
       "author": {
         "name": "dEitY719",
