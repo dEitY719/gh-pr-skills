@@ -194,3 +194,19 @@ calls `gh` internally and inherits the exported `GH_HOST`.
 
 Report the applied labels (and skipped ones, if any) alongside the PR URL
 in Step 7.
+
+## Commit coverage and issue precedence
+
+Steps 2-3 of `SKILL.md` apply these rules before the body below is drafted.
+
+The PR body must reflect **every commit** in the range, not just the latest:
+read `git log <base>..HEAD` and group by theme (a 5-commit PR mentions all 5).
+Issue precedence, same as `gh-pr:commit`: (1) explicit `/gh-pr:create <N>`, (2) recent
+conversation `#N`, (3) range commit footers, (4) none → omit the link.
+
+## Label derivation (Step 6)
+
+Derive labels from conventional-commit types in `git log <base>..HEAD` and PR
+scope; apply only labels that already exist (`GH_HOST="$TARGET_HOST" gh label
+list --repo "$GH_REPO"`) — never create new ones. Mapping + safe-apply loop:
+the "Label Mapping" and safe-apply sections above.

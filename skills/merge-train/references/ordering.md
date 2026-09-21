@@ -164,3 +164,29 @@ session on a queue that would come out empty. This skill re-runs the filter
 **authoritatively**, because minutes pass between that count and the moment
 each PR is actually processed, and a PR can be touched — or labelled — again
 in between. Same code, later clock.
+
+## Step 2 — queue collection (the snippet SKILL.md pastes)
+
+Step 2 of `SKILL.md` pastes this block verbatim before applying the D-2 sort above.
+
+```bash
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
+if [ ! -f "$_SC/functions/gh_pr_merge_train.sh" ]; then
+    [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || { printf '[gh-pr:merge-train] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' "$_SC" >&2; return 1 2>/dev/null || exit 1; }
+    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"
+fi
+unset -f _gh_pr_merge_train_filter_targets 2>/dev/null || :
+unalias _gh_pr_merge_train_filter_targets 2>/dev/null || :
+export SHELL_COMMON="$_SC"
+[ -f "$_SC/functions/gh_pr_merge_train.sh" ] && . "$_SC/functions/gh_pr_merge_train.sh"
+[ "$(command -v _gh_pr_merge_train_filter_targets 2>/dev/null)" = _gh_pr_merge_train_filter_targets ] || { unset SHELL_COMMON; printf '[gh-pr:merge-train] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' "$_SC" >&2; return 1 2>/dev/null || exit 1; }
+GH_HOST="$TARGET_HOST" gh pr list --repo "$TARGET_REPO" --author @me --state open \
+  --limit 50 --json number,updatedAt,isDraft,mergeable,mergeStateStatus,baseRefName,title,labels \
+  | _gh_pr_merge_train_filter_targets --now "$(date +%s)"
+```
+
+`--author @me` is not optional (D-7) — never auto-merge a colleague's PR.
+`_gh_pr_merge_train_filter_targets` is the **shared** filter (dEitY719/dotfiles#1524): it drops drafts,
+every PR carrying the `reply-pending` label, and every PR inside the D-6 quiet period —
+the exact same function `shell-common/tools/custom/pr_merge_train_cron.sh` runs, so the
+two can never disagree. **Do not re-implement or paraphrase that filter here** — run it.

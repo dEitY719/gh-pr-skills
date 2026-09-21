@@ -196,7 +196,6 @@ jobs:
     uses: dEitY719/harness-skills/.github/workflows/skill-check.yml@main
     with:
       plugin-name: gh-pr
-      max-skill-lines: 197
       allow-emoji-paths: |
         skills/approve/references/ai-metrics.md
         ...
@@ -208,10 +207,9 @@ version agreement across all seven manifests, shell scripts, and the no-emoji
 rule. There is no local copy to keep in sync; a check added upstream applies here
 on the next run.
 
-`max-skill-lines` is pinned above the 100-line default because four `SKILL.md`
-files arrived from dotfiles already over it (`merge` 197, `merge-train` 148,
-`reply` 143, `review` 110). That is tracked migration debt, not a new standard —
-see [`CLAUDE.md`](CLAUDE.md) → "Known migration debt".
+`max-skill-lines` is not overridden: every `SKILL.md` is inside the shared
+100-line default. The pin that once admitted four over-length files was
+retired in #51; see [`CLAUDE.md`](CLAUDE.md) → "Known migration debt".
 
 The `allow-emoji-paths` entries cover text the skills **quote** rather than
 decorate with: the ai-metrics footer, whose chart / person / robot glyphs are the

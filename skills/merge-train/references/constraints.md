@@ -100,3 +100,22 @@ progress while this one is stuck.
 
 `--author @me` (D-7). A colleague's PR is out of scope for an unattended merge,
 regardless of how mergeable it looks.
+
+## The five constraints `SKILL.md` used to call out inline
+
+`SKILL.md`'s own Constraints section named these five before it was cut to a
+pointer at this file. Reproduced verbatim, closing self-reference included:
+
+- **Never call `gh-pr:merge-emergency`** (NF-2). Admin bypass is not this
+  skill's path; an unmergeable PR is `[SKIPPED]` with a reason.
+- **Never abort the whole train** for one PR's failure (F-6).
+- **No merge strategy argument** — `gh-pr:merge`'s default rebase is what
+  `required_linear_history` allows (D-4).
+- **No review judgement of its own** — `gh-flow:issue` already ran
+  `gh-verify:review-all`, and the gate-off path delegates to `gh-pr:approve`
+  rather than deciding anything here. Step 3.5 reads that fan-out's verdict
+  **label** and nothing else; parsing a review comment body here is forbidden
+  (`references/review-verdict-gate.md` → "What this gate is not").
+- **No ai-metrics comment.** Every atom the train calls posts its own; a
+  train-level one would only duplicate them on the same PR.
+- Full list: `references/constraints.md`.

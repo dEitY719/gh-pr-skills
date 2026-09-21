@@ -264,3 +264,17 @@ per run. Then apply it against that PR's own `reviewDecision`:
 A `CHANGES_REQUESTED` PR is skipped **even when the gate is off**: someone
 explicitly blocked it, and the absence of a platform rule does not overrule a
 human's stated objection.
+
+## Step 3 of SKILL.md, in full
+
+Step 3 of `SKILL.md` is now a pointer at this file. Its full wording — the
+self-reference below included — was:
+
+Apply the decision table in `references/approval-gate.md`: read
+`required_approving_review_count` from **both** rulesets and classic branch
+protection, once per distinct `baseRefName`, cached per base — two calls per
+base, never per PR. Either source requiring `>= 1` → gate on; both reporting
+no policy → off (D-5). Classify each source by HTTP status, not exit code;
+only a genuinely undetermined answer stays fail-closed. Even with the gate
+off, a non-empty non-`APPROVED` `reviewDecision` is `[SKIPPED]` before
+`gh-pr:merge` is called — it would refuse, and NF-2 forbids clearing that.

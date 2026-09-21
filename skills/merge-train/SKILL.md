@@ -38,27 +38,10 @@ the same remote URL (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). An explic
 
 ## Step 2: Collect and order the queue
 
-```bash
-_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
-if [ ! -f "$_SC/functions/gh_pr_merge_train.sh" ]; then
-    [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || { printf '[gh-pr:merge-train] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' "$_SC" >&2; return 1 2>/dev/null || exit 1; }
-    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"
-fi
-unset -f _gh_pr_merge_train_filter_targets 2>/dev/null || :
-unalias _gh_pr_merge_train_filter_targets 2>/dev/null || :
-export SHELL_COMMON="$_SC"
-[ -f "$_SC/functions/gh_pr_merge_train.sh" ] && . "$_SC/functions/gh_pr_merge_train.sh"
-[ "$(command -v _gh_pr_merge_train_filter_targets 2>/dev/null)" = _gh_pr_merge_train_filter_targets ] || { unset SHELL_COMMON; printf '[gh-pr:merge-train] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' "$_SC" >&2; return 1 2>/dev/null || exit 1; }
-GH_HOST="$TARGET_HOST" gh pr list --repo "$TARGET_REPO" --author @me --state open \
-  --limit 50 --json number,updatedAt,isDraft,mergeable,mergeStateStatus,baseRefName,title,labels \
-  | _gh_pr_merge_train_filter_targets --now "$(date +%s)"
-```
-
-`--author @me` is not optional (D-7) — never auto-merge a colleague's PR.
-`_gh_pr_merge_train_filter_targets` is the **shared** filter (dEitY719/dotfiles#1524): it drops drafts,
-every PR carrying the `reply-pending` label, and every PR inside the D-6 quiet period —
-the exact same function `shell-common/tools/custom/pr_merge_train_cron.sh` runs, so the
-two can never disagree. **Do not re-implement or paraphrase that filter here** — run it.
+Paste the queue-collection snippet from `references/ordering.md` → "Step 2 —
+queue collection" verbatim: it sources shell-common and pipes `gh pr list
+--author @me` through the shared `_gh_pr_merge_train_filter_targets` filter —
+never re-implement or paraphrase that filter, and never drop `--author @me` (D-7).
 
 Sort the surviving array `CLEAN` → `BEHIND` → `UNSTABLE` → `DIRTY`, ties by
 ascending PR number (D-2). Ordering, the label, and the quiet-period rationale:
@@ -68,30 +51,14 @@ ascending PR number (D-2). Ordering, the label, and the quiet-period rationale:
 
 ## Step 3: Read the approval policy per base branch
 
-Apply the decision table in `references/approval-gate.md`: read
-`required_approving_review_count` from **both** rulesets and classic branch
-protection, once per distinct `baseRefName`, cached per base — two calls per
-base, never per PR. Either source requiring `>= 1` → gate on; both reporting
-no policy → off (D-5). Classify each source by HTTP status, not exit code;
-only a genuinely undetermined answer stays fail-closed. Even with the gate
-off, a non-empty non-`APPROVED` `reviewDecision` is `[SKIPPED]` before
-`gh-pr:merge` is called — it would refuse, and NF-2 forbids clearing that.
+Apply the decision table in `references/approval-gate.md` — read
+`required_approving_review_count` per distinct `baseRefName`, cached, fail-closed.
 
 ## Step 3.5: Apply the review verdict gate
 
-Over the PRs Step 2 let through — **not** a new API call, the `labels` field
-is already in hand — apply the decision table in
-`references/review-verdict-gate.md`: `review-blocked` (even alongside a
-stale `review-passed`) is `[SKIPPED] review-blocked — reviewer verdict is
-blocking`; neither label is `[SKIPPED] review not verified — no
-review-passed label`; `review-passed` alone stays in the queue. Check with
-`_gh_pr_merge_train_has_review_blocked_label` /
-`_gh_pr_merge_train_has_review_passed_label` (same file Step 2 sourced).
-Label presence only: absence is "not verified", not "passed". **Never**
-re-derive the `jq` or parse a review comment body — `gh-verify:review-all` is
-the labels' sole writer. The sha-freshness check against a stale
-`review-passed` happens later, at Step 4's F-3 re-query
-(`references/routing-table.md`).
+Apply the decision table in `references/review-verdict-gate.md` over the PRs
+Step 2 let through — no new API call, the `labels` field is already in hand.
+`review-blocked` and "neither label" are `[SKIPPED]`; `review-passed` alone stays.
 
 ## Step 4: Run the train — one PR at a time
 
@@ -116,19 +83,8 @@ assistant text, never via a `Bash` heredoc or `Write`.
 
 ## Constraints
 
-- **Never call `gh-pr:merge-emergency`** (NF-2). Admin bypass is not this
-  skill's path; an unmergeable PR is `[SKIPPED]` with a reason.
-- **Never abort the whole train** for one PR's failure (F-6).
-- **No merge strategy argument** — `gh-pr:merge`'s default rebase is what
-  `required_linear_history` allows (D-4).
-- **No review judgement of its own** — `gh-flow:issue` already ran
-  `gh-verify:review-all`, and the gate-off path delegates to `gh-pr:approve`
-  rather than deciding anything here. Step 3.5 reads that fan-out's verdict
-  **label** and nothing else; parsing a review comment body here is forbidden
-  (`references/review-verdict-gate.md` → "What this gate is not").
-- **No ai-metrics comment.** Every atom the train calls posts its own; a
-  train-level one would only duplicate them on the same PR.
-- Full list: `references/constraints.md`.
+Read `references/constraints.md` before the train runs — it carries all ten,
+including the NF-2 ban on `gh-pr:merge-emergency` and the F-6 never-abort rule.
 
 ## Related Skills
 

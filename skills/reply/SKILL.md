@@ -53,18 +53,10 @@ comments — nothing to do.` and **stop**: no Steps 3–7, no ai-metrics, no pus
 
 ## Step 3: Evaluate Each Comment
 
-For each unaddressed comment, read the referenced file (`path` at `line`)
-and classify as **ACCEPT** / **ACCEPT-PARTIAL** / **DECLINE** / **QUESTION**.
-Bot comments (gemini-code-assist, sourcery-ai, copilot) follow the same
-rules; see `references/reply-templates.md` for the full rubric.
-
-Record each item's origin as `<reviewer>:<severity>:<verdict>[:<owner>/<repo>#<N>]`
-into `ORIGINS` via `_gh_pr_reply_origin_line` (`references/review-passed-gate.md`
-§ Step 3) — Steps 6 and 7 both read that stream, because a flat
-accepted/declined count cannot tell an unresolved BLOCKER from a declined
-suggestion (dEitY719/dotfiles#1616). The optional 4th field names the issue a
-declined BLOCKER was escalated to (dEitY719/dotfiles#1762); it changes the
-report line, never the gate's decision — escalation is not resolution.
+For each unaddressed comment, classify it **ACCEPT** / **ACCEPT-PARTIAL** /
+**DECLINE** / **QUESTION**, then record its origin token. Read
+`references/classification-and-origins.md` and follow it verbatim — the rubric,
+the bot rule, and the `_gh_pr_reply_origin_line` / `ORIGINS` wire format.
 
 ## Step 4: Apply Fixes (ACCEPT / ACCEPT-PARTIAL only)
 
@@ -85,38 +77,19 @@ If any fixes were committed: `git push` (never force-push unless the user
 asked) and report new commit SHAs. Set `PUSHED_FIXES` to the count of new
 SHAs on the remote branch; no fixes / skipped push → `PUSHED_FIXES=0`.
 
-If `PUSHED_FIXES > 0`: sync the board back to `In review`
-(`references/board-sync-in-review.sh.md`, soft-fail), then drop the now-stale
-`review-passed` (`references/verdict-label-removal.sh.md`, soft-fail) — the
-reviewed commit is no longer head. Both run before the gate below.
-
-Then, unconditionally and only after Step 5 has replied to every comment: run
-the `review-passed` gate exactly as `references/review-passed-gate.md`
-specifies — it is the SSOT for `HEAD_SHA`/`ME` resolution, the raw-JSON
-requirement, the origin-history merge, and the five-call pipeline order
-(soft-fail; `gh-verify:review-all` owns `review-blocked` and never writes
-`review-passed`; see `references/constraints.md` for the NF-2 rationale).
-Never hand-write either label.
-
-Then **unconditionally** run the same removal block Step 2.5 does —
-`references/reply-pending-label-removal.sh.md` — so a label left on cannot
-wedge the PR out of `gh-pr:merge-train` (dEitY719/dotfiles#1524).
+Then run `references/step6-board-and-labels.md` verbatim, in the order it
+states: the `In review` board sync and stale-verdict drop when
+`PUSHED_FIXES > 0`, the `review-passed` gate, then `reply-pending` removal.
 
 ## Step 7: Report
 
-Print the summary table per `references/final-summary.md` (Accepted / Declined /
-Answered counts, the per-reviewer/severity breakdown, the `review-passed`
-gate outcome line, commit SHAs, skipped comments, and the lingering
-`CHANGES_REQUESTED` nudge). Then post the ai-metrics PR comment per
-`references/ai-metrics-comment.sh.md` (soft-fail; skip when `GH_DISABLE_AI_METRICS=1`).
+Read `references/final-summary.md` § "Step 7 report" and follow it: the summary
+table, then the ai-metrics PR comment it hands off to.
 
 ## Constraints
 
-Read `references/constraints.md`. Non-negotiables: never skip a reply (bot
-comments included), never promote the card to `Approved` (owned by
-`gh-pr:approve`, dEitY719/dotfiles#1350), never resolve threads
-programmatically, never `--amend` / `--no-verify` / force-push, and route
-label/body edits through `_gh_pr_edit_safe_*`.
+Read `references/constraints.md` and honour every rule in it; its
+"Non-negotiables" section is the short form of this list.
 
 ## Related Skills
 
