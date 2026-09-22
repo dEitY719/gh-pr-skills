@@ -90,7 +90,7 @@ which is the whole point.
 - **`gh:pr` became `create`, not the empty string.** It is the one skill whose
   old directory name was identical to the plugin name, so the prefix rule had
   nothing left to strip. The name says what the skill does — open a PR — and
-  pairs with `gh-issue:create` so the same verb means "file the thing" in both
+  pairs with `gh-issue:issue-create` so the same verb means "file the thing" in both
   plugins (dEitY719/dotfiles#1677 §3). Do not rename it to `open`, `pr`, or `pr-create`;
   `gh-flow-skills` writes `gh-pr:create` into its hooks.
 - **Invocation form in prose is namespaced.** Body text referring to a skill as
@@ -100,7 +100,7 @@ which is the whole point.
 - **Cross-repo references use the *new* namespace, not the old one.** Unlike the
   Phase 2 repos, this one was migrated after the Phase 3 names were fixed, so
   `gh-verify:review-all`, `gh-verify:post-merge-verify`, `gh-resolve:ci-fail` /
-  `:conflict` / `:outdated`, `gh-setup:label-bootstrap`, `gh-issue:create`,
+  `:conflict` / `:outdated`, `gh-setup:label-bootstrap`, `gh-issue:issue-create`,
   `gh-flow:issue`, and `session:worktree-teardown` are written here in their
   final form (dEitY719/dotfiles#1677 §2). Do not "correct" them back to `gh:pr-merge` /
   `devx:pr-review-all`.
