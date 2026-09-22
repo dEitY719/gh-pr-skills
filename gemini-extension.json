@@ -1,6 +1,6 @@
 {
   "name": "gh-pr",
   "description": "GitHub commit-to-merge lifecycle — commit, open a PR, review, reply, approve, merge, emergency override, merge train",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "contextFileName": "GEMINI.md"
 }
