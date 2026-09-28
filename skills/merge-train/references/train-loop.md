@@ -48,7 +48,7 @@ call. Run this **only after** `gh-pr:merge` reported success; a `[SKIPPED]` or
 
 ```bash
 # Idle-only, exactly the judgement gh-pr:merge's Step 4 herdr hint already
-# makes (../../merge/references/herdr-tab-notify.sh.md): a `working` or
+# makes (gh-pr:merge's references/herdr-tab-notify.sh.md): a `working` or
 # `blocked` agent is a live session, and closing its tab kills work in flight.
 # Everything else here is a silent skip — this runs after the merge, so it can
 # never fail the PR it just merged.

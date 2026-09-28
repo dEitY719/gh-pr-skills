@@ -267,7 +267,7 @@ agy:BLOCKER:DECLINE:dEitY719/harness-skills#22
 
 PR dEitY719/dotfiles#1608 이 `_gh_pr_merge_train_review_passed_marker_sha` 에 적용한 것과 같은
 수정·검증기·논거다. 전체 논증은
-`../../merge-train/references/review-verdict-gate.md` →
+`gh-pr:merge-train` 의 `references/review-verdict-gate.md` →
 "Marker authorship" 에 있고, 두 후속 논점은 그대로 적용된다:
 
 - **봇 로그인.** GitHub 은 App 신원에 `<name>[bot]` 형태의 로그인을 준다

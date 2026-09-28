@@ -51,7 +51,7 @@ follow-up comment after a previous Claude reply.
 
 `user.login == ME` alone is not sufficient to mean "already answered": in a
 single-account pipeline, the review lanes (`gh-pr:review` / `gh-verify:review-all`)
-post the `ai-review` marker defined in `../../review/references/post-comment.md`
+post the `ai-review` marker defined in `gh-pr:review`'s `references/post-comment.md`
 under the same account `gh-pr:reply` answers with — that marker comment is
 *authored by ME* but is the finding itself, not an answer to it (issue #44;
 same-account marker-authorship ambiguity is discussed further in

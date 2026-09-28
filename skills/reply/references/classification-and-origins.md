@@ -4,7 +4,7 @@ Read from `SKILL.md` Step 3, before evaluating the first comment. The
 classification vocabulary and the `ORIGINS` token shape below are wire
 format: Steps 6 and 7 parse them, so reproduce them exactly.
 
-`references/...` and `../...` paths below are relative to `skills/reply/`, the same way SKILL.md writes them.
+`references/...` paths below are relative to `skills/reply/`, the same way SKILL.md writes them.
 
 For each unaddressed comment, read the referenced file (`path` at `line`)
 and classify as **ACCEPT** / **ACCEPT-PARTIAL** / **DECLINE** / **QUESTION**.

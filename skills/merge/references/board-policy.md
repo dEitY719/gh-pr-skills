@@ -1,7 +1,7 @@
 # Board Status Policy — cross-link
 
 The full rule set for the `Approved` column lives in
-`../../approve/references/board-policy.md`. This file is
+`gh-pr:approve`'s `references/board-policy.md` (the SSOT). This file is
 a thin pointer so the merge skill can cite the SSOT without duplicating
 its prose.
 
@@ -21,14 +21,14 @@ Step 2-B used to read the current board Status via
 (escape: `GH_PR_MERGE_SKIP_BOARD_CHECK=1`). Both the step and the env
 var are gone.
 
-Why: see `../../approve/references/board-policy.md` →
+Why: see `gh-pr:approve`'s `references/board-policy.md` →
 "2. Merge gate (read side) — removed in dEitY719/dotfiles#1513" for the full rationale
 (the gate was permanently un-satisfiable on `dEitY719/dotfiles`, so it
 was deleted rather than left as dead policy).
 
 ## See also
 
-- `../../approve/references/board-policy.md` — full rule
+- `gh-pr:approve`'s `references/board-policy.md` — full rule
   set, why fail-closed, the write-side guard rationale.
 - `shell-common/functions/gh_project_status.sh` — `Approved` write-side
   guard (unchanged by dEitY719/dotfiles#1513).
