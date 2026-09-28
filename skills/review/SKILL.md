@@ -56,7 +56,7 @@ Normalized enum: `default` / `quick` / `thorough` / `security` /
 
 Read `references/review-material.md` and follow it: the `--paths` inline rule,
 the diff-size branch on the threshold in
-`../approve/references/large-diff-delegation.md`, and the `PROMPT_FILE` rule.
+`gh-pr:approve`'s `references/large-diff-delegation.md`, and the `PROMPT_FILE` rule.
 
 ## Step 5: Dispatch to External CLI
 

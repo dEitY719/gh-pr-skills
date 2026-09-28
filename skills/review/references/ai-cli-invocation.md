@@ -51,7 +51,7 @@ agy and codex lanes concurrently, and a shared path lets one lane clobber
 the other's prompt so both CLIs review identical bytes (dEitY719/dotfiles#1276).
 
 Large diffs follow the same delegation pattern as
-`../../approve/references/large-diff-delegation.md`, and the **same
+`gh-pr:approve`'s `references/large-diff-delegation.md`, and the **same
 threshold** — that file is its single source, so read the number there
 rather than restating it. At or above it, dispatch an Explore subagent to
 pre-classify candidate findings instead of streaming the full diff into the

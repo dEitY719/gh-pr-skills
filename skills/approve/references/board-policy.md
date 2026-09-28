@@ -115,6 +115,4 @@ guard.
 
 - `references/board-approved-sync.sh.md` — Step 4.5 promotion block.
 - `shell-common/functions/gh_project_status.sh` — write-side guard impl.
-- `../../merge/references/board-policy.md` — cross-link
-  (records the dEitY719/dotfiles#1513 removal of the merge gate).
 - `docs/.ssot/github-project-board.md` — column semantics SSOT.
