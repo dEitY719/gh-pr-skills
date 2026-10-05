@@ -333,7 +333,7 @@
             <p><code>START_TS</code> 를 기록하고 한 메시지 안에서 <code>git status</code>(<code>-uall</code> 금지),
             <code>git diff</code>, staged 가 있으면 <code>git diff --staged</code>,
             <code>git log --oneline -20</code>(저장소 커밋 스타일 모방용)을 실행한다.
-            같은 메시지에서 위치 인자를 파싱하고 <code>references/github-target.md</code> 스니펫을 그대로 붙여
+            같은 메시지에서 위치 인자를 파싱하고 <code>lib/github-target.sh</code> 출력을 <code>eval</code> 해
             <code>GH_HOST</code> / <code>TARGET_REPO</code> / <code>TARGET_HOST</code> / <code>REMOTE</code> 를 export 한다 (dEitY719/dotfiles#1403).
             지정한 remote 가 없으면 <code>git remote -v</code> 목록과 함께 중단한다 — <code>origin</code> 으로 조용히 폴백하지 않는다.</p>
           </div>

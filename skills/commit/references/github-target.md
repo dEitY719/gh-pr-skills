@@ -19,33 +19,17 @@ never fall back to `origin` silently, which masks typos and posts metrics to
 the wrong repo (same Failure rule as
 `gh-issue-implement/references/repo-resolution.md`).
 
-```bash
-REMOTE="${REMOTE:-origin}"
-_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"                                  # tier 1
-if [ ! -f "$_SC/functions/gh_host.sh" ]; then
-    [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
-        printf '[gh-pr:commit] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-            "$_SC" >&2
-        return 1 2>/dev/null || exit 1
-    }
-    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
-fi
-unset -f _gh_resolve_host 2>/dev/null || :
-unalias _gh_resolve_host 2>/dev/null || :
-export SHELL_COMMON="$_SC"                                                           # before the load
-[ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
-[ "$(command -v _gh_resolve_host 2>/dev/null)" = _gh_resolve_host ] || {             # tier 5
-    unset SHELL_COMMON
-    printf '[gh-pr:commit] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-        "$_SC" >&2
-    return 1 2>/dev/null || exit 1
-}
-REMOTE_URL=$(git remote get-url "$REMOTE")
-TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")
-TARGET_HOST=$(_gh_host_from_url "$REMOTE_URL") || TARGET_HOST=$(_gh_resolve_host)
-export GH_HOST="$TARGET_HOST"
-export TARGET_REPO TARGET_HOST REMOTE
-```
+The binding lives in `lib/github-target.sh` (relative to `skills/commit/`);
+`SKILL.md` Step 1 holds the guarded call. Contract:
+
+| | |
+|---|---|
+| Input | `[remote]` (default `origin`) |
+| stdout | one `export SHELL_COMMON=… GH_HOST=… TARGET_REPO=… TARGET_HOST=… REMOTE=…` line, values single-quoted, for the caller to `eval` |
+| Loader | HARD tier ladder: tier 1 `$DOTFILES_ROOT` (default `$HOME/dotfiles`), tier 2 guarded `$CLAUDE_PLUGIN_ROOT/lib/vendor`, no cwd tier, tier 5 stops |
+| Exit | `0` bound; `1` no usable shell-common or unknown remote — stdout stays empty, so nothing half-bound is ever eval'd |
+
+`tests/commit-lib.sh` is the offline guard.
 
 Every `gh` call in Step 5 is then
 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`.
