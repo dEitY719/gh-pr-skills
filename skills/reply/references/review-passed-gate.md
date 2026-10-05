@@ -129,7 +129,7 @@ BLOCKER 가 미해결로 남았나"를 묻는 것이므로, 아직 답하지 않
    마커가 찍힌다.
 1. **drop (already done by `SKILL.md` Step 6 — do not repeat it here)** —
    `PUSHED_FIXES > 0` 이면 `review-passed` 를 먼저 뗀다
-   (`references/verdict-label-removal.sh.md`). 게이트보다 **앞**이어야 한다 —
+   (`lib/step6-board-and-labels.sh --phase pre-gate`). 게이트보다 **앞**이어야 한다 —
    뒤로 가면 방금 붙인 라벨을 지운다. `SKILL.md` Step 6 이 이 단계를 게이트
    호출보다 먼저 이미 실행하므로, 이 문서를 따라 순서대로 실행 중이라면
    **건너뛴다**. 이 항목은 실행 목록이 아니라 이 문서를 단독으로 읽는

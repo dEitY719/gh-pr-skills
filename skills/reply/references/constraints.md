@@ -46,6 +46,23 @@
     reads downstream as "not verified", never as a pass. `review-blocked` is
     still issued only by an external reviewer's verdict.
 
+## Failure policy
+
+Three tiers; `SKILL.md` carries the one-line form (#63).
+
+- **HARD — stop at once, report `[FAIL]`.** Step 1 cannot resolve the target
+  PR or repo; Step 2 cannot fetch the comments; Step 6 `git push` is refused.
+  A refused push stops **before** the board and label calls: running the gate
+  on a head that is not the commit just reviewed would hang `review-passed` on
+  unreviewed code. Never force-push to get past it.
+- **RETRY once, then record.** A Step 5 reply POST that fails is retried once.
+  Still failing -> keep going with the remaining comments, and Step 7 lists
+  the comment in a `[FAIL] unreplied: <ids>` row. One unreplied comment makes
+  the final verdict `[FAIL]` (`references/final-summary.md`).
+- **SOFT — warn and continue.** Board sync, the `review-passed` drop, the
+  `review-passed` gate, `reply-pending` removal, and the ai-metrics comment.
+  Each prints one `[WARN]` line and never changes the verdict.
+
 ## Non-negotiables (the short form SKILL.md carries)
 
 Read `references/constraints.md`. Non-negotiables: never skip a reply (bot
