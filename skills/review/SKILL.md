@@ -30,6 +30,8 @@ comment by default. **Never** submits `--approve` / `--request-changes` (that is
 If arg #1 is `-h` / `--help` / `help`, read `references/help.md` and
 output it verbatim, then stop. No API calls.
 
+**Stop-on-error policy** — HARD (`[FAIL] PR #<N> not reviewed — <reason>`, stop): Step 1–2 parse/pre-flight, or a non-zero exit from the Step 5 external CLI dispatch. SOFT (warn, continue): a Step 6 comment-post failure — the review body stays on stdout for the user to post by hand.
+
 ## Step 1: Parse Flags + Resolve Target
 
 Delegate to `gh_pr_review_parse` (`functions/gh_pr_review.sh` — the dotfiles `shell-common` checkout takes
@@ -80,7 +82,7 @@ Success — two lines:
 `[OK] PR #<N> reviewed by <ai> (--review=<preset>) — comment: <URL or skipped>`
 `Next: /gh-pr:reply <N> (address the findings) or /gh-pr:approve <N>`.
 
-Failure — every Step 2 pre-flight `exit 1` prints one line first:
+Failure — every HARD stop in the policy above prints one line first:
 `[FAIL] PR #<N> not reviewed — <reason>`.
 
 ## Constraints (full rationale: `references/constraints.md`)
