@@ -255,8 +255,9 @@ repo still need from dotfiles" answer stays in one place:
 
 Banned repo-wide, with one exception: the chart / person / robot glyphs of the
 dotfiles ai-metrics footer (dEitY719/dotfiles#317 F-2 / PR dEitY719/dotfiles#320 / dEitY719/dotfiles#367). That footer is a wire
-format the skills emit, so the eight reference files that specify it have to
-show the real glyphs. They are enumerated in `.github/workflows/validate.yml`
+format the skills emit, so the eight reference files that specify it — and
+`skills/merge/lib/post-merge-housekeeping.sh`, which posts it — have to show
+the real glyphs. They are enumerated in `.github/workflows/validate.yml`
 under `allow-emoji-paths`. Nothing else may carry one.
 
 ## Harness portability
