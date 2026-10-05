@@ -60,42 +60,21 @@ card to have *visibly* passed through `In review` before it can reach
 `/gh-pr:approve` is the review signal, regardless of which column the
 card came from.
 
-## The block (soft-fail — never blocks the Step 5 report)
+## The script (soft-fail — never blocks the Step 5 report)
 
-```sh
-# Inputs: PR_NUMBER; TARGET_REPO (Step 1); BOARD_BYPASS=1 only on --self-record.
-# --repo "$TARGET_REPO" is explicit (dEitY719/dotfiles#1405): without it the helper falls back
-# to `gh repo view`, which answers `gh repo set-default`, not this skill's
-# resolved remote.
-_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
-[ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
-_sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                              # save
-unset -f _gh_project_status_sync 2>/dev/null || :
-unalias _gh_project_status_sync 2>/dev/null || :
-export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"                     # before the load
-[ -r "$_HELPER" ] && . "$_HELPER"
-if [ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]; then
-    _rc=0
-    if [ "${BOARD_BYPASS:-0}" = "1" ]; then
-        printf '[gh-pr-approve] self-record: bypassing #393 fail-closed guard for PR #%s (operator intent).\n' \
-            "$PR_NUMBER" >&2
-        _GH_PROJECT_STATUS_GUARD_APPROVED_BYPASS=1 \
-            _gh_project_status_sync pr "$PR_NUMBER" "Approved" --only-from "Backlog,In progress,In review" --repo "$TARGET_REPO" || _rc=$?
-    else
-        _gh_project_status_sync pr "$PR_NUMBER" "Approved" --only-from "Backlog,In progress,In review" --repo "$TARGET_REPO" || _rc=$?
-    fi
-    if [ "$_rc" -ne 0 ]; then
-        printf '[gh-pr-approve] board sync rc=%s — continuing (soft-fail).\n' "$_rc" >&2
-    fi
-else                                                                                 # tier 5, soft
-    if [ -n "$_sc_was" ]; then export SHELL_COMMON="$_sc_prev"; else unset SHELL_COMMON; fi
-    printf '[gh-pr-approve] no usable shell-common at %s — board sync skipped; the verdict itself is unaffected.\n' \
-        "$_HELPER" >&2
-fi
-unset _sc_was _sc_prev
-# A helper that is missing or defines nothing takes the warn-and-skip arm above.
-```
+The block lives in `lib/board-approved-sync.sh` (relative to
+`skills/approve/`); `SKILL.md` Step 4.5 holds the guarded call. Contract:
+
+| | |
+|---|---|
+| Input | `<PR_NUMBER> [--self-record]`; env `TARGET_HOST` + `TARGET_REPO` (Step 1) |
+| Effect | `_gh_project_status_sync pr <N> "Approved" --only-from "Backlog,In progress,In review" --repo "$TARGET_REPO"`; `--self-record` adds the one-call `_GH_PROJECT_STATUS_GUARD_APPROVED_BYPASS=1` prefix |
+| Loader | soft warn-and-skip (harness-skills#60): tier 1 `$SHELL_COMMON` / `$HOME/dotfiles`, tier 2 `$CLAUDE_PLUGIN_ROOT/lib/vendor`, failure arm restores `SHELL_COMMON` |
+| Output | stderr only, `[gh-pr-approve]` prefix: bypass notice, `board sync rc=<N>`, or the no-usable-shell-common skip |
+| Exit | always `0` — bad arguments included (soft) |
+
+`tests/approve-lib.sh` is the offline guard (stub `gh`), and
+`tests/plugin-root-tier5.sh` §5 pins the loader's step order.
 
 Helper returns `0` on the happy path *and* on a silent no-op (repo has no
 projectV2 attachment). `GH_PROJECT_STATUS_SYNC=0` opt-out is absorbed by

@@ -146,7 +146,7 @@ sc=$(cd "$TMP" && env -u SHELL_COMMON HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
 #    the first loader in the run, so an unconditional unset would let an
 #    OPTIONAL step's failure knock out the value every required
 #    ${SHELL_COMMON:-...} after it reads.
-SOFT_SITES="skills/approve/references/board-approved-sync.sh.md
+SOFT_SITES="skills/approve/lib/board-approved-sync.sh
 skills/commit/references/board-sync.md
 skills/create/references/project-board-sync.md
 skills/merge/references/project-board-sync.md
