@@ -18,11 +18,12 @@ appends the ai-metrics footer to the PR body temp file `$BODY`.
 1. `ELAPSED=$(( ($(date +%s) - START_TS) / 60 ))`
 2. Read `gh-issue-create/references/metrics-baseline.md` and bind
    `HUMAN_H` by issue type.
-3. Read `references/metrics-helper.md` and paste the `compute_pr_tokens`
-   snippet **verbatim**. Inputs: `(linked-issue body) + (commit log
-   over $BASE_BRANCH..HEAD)` — **never** count `$BODY` (the drafted PR
-   body) as the input. That regression produced PR dEitY719/dotfiles#325's
-   `~1000 tokens` footer (issue dEitY719/dotfiles#326).
+3. `TOKENS=$(bash "$_L/pr-tokens.sh" "$ISSUE_NUMBER" "$BASE_BRANCH")` —
+   `$_L` is the Step 1 lib locator. Inputs: `(linked-issue body) + (commit
+   log over $BASE_BRANCH..HEAD)` — **never** `$BODY` (the drafted PR body).
+   That regression produced PR dEitY719/dotfiles#325's `~1000 tokens` footer
+   (issue dEitY719/dotfiles#326); rationale and fixtures:
+   `references/metrics-helper.md`.
 4. Append the footer:
 
    ```bash
