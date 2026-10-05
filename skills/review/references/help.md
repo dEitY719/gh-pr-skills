@@ -69,13 +69,12 @@ directory via `--dir` so relative writes do not touch the PR checkout.
 
 ## `--ai hermes`
 
-Internal-PC only (Samsung DS internal AI coding CLI; setup module
+Internal-PC only (internal AI coding CLI; setup module
 `hermes/`). Outside `_dotfiles_setup_mode == internal` the lane exits 1
 with `--ai hermes is internal-PC only (~/.dotfiles-setup-mode !=
-internal)`. The invocation passes a short instruction as argv plus the
-prompt file with `--file`; no `--model` override is accepted. The exact
-non-interactive subcommand is a first-pass assumption pending
-verification on an internal PC — see
+internal)`. The invocation is `hermes -z "<prompt>"` — the whole prompt
+as one argv value, refused up front at 131072 bytes or more
+(`MAX_ARG_STRLEN`); no `--model` override is accepted. See
 `references/ai-cli-invocation.md` § `--ai hermes`.
 
 ## Usage

@@ -225,7 +225,7 @@ _CLAUDE_SH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/clau
 hermes -z "$(cat "$PROMPT_FILE")"
 ```
 
-`hermes` is the Samsung DS internal AI coding CLI (setup module: `hermes/`),
+`hermes` is the internal AI coding CLI (setup module: `hermes/`),
 so the lane is gated to internal PCs exactly like `opencode` — a stray
 binary on a personal PC cannot reach the internal provider.
 
