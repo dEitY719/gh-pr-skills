@@ -1,7 +1,7 @@
 #!/bin/sh
 # VENDORED — do not edit here.
 # SSOT: dEitY719/dotfiles shell-common/functions/gh_pr_merge_train.sh
-# Synced 2026-09-05T10:16Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# Synced 2026-10-05T02:45Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
 # shell-common/functions/gh_pr_merge_train.sh
 # SSOT for the merge-train target filter (issue #1524).
@@ -164,6 +164,7 @@
 
 # D-6 quiet period, in minutes. The one hardcoded 11 in the repo.
 _gh_pr_merge_train_quiet_minutes() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _m="${GH_PR_MERGE_TRAIN_QUIET_MINUTES:-11}"
     case "$_m" in
         '' | *[!0-9]*)
@@ -179,6 +180,7 @@ _gh_pr_merge_train_quiet_minutes() {
 # session that owed the removal is presumed dead and the label stops excluding
 # its PR — see rule 2 in the header for the sizing rationale.
 _gh_pr_merge_train_reply_pending_stale_minutes() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _m="${GH_PR_MERGE_TRAIN_REPLY_PENDING_STALE_MINUTES:-90}"
     case "$_m" in
         '' | *[!0-9]*)
@@ -191,6 +193,7 @@ _gh_pr_merge_train_reply_pending_stale_minutes() {
 }
 
 _gh_pr_merge_train_filter_targets() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _now="" _minutes="" _cutoff _stale_minutes _stale_cutoff _json _out
 
     while [ "$#" -gt 0 ]; do
@@ -332,6 +335,7 @@ _gh_pr_merge_train_has_review_passed_label() {
 # match nothing, which looks exactly like "no leftovers" and is the same class
 # of invisible failure this whole predicate exists to prevent.
 _gh_pr_merge_train_needs_finalize() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _json
     _json=$(cat)
     printf '%s' "$_json" | jq -e '((.state // "") | ascii_upcase) == "MERGED"' \
@@ -349,6 +353,7 @@ _gh_pr_merge_train_needs_finalize() {
 # Same case-insensitive `.state` compare, for the same reason (PR #1725): Step 0
 # feeds this `gh search prs --merged` output, whose `state` is `"merged"`.
 _gh_pr_merge_train_finalize_targets() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _json _out
     _json=$(cat)
     [ -n "$_json" ] || return 1
@@ -580,6 +585,7 @@ _gh_pr_merge_train_base_ci_red() {
 #   double-quoted jq filter string below is rejected either way, same as
 #   before.
 _gh_pr_merge_train_review_passed_marker_sha() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _pr="$1" _repo="$2" _host="${3-}" _login="${4-}" \
         _jq _raw _rc _login_base _headers _bodies _link _last
 
@@ -722,6 +728,7 @@ _gh_pr_merge_train_review_passed_marker_sha() {
 #   actually established, and self-healing (deleting the label) on what was
 #   really its own unresolved state (agy, PR #1608 rounds 4 and 5).
 _gh_pr_merge_train_review_passed_stale() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _pr="$1" _repo="$2" _host="$3" _head_oid="$4" _login="$5" _marker_sha _lookup_rc
 
     case "$_head_oid" in
@@ -834,6 +841,7 @@ _gh_pr_merge_train_review_passed_stale() {
 #   re-deriving them inline is exactly the drift this file exists to prevent.
 
 _gh_pr_merge_train_record_pushed_sha() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _dir="${1-}" _pr="${2-}" _sha="${3-}"
 
     case "$_pr" in
@@ -856,6 +864,7 @@ _gh_pr_merge_train_record_pushed_sha() {
 }
 
 _gh_pr_merge_train_pushed_sha_matches() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _dir="${1-}" _pr="${2-}" _sha="${3-}" _recorded
 
     case "$_pr" in
@@ -873,6 +882,7 @@ _gh_pr_merge_train_pushed_sha_matches() {
 }
 
 _gh_pr_merge_train_forget_pushed_sha() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _dir="${1-}" _pr="${2-}"
 
     case "$_pr" in
@@ -885,6 +895,7 @@ _gh_pr_merge_train_forget_pushed_sha() {
 }
 
 _gh_pr_merge_train_readmit_own_pushes() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _dir="${1-}" _filtered="${2-}" _raw _nums _out
 
     if [ -z "$_dir" ] || [ -z "$_filtered" ]; then
