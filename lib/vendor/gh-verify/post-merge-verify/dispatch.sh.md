@@ -1,7 +1,7 @@
 <!-- VENDORED — do not edit here. -->
 <!-- SSOT: dEitY719/gh-verify-skills skills/post-merge-verify/references/dispatch.sh.md -->
-<!-- Source commit: e5e46299d17ee17e333e6bc4e95ecc51f2a121e2 (2026-09-20) -->
-<!-- Synced 2026-09-20 — no sync script covers this tree; re-copy from the SSOT at the -->
+<!-- Source commit: a3dd0162370f6763a7748e5da214d5ce0ad9e78a (2026-10-03) -->
+<!-- Synced 2026-10-05 — no sync script covers this tree; re-copy from the SSOT at the -->
 <!-- commit above, then update BOTH lines. tests/pmv-dispatch-resolves.sh asserts the -->
 <!-- copy still carries the plugin-root convention, which is what caught the last drift. -->
 <!-- Read by skills/merge/SKILL.md Step 5 when no live gh-verify is on the box. -->
@@ -449,9 +449,10 @@ else
 fi
 
 # --- 6. F-5: hand the verification over -----------------------------------
-# The registry stores the skill id (`gh-verify:merged`); a pane is typed
-# the dash form, which is what a Claude session accepts as a slash command.
-VERIFY_PROMPT="/$(printf '%s' "$VERIFY_SKILL" | tr ':' '-') ${PR_NUMBER}"
+# The registry stores the skill id (`gh-verify:merged`); a pane is typed that
+# id verbatim. Plugin skills are registered under the colon name only — the
+# dash form (`/gh-verify-merged`) is "Unknown command" (#69).
+VERIFY_PROMPT="/${VERIFY_SKILL} ${PR_NUMBER}"
 PROMPT_TRY=1
 while :; do
     PROMPT_JSON=$(herdr agent prompt "$PMV_AGENT" "$VERIFY_PROMPT" \
