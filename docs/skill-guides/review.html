@@ -248,7 +248,7 @@
         </li>
         <li>
           <h3>외부 CLI 디스패치</h3>
-          <p><code>_gh_pr_review_run_ai</code> 가 CLI 별 호출 형태를 담당한다: <code>codex exec --color=never</code>, <code>agy --print</code>, <code>claude -p</code>, <code>opencode run --model codemate/CodeLLMPro --dir ... --file</code>, <code>hermes -z</code>. stdout 은 재가공 없이 그대로 흘려보낸다. <code>opencode</code> / <code>hermes</code> 는 8~10분이 걸릴 수 있어 Bash 호출 timeout 을 600000ms 이상으로 올려야 한다.</p>
+          <p><code>_gh_pr_review_run_ai</code> 가 CLI 별 호출 형태를 담당한다: <code>codex exec --color=never</code>, <code>agy --print</code>, <code>claude -p</code>, <code>opencode run --model "$DOTFILES_OPENCODE_REVIEW_MODEL" --dir ... --file</code>, <code>hermes -z</code>. stdout 은 재가공 없이 그대로 흘려보낸다. <code>opencode</code> / <code>hermes</code> 는 8~10분이 걸릴 수 있어 Bash 호출 timeout 을 600000ms 이상으로 올려야 한다.</p>
         </li>
         <li>
           <h3>PR 코멘트 게시 (기본 ON)</h3>

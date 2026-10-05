@@ -76,7 +76,7 @@
    파일을 지운다.
 5. **Step 5 — 외부 CLI 디스패치.** `_gh_pr_review_run_ai` 가 CLI 별 호출 형태를
    담당한다: `codex exec --color=never`, `agy --print`, `claude -p`,
-   `opencode run --model codemate/CodeLLMPro --dir ... --file`, `hermes -z`.
+   `opencode run --model "$DOTFILES_OPENCODE_REVIEW_MODEL" --dir ... --file`, `hermes -z`.
    stdout 은 재가공 없이 그대로 흘려보낸다. `opencode` / `hermes` 는 8~10분이
    걸릴 수 있어 Bash 호출 timeout 을 600000ms 이상으로 올려야 한다.
 6. **Step 6 — PR 코멘트 게시(기본 ON).** 외부 AI 의 stdout 을 접힌 `<details>`
