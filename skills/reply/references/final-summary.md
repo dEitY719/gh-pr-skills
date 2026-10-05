@@ -1,8 +1,10 @@
 # Final Summary — output table printed by `gh-pr:reply` Step 7
 
-Print a table the user can scan after all replies are posted:
+Print a verdict line first, then a table the user can scan after all replies
+are posted, and end with exactly one `Next:` line:
 
 ```
+[OK] gh-pr:reply PR #123 — 5/5 comments replied
 PR #123 review comments processed: 5 total
   Accepted: 3 (commits abc1234, def5678)
   Declined: 1
@@ -12,7 +14,43 @@ PR #123 review comments processed: 5 total
     agy    blocking 0/0 accepted · non-blocking 3 (3 declined)
   [OK] BLOCKER 2건 전부 해소 — review-blocked 해제, review-passed 적용 (외부 재검토 없음, #1636)
   -> All comments replied to.
+Next: /gh-pr:approve 123
 ```
+
+On a pass that left any comment unreplied (Step 5 retry exhausted, see
+`references/constraints.md` § "Failure policy"):
+
+```
+[FAIL] gh-pr:reply PR #123 — 4/5 comments replied (unreplied: 2961234567)
+PR #123 review comments processed: 5 total
+  ...
+  [FAIL] unreplied: 2961234567
+Next: /gh-pr:reply 123
+```
+
+## Verdict line (always the first line)
+
+- `[OK] gh-pr:reply PR #<N> — <k>/<n> comments replied` when `k == n`.
+- `[FAIL] gh-pr:reply PR #<N> — <k>/<n> comments replied (unreplied: <ids>)`
+  when even one comment is unreplied — `<ids>` are the comment IDs, comma
+  separated, and the same list appears as a `[FAIL] unreplied: <ids>` row in
+  the table. A `[WARN]` from a soft step (board, labels, ai-metrics) never
+  turns the verdict into `[FAIL]`.
+- A HARD stop (Step 1 target, Step 2 fetch, Step 6 `git push` refused) prints
+  `[FAIL] gh-pr:reply PR #<N> — stopped at <step>: <reason>` instead of the
+  table, followed by `Next: /gh-pr:reply <N>` once the cause is fixed.
+
+## `Next:` line (always the last line)
+
+Exactly one, chosen in this order:
+
+1. Verdict `[FAIL]` (unreplied comments) -> `Next: /gh-pr:reply <N>`.
+2. The `review-passed` gate applied the label -> `Next: /gh-pr:approve <N>`.
+3. Otherwise (unresolved BLOCKER held, no external `ai-review` marker, label
+   write failed) -> `Next: 재리뷰 후 /gh-pr:reply <N>`.
+
+The lingering `CHANGES_REQUESTED` nudge below, when it fires, prints **above**
+the `Next:` line — never after it.
 
 ## Required fields
 
@@ -39,7 +77,7 @@ PR #123 review comments processed: 5 total
   politeness contract was met.
 - Step 6 reads the same `ORIGINS` stream this table renders, to decide
   whether `review-passed` may be applied
-  (`references/verdict-label-removal.sh.md` →
+  (`lib/step6-board-and-labels.sh --phase pre-gate` →
   `references/review-passed-gate.md`). Both steps use one stream — never
   re-derive it.
 - **No board-promotion row** — `Approved` is owned by `gh-pr:approve`
@@ -78,8 +116,10 @@ state was the exact gap that the run surfaced.
 
 ## Step 7 report — what SKILL.md delegates here
 
-Print the summary table per `references/final-summary.md` (Accepted / Declined /
+Print the `[OK]`/`[FAIL]` verdict line, then the summary table per
+`references/final-summary.md` (Accepted / Declined /
 Answered counts, the per-reviewer/severity breakdown, the `review-passed`
 gate outcome line, commit SHAs, skipped comments, and the lingering
 `CHANGES_REQUESTED` nudge). Then post the ai-metrics PR comment per
 `references/ai-metrics-comment.sh.md` (soft-fail; skip when `GH_DISABLE_AI_METRICS=1`).
+Print the `Next:` line last, after the ai-metrics step's own `[OK]`/`[WARN]`.

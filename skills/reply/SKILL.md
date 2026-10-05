@@ -18,14 +18,12 @@ metadata:
 
 ## Help
 
-If arg #1 is `-h`, `--help`, or `help`, read `references/help.md`, output it
-verbatim, then stop. No API calls.
+Arg #1 `-h` / `--help` / `help`: print `references/help.md` verbatim, stop. No API calls.
 
 ## Role
 
-Process every code-review comment on a PR: judge validity, fix valid ones,
-reply to each with the outcome — every comment, bot comments included, gets
-an explicit reply; never skip one.
+Judge every review comment on a PR, fix the valid ones, and reply to each —
+bot comments included; never skip one.
 
 ## Step 1: Resolve Target PR + Repo
 
@@ -39,16 +37,13 @@ Read `references/target-resolution.md` and follow it: positional args
 
 ## Step 2: Fetch All Review Comments
 
-Read `references/comment-fetching.md` for the three API endpoints, field
-extraction, and dedup rule. Fetch all three; filter out already-replied
-threads. Bot service notices (quota / rate-limit / outage) follow that
-reference's "Bot service notices" section (service-notice classification,
-single-line ack in Step 5, counted separately in Step 7).
+Fetch all three endpoints in `references/comment-fetching.md` (fields, dedup);
+filter out already-replied threads. Bot service notices (quota / rate-limit /
+outage) follow its "Bot service notices" section (one-line ack, counted apart).
 
 **Step 2.5 early exit:** if this yields **zero unaddressed threads** after
-dedup, first run the `reply-pending` removal block of
-`references/reply-pending-label-removal.sh.md` (this exit path is why it lives
-there and not inline in Step 6), then print exactly `No unaddressed review
+dedup, first run `lib/step6-board-and-labels.sh --phase post-gate` (located per
+`references/step6-board-and-labels.md`), then print exactly `No unaddressed review
 comments — nothing to do.` and **stop**: no Steps 3–7, no ai-metrics, no push.
 
 ## Step 3: Evaluate Each Comment
@@ -60,9 +55,8 @@ the bot rule, and the `_gh_pr_reply_origin_line` / `ORIGINS` wire format.
 
 ## Step 4: Apply Fixes (ACCEPT / ACCEPT-PARTIAL only)
 
-Keep each fix minimal and scoped — no drive-by refactors. Group related
-fixes into themed commits (one per theme, not per comment), e.g.
-`fix(review): address X …`. Never `--amend` or `--no-verify`.
+Minimal, scoped fixes — no drive-by refactors — in themed commits (one per
+theme, not per comment), e.g. `fix(review): address X …`. Never `--amend` / `--no-verify`.
 
 ## Step 5: Reply to Every Comment
 
@@ -71,25 +65,31 @@ declined ones and bot comments.** Read `references/reply-templates.md` for
 POST command shapes, the four body templates, the long-body fallback, and
 the consolidated table reply. Reply in the reviewer's language.
 
+**Failure policy** (detail: `references/constraints.md` § "Failure policy"):
+HARD stop + `[FAIL]` on a Step 1 target or Step 2 fetch failure, or a refused
+Step 6 push (no label/board calls after it). A failed reply POST retries once,
+then is recorded as unreplied, which makes the verdict `[FAIL]`. Board, label
+and ai-metrics steps are SOFT: one `[WARN]`, continue.
+
 ## Step 6: Push the Fix Commits + Sync Board + Set Verdict Labels
 
 If any fixes were committed: `git push` (never force-push unless the user
 asked) and report new commit SHAs. Set `PUSHED_FIXES` to the count of new
 SHAs on the remote branch; no fixes / skipped push → `PUSHED_FIXES=0`.
 
-Then run `references/step6-board-and-labels.md` verbatim, in the order it
-states: the `In review` board sync and stale-verdict drop when
-`PUSHED_FIXES > 0`, the `review-passed` gate, then `reply-pending` removal.
+Then, per `references/step6-board-and-labels.md` (locator block + order):
+`lib/step6-board-and-labels.sh --phase pre-gate <N> <PUSHED_FIXES>`, the
+`review-passed` gate, then `lib/step6-board-and-labels.sh --phase post-gate <N>`.
 
 ## Step 7: Report
 
-Read `references/final-summary.md` § "Step 7 report" and follow it: the summary
-table, then the ai-metrics PR comment it hands off to.
+Read `references/final-summary.md` § "Step 7 report" and follow it: first line
+`[OK]`/`[FAIL]` verdict, the summary table, the ai-metrics PR comment, and a
+final `Next:` line (`/gh-pr:approve <N>` when `review-passed` was applied).
 
 ## Constraints
 
-Read `references/constraints.md` and honour every rule in it; its
-"Non-negotiables" section is the short form of this list.
+Honour every rule in `references/constraints.md` (short form: "Non-negotiables").
 
 ## Related Skills
 

@@ -151,7 +151,7 @@ skills/commit/references/board-sync.md
 skills/create/references/project-board-sync.md
 skills/merge/references/project-board-sync.md
 skills/merge-emergency/references/project-board-sync.md
-skills/reply/references/board-sync-in-review.sh.md"
+skills/reply/lib/step6-board-and-labels.sh"
 
 # 5a. Mechanical, all six: the six steps in order. The whole sequence, not "X
 #     before Y", so a dropped or duplicated step is caught too.
