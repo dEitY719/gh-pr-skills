@@ -82,8 +82,7 @@ if command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
         # substr() rather than $2 so a worktree path containing spaces still
         # resolves; --porcelain guarantees the "worktree <path>" / "branch <ref>"
         # line pairing this relies on.
-        BRANCH="${HEAD_REF}"
-        WT_PATH=$(git worktree list --porcelain 2>/dev/null | awk -v b="refs/heads/${BRANCH}" \
+        WT_PATH=$(git worktree list --porcelain 2>/dev/null | awk -v b="refs/heads/${HEAD_REF}" \
             '/^worktree /{p=substr($0,10)} /^branch /{if (substr($0,8)==b) print p}' | head -1)
 
         # F-2: read-only agent enumeration. The lookup matches BOTH `cwd` (where

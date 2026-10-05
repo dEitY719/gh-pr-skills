@@ -66,12 +66,8 @@ parse_stacked_args() {
             --base)
                 _flags_seen=$((_flags_seen + 1))
                 STACK_MODE=base
-                if [ $# -lt 2 ]; then
-                    printf 'gh-pr:create: --base requires a branch name\n' >&2
-                    return 3
-                fi
-                STACK_BASE="$2"
-                if [ -z "${STACK_BASE-}" ]; then
+                STACK_BASE="${2-}"
+                if [ -z "$STACK_BASE" ]; then
                     printf 'gh-pr:create: --base requires a branch name\n' >&2
                     return 3
                 fi
