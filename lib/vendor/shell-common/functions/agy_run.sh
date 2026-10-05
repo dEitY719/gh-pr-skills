@@ -1,8 +1,9 @@
 #!/bin/sh
 # VENDORED — do not edit here.
 # SSOT: dEitY719/dotfiles shell-common/functions/agy_run.sh
-# Synced 2026-09-20T06:39Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# Synced 2026-10-05T02:45Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
+case $- in *i*) ;; *) [ -n "${DOTFILES_FORCE_INIT-}" ] || return 0 ;; esac
 # shell-common/functions/agy_run.sh
 # SSOT for the agy (Antigravity CLI) non-interactive transport.
 #
@@ -24,8 +25,6 @@
 #    bare trailing `--print` meant the prompt piped on stdin was never read.
 #    So it is passed empty and the stdin message carries the prompt.
 
-case $- in *i*) ;; *) [ -n "${DOTFILES_FORCE_INIT-}" ] || return 0 ;; esac
-
 # Run agy with the prompt on stdin; print its response text on stdout.
 #
 # Args: any extra agy flags (e.g. --dangerously-skip-permissions).
@@ -36,6 +35,7 @@ case $- in *i*) ;; *) [ -n "${DOTFILES_FORCE_INIT-}" ] || return 0 ;; esac
 # carried no SUCCESS result (the exit code alone is NOT the success signal —
 # a non-SUCCESS result that still exited 0 would otherwise look like a pass).
 _agy_run_stream() {
+    [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     # Named here rather than reported as a mysterious `jq: command not found`
     # attributed to agy (PR #1765 codex BLOCKER).
     command -v jq >/dev/null 2>&1 || {
