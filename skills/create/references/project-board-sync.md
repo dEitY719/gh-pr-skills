@@ -1,92 +1,27 @@
 # Project Board Sync — snippet + narrative
 
-> **Canonical executable snippet lives in this file** (below). `SKILL.md`
-> Step 7 points here and the model pastes the snippet verbatim. This file
-> is both the source of the bash and its narrative companion — rationale,
-> edge cases, and pointers. (Relocated from inline Step 7 for progressive
-> disclosure; the issue dEitY719/dotfiles#747 visual-checklist guarantees are preserved by
-> the Step 8 report row, not by inlining the bash.)
+> The executable lives in `lib/project-board-sync.sh <PR_NUMBER>` (relative
+> to `skills/create/`; env `GH_HOST`, `GH_REPO`, `REMOTE`). This file is its
+> contract and narrative companion — rationale, edge cases, and pointers.
+> (The issue dEitY719/dotfiles#747 visual-checklist guarantees are preserved by
+> the Step 8 report row.)
 
-## Executable snippet (paste verbatim into Step 7)
+## What the script does
 
-First, detect a PostToolUse hook that already handles this sync — when
-present, skip the inline call to avoid triple-syncing (issue dEitY719/dotfiles#390):
+1. Detect a PostToolUse hook that already handles this sync — when present,
+   print one `board sync delegated to PostToolUse hook` line and skip, to
+   avoid triple-syncing (issue dEitY719/dotfiles#390).
+2. Otherwise load `gh_project_status.sh` through the SOFT warn-and-skip loader
+   (harness-skills#60): a missing helper, or one that defines nothing, is ONE
+   `[gh-pr] no usable shell-common at <path>` warning and a skip; the failure
+   arm restores `SHELL_COMMON`.
+3. PR card -> `In review` (no guard), then each closing Issue ->
+   `In progress` (`--only-from "Backlog,Ready,In review"`); every sync `|| true`.
 
-```bash
-hook_skip=0
-for hook_path in \
-    "${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/.claude/hooks/post-pr-create-status.sh" \
-    "$HOME/.claude/hooks/post-gh-pr-create.sh" \
-    "$HOME/dotfiles/claude/hooks/post-gh-pr-create.sh"
-do
-    if [ -x "$hook_path" ]; then
-        hook_skip=1
-        printf '[gh-pr] board sync delegated to PostToolUse hook (%s) — skipping inline.\n' "$hook_path" >&2
-        break
-    fi
-done
+Exit: `0` in every case above. `1` only when `GH_REPO` was empty and the
+nested HARD `gh_host.sh` loader that re-resolves it hit tier 5 — a broken
+install. A non-numeric argument is one warning, exit 0.
 
-if [ "$hook_skip" -eq 0 ]; then
-    # Soft warn-and-skip loader (harness-skills#60). A missing helper, or one
-    # that sources but defines nothing (interactive-guard regression, partial
-    # sourcing, a rename), skips the board sync with ONE warning naming the
-    # path — no longer silently (dEitY719/dotfiles#644 NF-1's silence hid a
-    # broken install). `|| true` alone would absorb `command not found`
-    # (rc 127) and the whole reconciliation would no-op — dEitY719/dotfiles#724.
-    _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
-    [ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-        || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
-    _sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                      # save
-    unset -f _gh_project_status_sync 2>/dev/null || :
-    unalias _gh_project_status_sync 2>/dev/null || :
-    export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"             # before the load
-    [ -r "$_HELPER" ] && . "$_HELPER"
-    if [ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]; then
-        # Auto-resolve GH_REPO when unset/empty so neither the PR sync
-        # below nor the linked-issues loop is left to the helper's
-        # `gh repo view` auto-detect (PR dEitY719/dotfiles#780 review, dEitY719/dotfiles#1405).
-        if [ -z "${GH_REPO:-}" ]; then
-            # Re-resolve from git's remote, never from `gh repo view`
-            # (which answers gh CLI's default repo — wrong host on a
-            # dual-host login, dEitY719/dotfiles#1403). The remote is parameterized: it is
-            # $REMOTE, the [remote] positional bound in Step 1a-0, `origin`
-            # by default (dEitY719/dotfiles#1405). Source gh_host.sh explicitly:
-            # gh_project_status.sh only sources it on the GH_HOST-unset
-            # path, which Step 1a-0's export already bypassed.
-            _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                   # tier 1
-            if [ ! -f "$_SC/functions/gh_host.sh" ]; then
-                [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                            # tier 5
-                    printf '[gh-pr:create] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-                        "$_SC" >&2
-                    return 1 2>/dev/null || exit 1
-                }
-                _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                # tier 2
-            fi
-            unset -f _gh_resolve_host 2>/dev/null || :
-            unalias _gh_resolve_host 2>/dev/null || :
-            export SHELL_COMMON="$_SC"                                           # before the load
-            [ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
-            [ "$(command -v _gh_resolve_host 2>/dev/null)" = _gh_resolve_host ] || { # tier 5
-                unset SHELL_COMMON
-                printf '[gh-pr:create] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-                    "$_SC" >&2
-                return 1 2>/dev/null || exit 1
-            }
-            GH_REPO=$(_gh_parse_owner_repo_url "$(git remote get-url "${REMOTE:-origin}")" 2>/dev/null || true)
-        fi
-        _gh_project_status_sync pr "$PR_NUMBER" "In review" --repo "$GH_REPO" || true
-        for _issue in $(_gh_pr_closing_issue_numbers "$PR_NUMBER" "$GH_REPO" 2>/dev/null || true); do
-            _gh_project_status_sync issue "$_issue" "In progress" \
-                --only-from "Backlog,Ready,In review" || true
-        done
-    else                                                                         # tier 5, soft
-        if [ -n "$_sc_was" ]; then export SHELL_COMMON="$_sc_prev"; else unset SHELL_COMMON; fi
-        printf '[gh-pr] no usable shell-common at %s — board sync skipped; the PR itself is unaffected.\n' \
-            "$_HELPER" >&2
-    fi
-    unset _sc_was _sc_prev
-fi
-```
 
 `GH_REPO` should be `owner/repo` (e.g. `dEitY719/dotfiles`) — normally bound
 in Step 1a-0. The block re-resolves it from `$REMOTE`'s URL (`origin` by
@@ -198,7 +133,6 @@ wrapper — no auth state changes, no API mutation.
 ## Where the helper lives
 
 `shell-common/functions/gh_project_status.sh` — shared between `gh-pr:create`,
-`gh-pr:reply`, and other PR/issue lifecycle skills. The skill **sources**
+`gh-pr:reply`, and other PR/issue lifecycle skills. The script **sources**
 this file; do not duplicate the helper's implementation. The bash that
-*calls* the helper lives in the "Executable snippet" section above; Step 7
-of `SKILL.md` points here and the model pastes it verbatim.
+*calls* the helper is `lib/project-board-sync.sh`; Step 7 of `SKILL.md` runs it.
