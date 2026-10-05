@@ -3,9 +3,17 @@
 Step 4 runs these four side effects, in this order. `references/...` paths below
 are relative to `skills/merge/`, the same way SKILL.md writes them.
 
-Four independent soft-fail side effects, in this order. Each reference file
-holds the snippet to paste verbatim plus its own rationale; none of them can
-block or alter the Step 5 report.
+Four independent soft-fail side effects, in this order, all run by one script:
+
+```text
+TARGET_HOST=<host> START_TS=<epoch> [TOKENS=<n>] \
+    bash lib/post-merge-housekeeping.sh <PR_NUMBER> <owner/repo> <headRefName>
+```
+
+It **always exits 0** (bad arguments included) and prints at most one
+`[WARN]` / `[INFO]` line per side effect. Each reference file below holds that
+step's rationale and failure modes; none of them can block or alter the Step 5
+report. `tests/merge-lib.sh` is the offline guard.
 
 | What | Reference | Failure mode |
 |---|---|---|

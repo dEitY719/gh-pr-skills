@@ -14,30 +14,12 @@ the merge report — the helper logs to stderr and returns 0.
 
 ## (1) PR card → `Done`
 
-```bash
-# Soft warn-and-skip loader (harness-skills#60). A missing helper, or one that
-# sources but defines nothing (dEitY719/dotfiles#724), skips the board sync with
-# ONE warning naming the path — no longer silently (dEitY719/dotfiles#644 NF-1's
-# silence hid a broken install).
-_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
-[ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
-_sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                              # save
-unset -f _gh_project_status_sync 2>/dev/null || :
-unalias _gh_project_status_sync 2>/dev/null || :
-export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"                     # before the load
-[ -r "$_HELPER" ] && . "$_HELPER"
-if [ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]; then
-    # --repo is explicit (dEitY719/dotfiles#1405) — the helper's auto-detect answers
-    # `gh repo set-default`, not the remote Step 1 resolved.
-    _gh_project_status_sync pr "$PR_NUMBER" "Done" --repo "$TARGET_REPO" || true
-else                                                                                 # tier 5, soft
-    if [ -n "$_sc_was" ]; then export SHELL_COMMON="$_sc_prev"; else unset SHELL_COMMON; fi
-    printf '[gh-pr-merge] no usable shell-common at %s — board sync skipped; the merge itself is unaffected.\n' \
-        "$_HELPER" >&2
-fi
-unset _sc_was _sc_prev
-```
+Implemented as step 1 of `lib/post-merge-housekeeping.sh` (relative to `skills/merge/`): soft warn-and-skip
+loader (harness-skills#60), then
+`_gh_project_status_sync pr "$PR_NUMBER" "Done" --repo "$TARGET_REPO" || true`.
+A missing helper, or one that defines nothing (dEitY719/dotfiles#724), is ONE
+`[gh-pr-merge] no usable shell-common at <path>` warning on stderr and a skip;
+the failure arm restores `SHELL_COMMON`.
 
 `Done` is the terminal PR state after merge, regardless of which
 column the card was in (`In review`, `Approved`, or `In progress` if a
@@ -68,16 +50,10 @@ in `pr view --json`'s allow-list and exits with "Unknown JSON field"
 query, which is supported across all `gh` versions that ship the
 `api graphql` subcommand.
 
-```bash
-# Wrap inside the same [ -r "$_HELPER" ] block from step (1) so the closing-issue
-# helper is only called after the source succeeded. With the helper missing
-# (NF-1, dEitY719/dotfiles#644) OR sourced-but-function-undefined (dEitY719/dotfiles#724) the entire
-# reconciliation is silently skipped — both gates live in step (1).
-for _issue in $(_gh_pr_closing_issue_numbers "$PR_NUMBER" "$TARGET_REPO" 2>/dev/null || true); do
-    _gh_project_status_sync issue "$_issue" "Done" \
-        --only-from "Backlog,In progress,In review" --repo "$TARGET_REPO" || true
-done
-```
+Implemented right after (1), inside the same proven-helper branch — a
+missing or empty helper skips this whole reconciliation:
+for each issue from `_gh_pr_closing_issue_numbers "$PR_NUMBER" "$TARGET_REPO"`,
+`_gh_project_status_sync issue <N> "Done" --only-from "Backlog,In progress,In review" --repo "$TARGET_REPO" || true`.
 
 The `--only-from` whitelist enforces three properties:
 
@@ -107,5 +83,5 @@ The `--only-from` whitelist enforces three properties:
 
 `shell-common/functions/gh_project_status.sh` — shared with `gh-pr:create`,
 `gh-pr:reply`, `gh-pr:commit`, `gh-flow:issue`, and `gh-pr:merge-emergency`.
-Source the file each invocation; do not inline-copy the snippet so a
+Source the file each invocation; do not inline-copy the helper so a
 single fix propagates everywhere.

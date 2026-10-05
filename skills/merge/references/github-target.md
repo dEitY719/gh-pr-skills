@@ -8,32 +8,18 @@ Run this in Step 1, **before any `gh` call**.
 the host from one and the same remote URL, then export the host so the helpers
 this skill sources (`gh_project_status.sh`, `gh_pr_edit_safe.sh`) inherit it:
 
-```bash
-_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"                                  # tier 1
-if [ ! -f "$_SC/functions/gh_host.sh" ]; then
-    [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
-        printf '[gh-pr:merge] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-            "$_SC" >&2
-        return 1 2>/dev/null || exit 1
-    }
-    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
-fi
-unset -f _gh_resolve_host 2>/dev/null || :
-unalias _gh_resolve_host 2>/dev/null || :
-export SHELL_COMMON="$_SC"                                                           # before the load
-[ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
-[ "$(command -v _gh_resolve_host 2>/dev/null)" = _gh_resolve_host ] || {             # tier 5
-    unset SHELL_COMMON
-    printf '[gh-pr:merge] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-        "$_SC" >&2
-    return 1 2>/dev/null || exit 1
-}
-REMOTE_URL=$(git remote get-url "${REMOTE:-origin}") || exit 1
-TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL") || exit 1
-TARGET_HOST=$(_gh_host_from_url "$REMOTE_URL") || TARGET_HOST=$(_gh_resolve_host)
-export GH_HOST="$TARGET_HOST"
-export TARGET_REPO TARGET_HOST
-```
+The binding lives in `lib/github-target.sh` (relative to `skills/merge/`);
+`SKILL.md` Step 1 holds the guarded call. Contract:
+
+| | |
+|---|---|
+| Input | `[remote]` (default `origin`) |
+| stdout | one `export SHELL_COMMON=… GH_HOST=… TARGET_REPO=… TARGET_HOST=…` line, values single-quoted, for the caller to `eval` |
+| Loader | HARD tier ladder: tier 1 `$DOTFILES_ROOT` (default `$HOME/dotfiles`), tier 2 guarded `$CLAUDE_PLUGIN_ROOT/lib/vendor`, no cwd tier, tier 5 stops |
+| Exit | `0` bound; `1` no usable shell-common, unknown remote, or an unparsable remote URL — stdout stays empty, so nothing half-bound is ever eval'd |
+
+`tests/plugin-root-tier5.sh` §2-4 runs it against a planted cwd copy and a PATH
+imposter; `tests/merge-lib.sh` covers the binding itself.
 
 An unknown remote stops the run with `git remote -v` — never a silent `origin`
 fallback.

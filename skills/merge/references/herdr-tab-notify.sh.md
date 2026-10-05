@@ -14,62 +14,15 @@ closed, removed, or otherwise mutated — every herdr/git call here is a
 read-only `list` (NF-2). A `working`/`blocked` agent prints nothing at
 all: silence, not a second info line (F-4).
 
-```bash
-# NF-1: every gate here is a silent skip. Either tool missing (the expected
-# state on any machine without the agent runner), or no worktree (the merge
-# ran on a different machine) → the merge report is unaffected. The two
-# builtin `command -v` gates come first so that common case never pays for
-# the worktree scan below.
-if command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-    # "Which herdr agent is sitting on this worktree?" comes from one SSOT
-    # (dEitY719/dotfiles#1569), sourced — never re-implemented here. This hint used to carry the
-    # weakest of the four hand-copied answers: a plain `.cwd == $wt` string
-    # equality, which missed both a session that had `cd`-ed inside its worktree
-    # and a worktree reached through a symlink. Adopting the shared predicate
-    # WIDENS what this hint notices, on purpose; widening is safe precisely
-    # because the hint is read-only (NF-2) and costs one INFO line.
-    # An unreadable helper is a silent skip like every other gate.
-    NOTIFY_LOOKUP_LIB="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/functions/herdr_agent_lookup.sh"
-    # shellcheck source=/dev/null
-    if [ -r "$NOTIFY_LOOKUP_LIB" ] && . "$NOTIFY_LOOKUP_LIB"; then
-        # F-1: locate the local worktree checked out on the merged branch.
-        # substr() rather than $2 so a worktree path containing spaces still
-        # resolves; --porcelain guarantees the "worktree <path>" / "branch <ref>"
-        # line pairing this relies on.
-        BRANCH="${HEAD_REF}"
-        WT_PATH=$(git worktree list --porcelain 2>/dev/null | awk -v b="refs/heads/${BRANCH}" \
-            '/^worktree /{p=substr($0,10)} /^branch /{if (substr($0,8)==b) print p}' | head -1)
+Implemented as step 2 of `lib/post-merge-housekeeping.sh` (relative to `skills/merge/`). Gates, in order: `herdr` and `jq` on
+PATH; a readable `${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/functions/herdr_agent_lookup.sh`
+(dEitY719/dotfiles#1569, sourced — never re-implemented); a local worktree on
+`refs/heads/$HEAD_REF` from `git worktree list --porcelain`;
+`herdr_agent_match_for_cwd "$(herdr_agent_physical_path "$WT_PATH")" idle`.
+Only when all hold it prints the one line:
 
-        # F-2: read-only agent enumeration. The lookup matches BOTH `cwd` (where
-        # the pane was opened) and `foreground_cwd` (where its shell stands now),
-        # on a path BOUNDARY, against the PHYSICAL path — and it takes the first
-        # match, because two agents on one worktree is abnormal: ignore the rest,
-        # warn about nothing (Error Cases).
-        #
-        # F-4: the `idle` argument puts the status gate inside the lookup, so a
-        # `working`/`blocked` agent yields nothing at all — silence, not a second
-        # info line — and does not even pay for the workspace lookup below. A
-        # non-zero return is either "herdr could not be asked" or "nothing idle
-        # is there"; this hint treats both the same, silently.
-        if [ -n "$WT_PATH" ] &&
-            MATCH=$(herdr_agent_match_for_cwd "$(herdr_agent_physical_path "$WT_PATH")" idle); then
-            # tab_id <TAB> agent_status <TAB> workspace_id. The middle field is
-            # discarded: the filter above already pinned it to `idle`.
-            IFS=$'\t' read -r TAB_ID _ WS_ID <<<"$MATCH"
-
-            # Label is cosmetic — fall back to the raw workspace id when
-            # this read-only lookup fails or the workspace is unlabeled.
-            WS_LABEL=$(herdr workspace list 2>/dev/null | jq -r --arg id "$WS_ID" \
-                '.result.workspaces[]? | select(.workspace_id == $id) | .label // empty' 2>/dev/null | head -1)
-
-            # F-3: exactly one line, only for an idle agent. The path printed is
-            # the one `git worktree list` reported, not its resolved twin — that
-            # is the spelling the human will recognise.
-            printf "[INFO] herdr tab %s/%s is idle for the merged branch's worktree (%s) — consider: herdr tab close %s / session:worktree-teardown\n" \
-                "${WS_LABEL:-$WS_ID}" "$TAB_ID" "$WT_PATH" "$TAB_ID"
-        fi
-    fi
-fi
+```text
+[INFO] herdr tab <workspace-label|id>/<tab> is idle for the merged branch's worktree (<path>) — consider: herdr tab close <tab> / session:worktree-teardown
 ```
 
 ## Failure modes
@@ -118,14 +71,15 @@ This substep calls `git worktree list`, `herdr agent list`, and
 deletes a worktree, and never writes to the herdr server. The suggested
 cleanup commands are printed for a human to decide on and run.
 
-`tests/bats/skills/gh_pr_merge_herdr_notify.bats` enforces this
-mechanically: it greps this file, its fixture mirror and the shared
+`tests/bats/skills/gh_pr_merge_herdr_notify.bats` (dotfiles) enforces this
+mechanically: it greps the block, its fixture mirror and the shared
 `shell-common/functions/herdr_agent_lookup.sh` for the literal invocation
 substrings and fails if any of them appears — the guarantee now depends on
 that helper too, so the grep follows it there.
 
 ## Mirror
 
-`tests/bats/skills/_fixtures/gh_pr_merge_herdr_notify.sh` mirrors the bash
-block above as the function `gh_pr_merge_herdr_notify "$HEAD_REF"`. If the
-block here changes, mirror the change there so the bats suite catches drift.
+`tests/bats/skills/_fixtures/gh_pr_merge_herdr_notify.sh` (dotfiles) mirrors
+step 2 of `lib/post-merge-housekeeping.sh` as the function
+`gh_pr_merge_herdr_notify "$HEAD_REF"`. If the script's step 2 changes, mirror
+the change there so the bats suite catches drift.

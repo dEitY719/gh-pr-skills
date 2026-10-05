@@ -24,9 +24,16 @@ If arg #1 is `-h`/`--help`/`help`, output `references/help.md` verbatim and stop
 
 ## Step 1: Parse Args + Resolve Repo
 
-Record `START_TS=$(date +%s)` immediately for elapsed-time tracking in Step 4.
+Record `START_TS=$(date +%s)` immediately (Step 4 elapsed time). Argument rules — defaults and the refusal for each: `references/arg-parsing.md`. Bind
+`TARGET_REPO` / `TARGET_HOST` / `GH_HOST` from the `[remote]` URL (contract: `references/github-target.md`);
+every `lib/` call in this skill opens with the first three lines:
 
-Argument rules — defaults, the refusal for each, and the `TARGET_REPO` / `TARGET_HOST` / `GH_HOST` binding: `references/arg-parsing.md`.
+```bash
+_L=""; if [ -n "${HERMES_SKILL_DIR}" ]; then _L="${HERMES_SKILL_DIR}/lib"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then _L="$CLAUDE_PLUGIN_ROOT/skills/merge/lib"; fi
+[ -n "$_L" ] && [ -d "$_L" ] || { printf '[FAIL] gh-pr:merge: lib/ unresolved (%s) - export HERMES_SKILL_DIR=<skill dir> or CLAUDE_PLUGIN_ROOT=<plugin dir>\n' "${_L:-unset}" >&2; exit 1; }
+_gt=$(sh "$_L/github-target.sh" "<remote>") || exit 1; eval "$_gt"
+```
 
 ## Step 2: Pre-flight (parallel)
 
@@ -44,14 +51,14 @@ here. Rationale + the retired Step 2-B in `references/board-policy.md`.
 GH_HOST="$TARGET_HOST" gh pr merge <N> --repo "$TARGET_REPO" --<strategy> --delete-branch
 ```
 
-Flag mapping in `references/strategy-selection.md`. If `gh` returns
-"merge method is not allowed", print the repo-settings guidance from
-`references/strategy-selection.md` and stop. **Never** silently switch
-strategies.
+Flag mapping in `references/strategy-selection.md`. If `gh` returns "merge method is not allowed",
+print that file's repo-settings guidance and stop. **Never** silently switch strategies.
 
 ## Step 4: Post-merge Housekeeping
 
-Read `references/post-merge-housekeeping.md` and run the four soft-fail side effects it tables, in order; paste each linked snippet verbatim.
+Four soft-fail side effects in one call (board → `Done`, herdr hint, `review-passed` cleanup,
+ai-metrics; always exit 0 — contract: `references/post-merge-housekeeping.md`). After the Step 1 lines:
+`TARGET_HOST=<host> START_TS=<ts> bash "$_L/post-merge-housekeeping.sh" <N> <owner/repo> <headRefName>`.
 
 ## Step 5: Fetch Merge SHA + Report
 
@@ -87,10 +94,6 @@ fi
 
 ## Related Skills
 
-`gh-pr:approve` produces the approval this skill gates on · `gh-pr:merge-emergency`
-is the admin-override path when approval cannot be obtained · `gh-verify:post-merge-verify`
-owns the dispatch block Step 5 stages via `lib/post-merge-verify-dispatch.sh`
-for repos registered in
-`${IW_WATCHED_REPOS:-${HOME}/.agent-factory/avatars/issue-watcher/watched-repos.json}`,
-and stays a standalone manual entry point
-(`/gh-verify:post-merge-verify <N>`).
+`gh-pr:approve` produces the approval this skill gates on · `gh-pr:merge-emergency` is the admin-override
+path when approval cannot be obtained · `gh-verify:post-merge-verify` owns the dispatch block Step 5 stages
+via `lib/post-merge-verify-dispatch.sh` for registered repos, and stays a manual entry point (`/gh-verify:post-merge-verify <N>`).

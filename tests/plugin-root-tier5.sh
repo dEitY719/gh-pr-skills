@@ -33,7 +33,7 @@
 set -eu
 
 ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
-SITE=skills/merge/references/github-target.md
+SITE=skills/merge/lib/github-target.sh
 fail=0
 
 # 1. The gate grep, verbatim from the convention page. It has no false
@@ -48,21 +48,11 @@ if [ -n "$hits" ]; then
 	fail=1
 fi
 
-# 2. Extract the resolution preamble of a real site — the first bash fence up to
-#    and including its export — and run it as the harness would paste it.
+# 2. Run a real resolution site — merge's lib/github-target.sh, which prints the
+#    bindings for the caller to eval and nothing else (#65) — as the skill does.
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT INT TERM
-F=$(printf '\140\140\140')
-# Stop at the proof's closing brace, NOT at `export SHELL_COMMON=`: since
-# harness-skills#37 the export sits ABOVE the load, so the old stop condition
-# would have cut the block off before the load and the proof it is here to
-# exercise — and a truncated block cannot reach tier 5, which this test would
-# then report as a tier-5 failure for the wrong reason.
-awk -v f="$F" '$0 == f "bash" && !b { b = 1; next } $0 == f && b { exit }
-	!b { next } { print }
-	/^\[ "\$\(command -v / { p = 1 } p && $0 == "}" { exit }' \
-	"$ROOT/$SITE" > "$TMP/block.sh"
-[ -s "$TMP/block.sh" ] || { printf 'FAIL  no bash fence extracted from %s\n' "$SITE"; exit 1; }
+cp "$ROOT/$SITE" "$TMP/block.sh"
 
 # The hostile half of the negative case: a pull request under review can add
 # lib/vendor/shell-common to its own tree, and $PWD is that checkout. Plant a
@@ -91,12 +81,12 @@ case "$err" in
 	*) printf 'FAIL  tier 5 message does not name %s, the path it tried: %s\n' "$TIER1" "$err"; fail=1 ;;
 esac
 
-# Sourced instead of run: `return 1 2>/dev/null || exit 1` must not kill the
-# caller, and SHELL_COMMON must still be unset — never "/lib/vendor/shell-common".
+# Its stdout is what the caller evals: a tier-5 stop must print nothing, so the
+# eval can never export SHELL_COMMON — never "/lib/vendor/shell-common".
 # shellcheck disable=SC2016  # the inner shell expands these, not this one
 sc=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT -u SHELL_COMMON \
 	HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
-	sh -c '. "$1" >/dev/null 2>&1; printf "%s" "${SHELL_COMMON-<unset>}"' \
+	sh -c 'eval "$(sh "$1" 2>/dev/null)"; printf "%s" "${SHELL_COMMON-<unset>}"' \
 	sh "$TMP/block.sh")
 [ "$sc" = "<unset>" ] || {
 	printf 'FAIL  SHELL_COMMON exported before the proof: %s\n' "$sc"
@@ -118,21 +108,24 @@ err=$(cd "$TMP" && env -u SHELL_COMMON HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" 
 	CLAUDE_PLUGIN_ROOT="$TMP/root" PATH="$TMP/bin:$PATH" sh "$TMP/block.sh" 2>&1 >/dev/null)
 rc=$?
 set -e
-[ "$rc" -ne 0 ] || {
-	printf 'FAIL  a PATH executable named _gh_resolve_host satisfied the load proof\n'
-	fail=1
-}
+# The script would also stop later, at `git remote get-url` outside a checkout,
+# so rc alone cannot tell the proof held: require the proof's own message.
+case "$rc:$err" in
+	[1-9]*:*'did not load a usable shell-common'*) ;;
+	*) printf 'FAIL  a PATH executable named _gh_resolve_host satisfied the load proof (rc=%s): %s\n' "$rc" "$err"
+	   fail=1 ;;
+esac
 
-# 4. That failure leaves SHELL_COMMON unset, although the block exports it
-#    BEFORE the load (harness-skills#37). The export has to come first — every
-#    vendored helper resolves its siblings through ${SHELL_COMMON:-...} while it
-#    sources — so the tier-5 arm's `unset` is what keeps the observable contract
-#    "set if and only if a helper proved out". Without it this is the poisoned
-#    export of gh-resolve-skills#8, reached from the other side.
+# 4. That failure leaves SHELL_COMMON unset in the caller, although the script
+#    exports it BEFORE the load (harness-skills#37): the export has to come
+#    first — every vendored helper resolves its siblings through
+#    ${SHELL_COMMON:-...} while it sources — and the tier-5 arm prints no eval
+#    line, which keeps the contract "set if and only if a helper proved out".
+#    Without it this is the poisoned export of gh-resolve-skills#8.
 # shellcheck disable=SC2016  # the inner shell expands these, not this one
 sc=$(cd "$TMP" && env -u SHELL_COMMON HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
 	CLAUDE_PLUGIN_ROOT="$TMP/root" PATH="$TMP/bin:$PATH" \
-	sh -c '. "$1" >/dev/null 2>&1; printf "%s" "${SHELL_COMMON-<unset>}"' \
+	sh -c 'eval "$(sh "$1" 2>/dev/null)"; printf "%s" "${SHELL_COMMON-<unset>}"' \
 	sh "$TMP/block.sh")
 [ "$sc" = "<unset>" ] || {
 	printf 'FAIL  a tree that failed the proof stayed exported as SHELL_COMMON: %s\n' "$sc"
@@ -149,7 +142,7 @@ sc=$(cd "$TMP" && env -u SHELL_COMMON HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
 SOFT_SITES="skills/approve/lib/board-approved-sync.sh
 skills/commit/lib/board-sync.sh
 skills/create/lib/project-board-sync.sh
-skills/merge/references/project-board-sync.md
+skills/merge/lib/post-merge-housekeeping.sh
 skills/merge-emergency/references/project-board-sync.md
 skills/reply/lib/step6-board-and-labels.sh"
 
