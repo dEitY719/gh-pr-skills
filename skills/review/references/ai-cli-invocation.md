@@ -173,16 +173,24 @@ _CLAUDE_SH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/clau
     echo "--ai opencode is internal-PC only (~/.dotfiles-setup-mode != internal)" >&2
     exit 1
 }
+_OPENCODE_MODEL=$(_gh_pr_review_opencode_model)
+[ -n "$_OPENCODE_MODEL" ] || {
+    echo "[WARN] --ai opencode skipped: DOTFILES_OPENCODE_REVIEW_MODEL is not set (env or shell-common/env/internal.local.sh)" >&2
+    exit 1
+}
 
 opencode run "첨부 파일의 지시사항에 따라 위 PR diff를 리뷰해줘." \
-    --model codemate/CodeLLMPro \
+    --model "$_OPENCODE_MODEL" \
     --dir "$OPENCODE_WORKDIR" \
     --file "$PROMPT_FILE"
 ```
 
-The model is fixed to `codemate/CodeLLMPro`; no user-facing `--model`
-override is accepted. `codemate/CodeLLMMax` is intentionally absent from
-the code path. Because OpenCode is agentic and may have filesystem
+The model comes from `DOTFILES_OPENCODE_REVIEW_MODEL`: the env var wins,
+else its assignment is parsed (never sourced) out of the gitignored
+`shell-common/env/internal.local.sh` (dEitY719/dotfiles#2007). Unset means
+the lane is skipped with a `[WARN]`, never a silent fall back to
+opencode's default model. No user-facing `--model` override is
+accepted. Because OpenCode is agentic and may have filesystem
 permissions, the dispatcher creates an isolated temporary run directory,
 passes it with `--dir`, and removes it after the run. The PR worktree is
 not the OpenCode process directory, so relative agent writes do not leak
@@ -248,7 +256,7 @@ Step 5 of the skill delegates to `_gh_pr_review_run_ai` in
 `shell-common/functions/gh_pr_review.sh`. The function pipes
 `PROMPT_FILE` into the chosen CLI with the exact invocation shape
 documented above (`codex exec --color=never`, `agy --print`, `claude -p`,
-`opencode run ... --model codemate/CodeLLMPro --dir ... --file`, or
+`opencode run ... --model "$DOTFILES_OPENCODE_REVIEW_MODEL" --dir ... --file`, or
 `hermes -z "$(cat "$PROMPT_FILE")"`, plus the
 `CLAUDE_CONFIG_DIR` injection for `--user`). Stdout streams to
 the user verbatim — no reformatting, no summarization, no truncation.

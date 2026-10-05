@@ -61,7 +61,9 @@ claude -p ...`.
 
 ## `--ai opencode`
 
-Internal-PC only. The lane uses fixed model `codemate/CodeLLMPro`,
+Internal-PC only. The lane takes its model from
+`DOTFILES_OPENCODE_REVIEW_MODEL` (env, else the gitignored
+`shell-common/env/internal.local.sh`; unset -> skipped with a warning),
 passes the prompt file with `--file`, and runs in an isolated temporary
 directory via `--dir` so relative writes do not touch the PR checkout.
 
