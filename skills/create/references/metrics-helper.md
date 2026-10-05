@@ -14,47 +14,23 @@ of (issue body + commit log) ÷ 4") didn't bind tightly to a variable name
 at execution time, so the executor fell back to the closest in-scope file
 (`$BODY`) and the footer under-reported by ~7×.
 
-This file pins the exact bash so the inputs cannot drift again.
-
-## Snippet — paste into Step 4 verbatim
+This is now pinned in code: `lib/pr-tokens.sh` (#72) computes the two
+inputs itself, so they cannot drift again. Step 4 calls it through the
+Step 1 lib locator (`$_L`):
 
 ```bash
-compute_pr_tokens() {
-    local _issue_body="$1" _commit_log="$2"
-    local _total _t
-    _total=$((
-        $(printf '%s' "$_issue_body" | wc -m) +
-        $(printf '%s' "$_commit_log" | wc -m)
-    ))
-    _t=$(( (_total / 4 + 250) / 500 * 500 ))
-    [ "$_t" -lt 1000 ] && _t=1000
-    printf '%s\n' "$_t"
-}
-
-ISSUE_BODY=""
-if [ -n "${ISSUE_NUMBER-}" ]; then
-    # Host + repo are both explicit (dEitY719/dotfiles#1403). The old `--repo`-less fallback
-    # branch was removed: a bare `gh issue view <N>` resolves against gh
-    # CLI's own `gh repo set-default`, so on a dual-host login it reads a
-    # different server's issue #N — or reports "not found" for an issue that
-    # is OPEN — and the resulting empty body silently under-reports TOKENS.
-    ISSUE_BODY=$(GH_HOST="$TARGET_HOST" gh issue view "$ISSUE_NUMBER" \
-        --repo "$GH_REPO" \
-        --json body --jq '.body? // empty' 2>/dev/null) || ISSUE_BODY=""
-fi
-COMMIT_LOG=$( { git log "$BASE_BRANCH..HEAD" --format=%B; \
-                git diff "$BASE_BRANCH...HEAD"; } 2>/dev/null )
-
-TOKENS=$(compute_pr_tokens "$ISSUE_BODY" "$COMMIT_LOG")
+TOKENS=$(bash "$_L/pr-tokens.sh" "$ISSUE_NUMBER" "$BASE_BRANCH")
 ```
 
-The two inputs are computed explicitly. `$BODY` (the PR body temp file) is
-deliberately not referenced — it's the wrong input.
+It prints one line, the token count. `$BODY` (the PR body temp file) is
+deliberately not an input — it's the wrong one.
 
-`$TARGET_HOST` / `$GH_REPO` come from Step 1a-0. An empty `ISSUE_BODY` is a
-tolerated outcome here (the commit log alone usually clears the 1000 floor),
-which is exactly why the host must be pinned: a wrong-host read fails softly
-and looks identical to "the issue has no body".
+`$TARGET_HOST` / `$GH_REPO` come from Step 1a-0 and are read from the
+environment. An empty issue body is a tolerated outcome (the commit log
+alone usually clears the 1000 floor), which is exactly why the host must be
+pinned: a wrong-host read fails softly and looks identical to "the issue has
+no body". A failed `gh issue view` therefore prints one `[WARN]` line on
+stderr and the count continues with an empty issue body.
 
 ## Regression case — PR dEitY719/dotfiles#325
 
@@ -71,13 +47,14 @@ drift on the same commit set), never 1 000.
 
 ## Boundary fixtures
 
-- Both inputs empty → `compute_pr_tokens "" ""` returns `1000` (floor).
+- Both inputs empty → `1000` (floor).
 - Tiny PR (total ≈ 50)        → `1000` (floor).
 - Mid PR  (total ≈ 12 000)    → `3000`.
 - Large PR (total ≈ 80 000)   → `20000`.
 
 Numbers match `(total / 4 + 250) / 500 * 500` exactly. Any drift in the
-formula must update both this table and the snippet above.
+formula must update both this table and `lib/pr-tokens.sh`;
+`tests/create-lib.sh` pins the floor, the rounding and the no-issue case.
 
 ## What `compute_pr_tokens` does NOT do
 

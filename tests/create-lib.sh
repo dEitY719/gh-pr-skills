@@ -8,6 +8,7 @@
 #   branch-state.sh       push-action rows; dispatch on/off the base branch
 #   lint-guard.sh         bypass passes, broken install / no base stops
 #   project-board-sync.sh hook auto-skip, call shape, soft skip
+#   pr-tokens.sh          floor 1000, round to 500, no-issue, gh soft-fail
 #
 #   sh tests/create-lib.sh
 set -eu
@@ -23,7 +24,10 @@ mkdir -p "$TMP/bin" "$TMP/sc/functions" "$TMP/home"
 cat > "$TMP/bin/gh" <<'EOF'
 #!/bin/sh
 printf '%s\n' "$*" >> "${GH_LOG:-/dev/null}"
-case "$*" in "repo view"*) echo main ;; esac
+case "$*" in
+    "repo view"*) echo main ;;
+    "issue view"*) [ -z "${GH_FAIL-}" ] || exit 1; printf '%s\n' "${FAKE_ISSUE_BODY-}" ;;
+esac
 exit 0
 EOF
 chmod +x "$TMP/bin/gh"
@@ -133,5 +137,21 @@ r SHELL_COMMON="$TMP/sc" bash "$L/project-board-sync.sh" 9
 case "$rc:$err" in 0:*'delegated to PostToolUse hook'*) ;; *) bad "board sync hook skip: rc=$rc $err" ;; esac
 [ ! -s "$TMP/sync.log" ] || bad "board sync ran despite the hook"
 
-[ "$fail" -eq 0 ] && printf 'ok    create lib: target eval line, stacked rc contract 0/2-6, push policy rows, base-branch dispatch, lint guard, board sync shape and skips\n'
+# --- pr-tokens.sh ---------------------------------------------------------------
+# The work repo is on feat/issue-65, one empty commit over main: a log of a few
+# dozen chars, so the issue body decides the count.
+: > "$TMP/gh.log"
+r GH_LOG="$TMP/gh.log" bash "$L/pr-tokens.sh" "" main
+[ "$rc:$out" = 0:1000 ] || bad "pr-tokens floor, no issue: rc=$rc out=$out $err"
+[ ! -s "$TMP/gh.log" ] || bad "pr-tokens called gh without an issue: $(cat "$TMP/gh.log")"
+big=$(printf '%7000s' '' | tr ' ' x)
+r GH_LOG="$TMP/gh.log" FAKE_ISSUE_BODY="$big" bash "$L/pr-tokens.sh" 72 main
+[ "$rc:$out" = 0:2000 ] || bad "pr-tokens round to 500 (~7000 chars -> 2000): rc=$rc out=$out $err"
+grep -q '^issue view 72 --repo o/r ' "$TMP/gh.log" || bad "pr-tokens gh call shape: $(cat "$TMP/gh.log")"
+r GH_FAIL=1 FAKE_ISSUE_BODY="$big" bash "$L/pr-tokens.sh" 72 main
+case "$rc:$out:$err" in 0:1000:*'[WARN]'*) ;; *) bad "pr-tokens gh soft-fail: rc=$rc out=$out $err" ;; esac
+r bash "$L/pr-tokens.sh" 72
+[ "$rc:$out" = 1: ] || bad "pr-tokens without a base: rc=$rc out=$out"
+
+[ "$fail" -eq 0 ] && printf 'ok    create lib: target eval line, stacked rc contract 0/2-6, push policy rows, base-branch dispatch, lint guard, board sync shape and skips, pr token floor/rounding/soft-fail\n'
 exit "$fail"
