@@ -51,13 +51,13 @@ opt-in 했고(`.github/workflows/stacked-closes-rollup.yml`, `CLAUDE.md`/`AGENTS
 ## 동작 단계
 
 1. **Step 1 — 인자 파싱, base 결정, 상태 수집.** `START_TS` 기록.
-   *1a-0*: 어떤 `gh` 호출보다 먼저 `references/github-target.md` 스니펫으로
+   *1a-0*: 어떤 `gh` 호출보다 먼저 `lib/github-target.sh` 출력을 eval 해
    `GH_HOST` / `GH_REPO` / `TARGET_HOST` / `REMOTE` 를 export.
-   *1a*: `references/stacked-pr.md` 의 함수와 dispatch 블록으로 `BASE_BRANCH` /
+   *1a*: `lib/stacked-pr.sh` 로 `BASE_BRANCH` /
    `PARENT_PR` / `ISSUE_NUMBER` 를 바인딩. 잘못된 입력이면 push 없이 중단한다
    (`rc=2` 상호 배타 플래그, `rc=3` 잘못된 `--base`, `rc=4` 부모 PR 후보 다수,
    `rc=5` 부모 PR 이 `OPEN` 아님, `rc=6` 부모가 이미 stacked).
-   *1b*: `references/branch-state.md` 로 커밋 range 와 push 상태를 조사한다.
+   *1b*: `lib/branch-state.sh dispatch` 로 커밋 range 와 push 상태를 조사한다.
    결과는 `not-on-base`(정상 진행) / `nothing-to-pr`(중단) /
    `auto-branch-and-rewind` / `auto-branch-warn-only` 중 하나다.
 2. **Step 2-3 — 모든 커밋 분석 + 이슈 결정.** `git log <base>..HEAD` 를 읽어 주제별로
@@ -68,7 +68,7 @@ opt-in 했고(`.github/workflows/stacked-closes-rollup.yml`, `CLAUDE.md`/`AGENTS
    `references/pr-body-template.md` 의 제목 규칙(70자 미만, 명령형)과 본문
    마크다운(`## Summary` / `## Changes` / `## Test plan` / `## Related`)을 따르고,
    기존 커밋이 쓰는 언어에 맞춘다. `references/ai-metrics-footer.md` 로 푸터를
-   덧붙인다(soft-fail). **Step 4.5 는 push 전에** `references/lint-guard.md` 의
+   덧붙인다(soft-fail). **Step 4.5 는 push 전에** `lib/lint-guard.sh` 로
    `_gh_pr_lint_run "$BASE_BRANCH"` 를 실행해 lint 에러면 hard-fail 한다
    (도구 없음 / 변경 없음 / `GH_PR_LINT_BYPASS=1` 이면 자동 skip).
 4. **Step 5 — push 후 생성.** upstream 상태별 push 정책: upstream 없음 또는

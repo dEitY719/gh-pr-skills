@@ -148,7 +148,7 @@ sc=$(cd "$TMP" && env -u SHELL_COMMON HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
 #    ${SHELL_COMMON:-...} after it reads.
 SOFT_SITES="skills/approve/lib/board-approved-sync.sh
 skills/commit/lib/board-sync.sh
-skills/create/references/project-board-sync.md
+skills/create/lib/project-board-sync.sh
 skills/merge/references/project-board-sync.md
 skills/merge-emergency/references/project-board-sync.md
 skills/reply/lib/step6-board-and-labels.sh"

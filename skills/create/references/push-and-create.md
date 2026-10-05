@@ -22,17 +22,13 @@ Compare with `git status -sb` or
 
 Mispair detection reuses that same `$UPSTREAM`:
 
-```bash
-REMOTE="${REMOTE:-origin}"
-CUR=$(git rev-parse --abbrev-ref HEAD)
-UPSTREAM_NORM="${UPSTREAM#refs/remotes/}"
-[ -n "$UPSTREAM_NORM" ] && [ "$UPSTREAM_NORM" != "$REMOTE/$CUR" ] && MISPAIRED=1
-```
+`bash lib/branch-state.sh push-action "$CUR" "$UPSTREAM" "$DIVERGED" "$REMOTE"`
+prints the row's action (`push -u <remote> HEAD` / `push` / `STOP`).
 
-The strip is load-bearing: `--symbolic-full-name` yields
+Inside it, the `refs/remotes/` strip is load-bearing: `--symbolic-full-name` yields
 `refs/remotes/origin/main`, which never equals `$REMOTE/$CUR` — comparing the
 raw value would flag *every* branch as mispaired. `gh_pr_normalize_upstream`
-in `references/branch-state.md` is the reusable form of that same strip.
+in `lib/branch-state.sh` is that strip.
 
 This row is the *normal* state after `git worktree add ... -b <branch>` off
 `origin/main`: git's `branch.autoSetupMerge` points the new branch at its
@@ -46,7 +42,7 @@ branch", and a same-named remote branch is the normal/expected state. Known,
 accepted side effect.
 
 Executable SSOT for the rows above (`gh_pr_push_action`,
-`gh_pr_upstream_is_mispaired`) lives in `references/branch-state.md`, mirrored
+`gh_pr_upstream_is_mispaired`) lives in `lib/branch-state.sh`, mirrored
 1:1 by `tests/bats/skills/_fixtures/gh_pr_push_policy.sh`. Both take the target
 remote as a trailing optional argument that defaults to `origin`, so
 `gh_pr_push_action "$CUR" "$UPSTREAM" "$DIVERGED" "$REMOTE"` is the Step 5

@@ -16,34 +16,14 @@ push, surfacing failures before they hit the remote.
 
 The detection and execution logic is implemented in
 `shell-common/functions/gh_pr_lint.sh` as `_gh_pr_lint_run <base>`.
-The skill sources the file and calls the function — never inline the
+`lib/lint-guard.sh <BASE_BRANCH>` (relative to `skills/create/`) loads it
+through the HARD tier ladder (tier 1 `$DOTFILES_ROOT`, tier 2 guarded
+`$CLAUDE_PLUGIN_ROOT/lib/vendor`, no cwd tier, tier 5 stops) and runs it.
+Contract: exit `0` clean or skipped; exit `1` with
+`gh-pr:create stopped at Step 4.5 (lint guard).` on stderr when lint failed,
+or a tier-5 message when no usable shell-common loaded. Never inline the
 detection logic in `SKILL.md`.
 
-```bash
-_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"                                  # tier 1
-if [ ! -f "$_SC/functions/gh_pr_lint.sh" ]; then
-    [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
-        printf '[gh-pr:create] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-            "$_SC" >&2
-        return 1 2>/dev/null || exit 1
-    }
-    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
-fi
-unset -f _gh_pr_lint_run 2>/dev/null || :
-unalias _gh_pr_lint_run 2>/dev/null || :
-export SHELL_COMMON="$_SC"                                                           # before the load
-[ -f "$_SC/functions/gh_pr_lint.sh" ] && . "$_SC/functions/gh_pr_lint.sh"
-[ "$(command -v _gh_pr_lint_run 2>/dev/null)" = _gh_pr_lint_run ] || {               # tier 5
-    unset SHELL_COMMON
-    printf '[gh-pr:create] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-        "$_SC" >&2
-    return 1 2>/dev/null || exit 1
-}
-_gh_pr_lint_run "$BASE_BRANCH" || {
-    printf 'gh-pr:create stopped at Step 4.5 (lint guard).\n' >&2
-    exit 1
-}
-```
 
 ## Detection priority
 

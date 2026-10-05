@@ -14,22 +14,24 @@ two questions the old policy conflated:
 to `origin`, which is why every function below defaults its remote parameter
 to `origin` too. Wherever this file says `origin`, read "the target remote".
 
-> SSOT for the bash bound to `gh_pr_normalize_upstream`,
-> `gh_pr_upstream_is_mispaired`, `gh_pr_push_action`,
-> `gh_pr_commit_type`, `gh_pr_branch_name`, and
-> `gh_pr_base_branch_decision`. The bats regression suite at
-> `tests/bats/skills/gh_pr_push_policy.bats` mirrors the same functions
-> verbatim via `tests/bats/skills/_fixtures/gh_pr_push_policy.sh` — when
-> this file changes, mirror the change there too (and vice versa).
+> The executable SSOT for `gh_pr_normalize_upstream`,
+> `gh_pr_upstream_is_mispaired`, `gh_pr_push_action`, `gh_pr_commit_type`,
+> `gh_pr_branch_name`, `gh_pr_base_branch_decision` and the Step 1b dispatch
+> is `lib/branch-state.sh` (relative to `skills/create/`), called as
+> `branch-state.sh dispatch` (Step 1b) and
+> `branch-state.sh push-action <cur> <upstream> <diverged> [remote]` (Step 5).
+> dotfiles' bats suite (`tests/bats/skills/gh_pr_push_policy.bats`, fixture
+> `tests/bats/skills/_fixtures/gh_pr_push_policy.sh`) mirrors the same
+> functions — when the script changes, mirror the change there too.
 
 **Test-coverage boundary.** The mirroring above covers the *functions* only:
 they are pure string/set logic, so bats exercises them with plain arguments.
-The "How Step 1b ties it together" dispatch block below is **not** bats-covered
+The Step 1b dispatch (`branch-state.sh dispatch`) is **not** bats-covered
 — it performs live `git switch -c` and `git branch -f` mutations, which the
 fixture's no-live-git philosophy deliberately excludes, and this repo's skill
-bats suites have no scratch-repo harness for branch mutation to reuse. That
-glue script is documentation reviewed by hand; treat edits to it with the care
-that unverified code deserves.
+bats suites have no scratch-repo harness for branch mutation to reuse. `tests/create-lib.sh` covers it in a
+throwaway scratch repo instead (on-base auto-branch + rewind, nothing-to-pr,
+existing-branch refusal).
 
 ## F-1 — upstream / branch-name mismatch
 
@@ -62,57 +64,9 @@ current branch", and a same-named remote branch is the normal, expected
 state for that. Users who want the old pairing back can restore it with
 `git branch -u <remote>/<other> <branch>` after the PR is merged.
 
-```sh
-# Normalises an upstream ref to "<remote>/<branch>".
-# `git rev-parse --symbolic-full-name @{u}` yields "refs/remotes/origin/main";
-# `--abbrev-ref` yields "origin/main". Both must compare equal.
-gh_pr_normalize_upstream() {
-    local _u="${1-}"
-    _u="${_u#refs/remotes/}"
-    printf '%s' "$_u"
-}
-
-# Returns 0 when the upstream points at a different-named branch, or at the
-# right-named branch on a *different remote* than the one this run targets.
-# No upstream at all → 1 (that is row 1 of the push table, not a mispair).
-#   $1  upstream ref (may be empty)
-#   $2  current branch name
-#   $3  target remote (optional, default "origin" — the [remote] positional, dEitY719/dotfiles#1405)
-gh_pr_upstream_is_mispaired() {
-    local _upstream _current="${2-}" _remote="${3:-origin}"
-    _upstream=$(gh_pr_normalize_upstream "${1-}")
-    [ -n "$_upstream" ] || return 1
-    [ -n "$_current" ] || return 1
-    [ "$_upstream" = "$_remote/$_current" ] && return 1
-    return 0
-}
-
-# Prescribes the push command for the current upstream state.
-#   $1  current branch name
-#   $2  upstream ref ("" when the branch has no upstream)
-#   $3  "diverged" when the branch and its upstream have both moved
-#   $4  target remote (optional, default "origin" — the [remote] positional, dEitY719/dotfiles#1405)
-# Output: "push -u <remote> HEAD" | "push" | "STOP"
-gh_pr_push_action() {
-    local _current="${1-}" _upstream="${2-}" _diverged="${3-}" _remote="${4:-origin}"
-
-    if [ -z "$(gh_pr_normalize_upstream "$_upstream")" ]; then
-        printf 'push -u %s HEAD\n' "$_remote"
-        return 0
-    fi
-    # F-1 — checked BEFORE divergence: a mispaired branch's ahead/behind is
-    # measured against the wrong ref, so "diverged" cannot be trusted yet.
-    if gh_pr_upstream_is_mispaired "$_upstream" "$_current" "$_remote"; then
-        printf 'push -u %s HEAD\n' "$_remote"
-        return 0
-    fi
-    if [ "$_diverged" = "diverged" ]; then
-        printf 'STOP\n'
-        return 0
-    fi
-    printf 'push\n'
-}
-```
+Implemented in `lib/branch-state.sh` (`gh_pr_normalize_upstream`,
+`gh_pr_upstream_is_mispaired`, `gh_pr_push_action` — the `push-action`
+subcommand).
 
 ## F-2 — session started on the base branch
 
@@ -145,40 +99,7 @@ first range commit's author date and `<short-sha>` from that same commit —
 never `date +%s` or a random suffix, so the name is reproducible and
 testable.
 
-```sh
-# Parses the conventional-commit type from a commit title.
-# Non-ASCII (Korean) subject text is ignored entirely — only the ASCII
-# prefix is read, which is why there is no slugify step here.
-# Unknown / prefix-less titles fall back to "chore".
-gh_pr_commit_type() {
-    local _title="${1-}" _type
-    _type=$(printf '%s' "$_title" |
-        sed -n 's/^\([a-z][a-z]*\)\(([^)]*)\)\{0,1\}!\{0,1\}:.*/\1/p')
-    case "$_type" in
-        feat|fix|refactor|perf|docs|test|chore|style|build|ci|revert) ;;
-        *) _type=chore ;;
-    esac
-    printf '%s' "$_type"
-}
-
-# Builds the auto-created branch name.
-#   $1  conventional-commit type (from gh_pr_commit_type)
-#   $2  issue number ("" when unresolved)
-#   $3  YYYYMMDD of the first range commit  (fallback form only)
-#   $4  short sha of the first range commit (fallback form only)
-gh_pr_branch_name() {
-    local _type="${1-}" _issue="${2-}" _date="${3-}" _sha="${4-}"
-    case "$_type" in
-        feat|fix|refactor|perf|docs|test|chore|style|build|ci|revert) ;;
-        *) _type=chore ;;
-    esac
-    if printf '%s' "$_issue" | grep -qE '^[1-9][0-9]*$'; then
-        printf '%s/issue-%s\n' "$_type" "$_issue"
-        return 0
-    fi
-    printf '%s/%s-%s\n' "$_type" "$_date" "$_sha"
-}
-```
+Implemented in `lib/branch-state.sh` (`gh_pr_commit_type`, `gh_pr_branch_name`).
 
 ### Rewind guard
 
@@ -215,54 +136,7 @@ Local '<base>' rewound to <remote>/<base>. Recover with:
   git reflog show <base>   # then: git branch -f <base> <old-sha>
 ```
 
-```sh
-# Normalises a whitespace/newline-separated SHA list into a sorted set.
-_gh_pr_normalize_sha_set() {
-    printf '%s\n' "${1-}" | tr -s '[:space:]' '\n' | grep -E '^[0-9a-fA-F]+$' | sort -u
-}
-
-# Decides what Step 1b does when the session is sitting on the base branch.
-#   $1  current branch
-#   $2  base branch
-#   $3  SHAs from `git rev-list "$REMOTE/$BASE..$BASE"` (local-only commits)
-#   $4  SHAs that would move to the new feature branch
-# Output (stdout), one of:
-#   not-on-base            — normal path, nothing to do here
-#   nothing-to-pr          — no local-only commits (dirty tree is gh-pr:commit's job)
-#   auto-branch-and-rewind — create branch, then `git branch -f` the base
-#   auto-branch-warn-only  — create branch, warn, do NOT rewind the base
-#
-# There is deliberately no `stop-already-pushed` output. Step 1b fetches
-# $REMOTE before deciding, so commits already on $REMOTE/$BASE drop out of the
-# $3 range and land on `nothing-to-pr` instead — see "Rewind guard" above.
-gh_pr_base_branch_decision() {
-    local _current="${1-}" _base="${2-}"
-    local _local_only _moved
-
-    if [ "$_current" != "$_base" ]; then
-        printf 'not-on-base\n'
-        return 0
-    fi
-
-    _local_only=$(_gh_pr_normalize_sha_set "${3-}")
-    _moved=$(_gh_pr_normalize_sha_set "${4-}")
-
-    if [ -z "$_local_only" ]; then
-        printf 'nothing-to-pr\n'
-        return 0
-    fi
-
-    # Defensive guard for the function's general contract, not a live branch:
-    # the single real call site below only runs with CUR == BASE, where
-    # $REMOTE/$BASE..HEAD and $REMOTE/$BASE..$BASE are the same range, so
-    # _local_only == _moved always holds and warn-only cannot fire today.
-    if [ "$_local_only" = "$_moved" ]; then
-        printf 'auto-branch-and-rewind\n'
-    else
-        printf 'auto-branch-warn-only\n'
-    fi
-}
-```
+Implemented in `lib/branch-state.sh` (`gh_pr_base_branch_decision`).
 
 ### Step 1b state gathering (run first, one message)
 
@@ -280,45 +154,12 @@ git log HEAD..origin/"$BASE_BRANCH" --oneline  # how far behind base (rebase nee
 
 ### How Step 1b ties it together
 
-```sh
-REMOTE="${REMOTE:-origin}"
-CUR=$(git rev-parse --abbrev-ref HEAD)
-UPSTREAM=$(git rev-parse --symbolic-full-name @{u} 2>/dev/null)
-
-DECISION=$(gh_pr_base_branch_decision "$CUR" "$BASE_BRANCH" \
-    "$(git rev-list "$REMOTE/$BASE_BRANCH..$BASE_BRANCH" 2>/dev/null)" \
-    "$(git rev-list "$REMOTE/$BASE_BRANCH..HEAD" 2>/dev/null)")
-
-case "$DECISION" in
-    not-on-base) ;;                      # normal path
-    nothing-to-pr)       exit 0 ;;       # nothing to PR (incl. already-pushed)
-    auto-branch-and-rewind|auto-branch-warn-only)
-        FIRST=$(git rev-list "$REMOTE/$BASE_BRANCH..HEAD" | tail -n 1)
-        NEW_BRANCH=$(gh_pr_branch_name \
-            "$(gh_pr_commit_type "$(git log -1 --format=%s "$FIRST")")" \
-            "$ISSUE_NUMBER" \
-            "$(git log -1 --format=%ad --date=format:%Y%m%d "$FIRST")" \
-            "$(git rev-parse --short "$FIRST")")
-        # MUST be guarded: on failure (e.g. $NEW_BRANCH already exists from a
-        # partial earlier run) HEAD is still the base branch, and rewinding it
-        # below would yank commits out from under the user's feet.
-        if ! git switch -c "$NEW_BRANCH"; then
-            printf "error: branch '%s' already exists — resolve manually (git branch -D '%s', or pick a different issue), then re-run.\n" \
-                "$NEW_BRANCH" "$NEW_BRANCH" >&2
-            exit 1
-        fi
-        if [ "$DECISION" = "auto-branch-and-rewind" ]; then
-            git branch -f "$BASE_BRANCH" "$REMOTE/$BASE_BRANCH"
-            printf "Local '%s' rewound to %s/%s. Recover with:\n" \
-                "$BASE_BRANCH" "$REMOTE" "$BASE_BRANCH"
-            printf '  git reflog show %s\n' "$BASE_BRANCH"
-        else
-            printf "warning: local '%s' still holds commits that did not move — not rewinding.\n" \
-                "$BASE_BRANCH" >&2
-        fi
-        ;;
-esac
-```
+`branch-state.sh dispatch` (env `BASE_BRANCH`, `REMOTE`, `ISSUE_NUMBER`)
+decides from `git rev-list "$REMOTE/$BASE_BRANCH..$BASE_BRANCH"` and
+`..HEAD`; on `auto-branch-*` it `git switch -c`s the generated name —
+**guarded**: if that branch already exists it exits 1 before any rewind, since
+HEAD is still the base branch — then rewinds per the guard above and prints
+the recovery hint. Its last stdout line is always `BRANCH_STATE=<outcome>`.
 
 ### Outcomes
 

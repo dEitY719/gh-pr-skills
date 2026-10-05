@@ -27,24 +27,27 @@ options (`[N]`, `--no-stack`, `--base <branch>`, env): `references/options.md`.
 
 Record `START_TS=$(date +%s)` immediately for Step 4 elapsed-time tracking.
 
-**1a-0 — parse positionals and bind the GitHub target, before any `gh` call:**
-read `references/github-target.md` and paste its snippet verbatim. It parses
-`[N] [remote] [--no-stack] [--base <branch>]` (dEitY719/dotfiles#1405) and exports `GH_HOST` /
-`GH_REPO` / `TARGET_HOST` / `REMOTE` (dEitY719/dotfiles#1403). `$REMOTE` drives every `gh` call
-**and** every git plumbing call below.
+**1a-0 + 1a — bind the GitHub target, then the base, before any `gh` call** (one Bash call). Parse
+`[N] [remote] [--no-stack] [--base <branch>]` (dEitY719/dotfiles#1405); `github-target.sh` exports
+`GH_HOST`/`GH_REPO`/`TARGET_HOST`/`REMOTE` (dEitY719/dotfiles#1403) and `$REMOTE` drives every `gh` **and**
+git plumbing call below. `stacked-pr.sh` binds `BASE_BRANCH`/`PARENT_PR`/`ISSUE_NUMBER`; abort
+without pushing on any non-zero rc (`2` both flags, `3` bad `--base`, `4` ambiguous parent — ask, re-run
+with `--base`/`--no-stack`, `5` parent not `OPEN`, `6` parent already stacked). Contracts:
+`references/github-target.md`, `references/stacked-pr.md`. Every `lib/` call opens with the first 3 lines:
 
-**1a — base via stacked-PR detection:** read `references/stacked-pr.md` and
-paste its SSOT functions + dispatch block ("How Step 1 of SKILL.md ties it
-together") verbatim. They bind `BASE_BRANCH`, `PARENT_PR`, `ISSUE_NUMBER` and
-exit on bad input (`rc=2` mutually-exclusive flags, `rc=3` bad `--base`,
-`rc=5` parent PR not `OPEN`). Abort without pushing on any of them.
+```bash
+_L=""; if [ -n "${HERMES_SKILL_DIR}" ]; then _L="${HERMES_SKILL_DIR}/lib"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then _L="$CLAUDE_PLUGIN_ROOT/skills/create/lib"; fi
+[ -n "$_L" ] && [ -d "$_L" ] || { printf '[FAIL] gh-pr:create: lib/ unresolved (%s) - export HERMES_SKILL_DIR=<skill dir> or CLAUDE_PLUGIN_ROOT=<plugin dir>\n' "${_L:-unset}" >&2; exit 1; }
+_gt=$(sh "$_L/github-target.sh" "<remote>") || exit 1; eval "$_gt"
+_sp=$(bash "$_L/stacked-pr.sh" <args>) || exit $?; eval "$_sp"
+```
 
-**1b — gather range + push state:** read `references/branch-state.md` and follow
-it end to end: run its "Step 1b state gathering" probes in one message, then
-paste its SSOT functions + "How Step 1b ties it together" dispatch block
-verbatim. Covers the upstream mispair check feeding Step 5's push policy (F-1)
-and the on-the-base-branch recovery (F-2); its "Outcomes" section defines
-`not-on-base` / `nothing-to-pr` / `auto-branch-*`.
+**1b — gather range + push state:** run the "Step 1b state gathering" probes of
+`references/branch-state.md` in one message, then
+`BASE_BRANCH=<base> REMOTE=<remote> ISSUE_NUMBER=<N> bash "$_L/branch-state.sh" dispatch`. Its last
+line `BRANCH_STATE=` is `not-on-base` / `nothing-to-pr` (stop) / `auto-branch-*` (the F-2
+recovery already switched branches); the upstream mispair check feeds Step 5's push policy (F-1).
 
 ## Steps 2-3: Analyze ALL Commits + Resolve Issue
 
@@ -56,14 +59,14 @@ before drafting: the every-commit rule and the issue-number precedence chain.
 Read `references/pr-body-template.md` for title rules and body markdown; match
 the language of existing commits. Then follow `references/ai-metrics-footer.md`
 verbatim to compute `TOKENS`/`HUMAN_H`/`ELAPSED` and append the footer to `$BODY`
-(soft-fail; honours `GH_DISABLE_AI_METRICS=1`, dEitY719/dotfiles#399). Step 4.5: paste the
-"Helper" snippet from `references/lint-guard.md` verbatim — runs against
-`$BASE_BRANCH` **before** the Step 5 push, hard-fails on lint errors, auto-skips
-on no-tools / empty change set / `GH_PR_LINT_BYPASS=1`.
+(soft-fail; honours `GH_DISABLE_AI_METRICS=1`, dEitY719/dotfiles#399). Step 4.5, **before** the Step 5
+push: `bash "$_L/lint-guard.sh" <BASE_BRANCH>` — exit 1 stops the run (lint errors or a broken
+install); auto-skips on no-tools / empty change set / `GH_PR_LINT_BYPASS=1` (`references/lint-guard.md`).
 
 ## Step 5: Push and Create
 
-Read `references/push-and-create.md` for the upstream-state push policy and the
+Read `references/push-and-create.md` for the upstream-state push policy
+(`bash "$_L/branch-state.sh" push-action <cur> <upstream> <diverged> <remote>`) and the
 `gh pr create` command (`mktemp` body file, `--assignee @me`, `--base
 "$BASE_BRANCH"`). After the URL returns, emit
 `printf '[step:gh-pr-create/push-and-create] OK\n'` (step-skip guard, dEitY719/dotfiles#753).
@@ -75,11 +78,10 @@ Derive and apply labels per "Label derivation (Step 6)" in
 
 ## Step 7: Sync Project Board Status
 
-Push the new PR card to `In review` and correct any linked Issue cards the GitHub
-builtin mis-moved there (Issues belong in `In progress`) — paste the snippet from
-`references/project-board-sync.md` verbatim. That file also carries the hook
-auto-skip narrative, `GH_REPO` requirement, Step 8 report-row mapping, and the
-`[step:gh-pr-create/board-sync] OK` marker.
+PR card to `In review`, linked Issue cards the builtin mis-moved back to `In progress`:
+`GH_HOST=<host> GH_REPO=<owner/repo> REMOTE=<remote> bash "$_L/project-board-sync.sh" <PR#>`.
+`references/project-board-sync.md` carries the hook auto-skip, the Step 8 report-row
+mapping and the `[step:gh-pr-create/board-sync] OK` marker (emitted whatever the outcome).
 
 ## Step 8: Report
 
