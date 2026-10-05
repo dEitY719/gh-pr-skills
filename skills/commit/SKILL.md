@@ -29,6 +29,8 @@ style, with a `Closes #N` / `Fixes #N` footer when a GitHub issue is known.
 `Refs` / `Resolves` / `See` / `References` keywords are forbidden — they break
 GitHub auto-close and project-board automation (see issue dEitY719/dotfiles#392).
 
+**Stop-on-error policy** — HARD (`[FAIL]`, stop): a secret-looking file in the diff, or nothing to stage. A failing hook: fix the cause and re-commit, at most 2 retries, then `[FAIL]` and stop. SOFT (warn, continue): Step 5 board sync and ai-metrics comment.
+
 ## Step 1: Inspect State (parallel) — ALWAYS FIRST
 
 Record `START_TS=$(date +%s)` immediately for elapsed-time tracking in Step 5.
@@ -64,8 +66,7 @@ or spans unrelated areas.
 - Stage only relevant files by name — avoid `git add -A`/`.` to keep secrets
   and unrelated changes out. **Never stage secret-looking files** (`.env`,
   `credentials.json`, keys); if the diff touches one, stop with a `[FAIL]` report.
-- **NEVER** `--amend` unless explicitly asked. **NEVER** `--no-verify` /
-  `--no-gpg-sign`: if a hook fails, fix the cause, re-stage, new commit.
+- **NEVER** `--amend` unless asked. **NEVER** `--no-verify` / `--no-gpg-sign` (hook failure: policy above).
 - See `references/commit-message-format.md` for the exact HEREDOC command.
 
 After `git commit` succeeds, emit the step-completion marker so the step-skip
@@ -95,5 +96,4 @@ closing step-skip-guard marker: `printf '[step:gh-pr-commit/report] OK\n'`.
 
 ## Related Skills
 
-`gh-pr:create` pushes the branch and opens the PR from these commits · `gh-issue:create`
-files the issue this commit links to.
+`gh-pr:create` pushes the branch and opens the PR from these commits · `gh-issue:create` files the issue this commit links to.

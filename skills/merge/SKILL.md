@@ -74,7 +74,7 @@ elif command -v jq >/dev/null 2>&1 && jq -e --arg r <owner/repo> \
     '(if type == "array" then . else (.repos // []) end) | any(.repo == $r)' \
     "${IW_WATCHED_REPOS:-$HOME/.agent-factory/avatars/issue-watcher/watched-repos.json}" \
     >/dev/null 2>&1; then
-    printf '[FAIL] gh-pr:merge: no lib/post-merge-verify-dispatch.sh under CLAUDE_PLUGIN_ROOT (%s), so the post-merge verification gate did NOT run for this REGISTERED repo. CLAUDE_PLUGIN_ROOT is a contract, not a Claude Code feature: Claude Code fills it, and on Codex / Gemini CLI / Antigravity / Kimi / Hermes / OpenCode you export it yourself, to the directory you read this SKILL.md from. GH_VERIFY_ROOT cannot stand in — the wrapper ships inside THIS plugin. Then re-run, or run /gh-verify:post-merge-verify <N> by hand.\n' \
+    printf '[FAIL] gh-pr:merge: no lib/post-merge-verify-dispatch.sh under CLAUDE_PLUGIN_ROOT (%s) — verification gate did NOT run for this REGISTERED repo; see references/post-merge-verify.md, or run /gh-verify:post-merge-verify <N> by hand.\n' \
         "${CLAUDE_PLUGIN_ROOT:-<unset>}" >&2                                         # tier 5
 fi
 ```

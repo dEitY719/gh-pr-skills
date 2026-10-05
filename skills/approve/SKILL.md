@@ -23,6 +23,8 @@ If arg #1 is `-h`, `--help`, or `help`, read `references/help.md` and output it
 verbatim, then stop. Positionals (`<PR#> [remote]`) and flags (`--self-record`,
 `--admin-merge`, `--squash`/`--rebase`/`--merge`) are tabled in that same file.
 
+**Stop-on-error policy** â€” HARD (`[FAIL]`, stop): any Step 1 pre-flight gate, or the `gh pr review` submission itself. SOFT (warn, continue): ai-metrics comment, Step 4.5 board sync, 4b follow-up issue creation (each failed issue listed as `[WARN]` in the report).
+
 ## Step 1: Resolve + Pre-flight Gate (parallel)
 
 Record `START_TS=$(date +%s)` immediately for elapsed-time tracking in Step 4.
@@ -58,8 +60,7 @@ for approvals must cite concrete diff locations. Path selection:
 
 ## Step 4: Submit Review or Self-PR Action
 
-Use `references/approval-templates.md` for commands and body templates; match the
-PR's dominant language.
+Use `references/approval-templates.md` for commands and body templates; match the PR's language.
 
 - **4a** Submit `gh pr review --approve`.
 - **4b** Create one issue per FOLLOW-UP, post one linking PR comment, then submit
@@ -73,8 +74,7 @@ After submitting the review (any path), post a separate ai-metrics PR comment â€
 
 ## Step 4.5: Promote the Board Card (soft-fail)
 
-Sole owner of the `Approved` column (dEitY719/dotfiles#1350): on 4a / 4b / self-PR `--self-record`,
-sync the card per `references/board-approved-sync.sh.md` (`--self-record` needs the dEitY719/dotfiles#393 single-call bypass).
+Sole owner of the `Approved` column (dEitY719/dotfiles#1350): on 4a / 4b / self-PR `--self-record`, sync the card per `references/board-approved-sync.sh.md` (`--self-record` needs the dEitY719/dotfiles#393 single-call bypass).
 
 ## Step 5: Verify and Report
 

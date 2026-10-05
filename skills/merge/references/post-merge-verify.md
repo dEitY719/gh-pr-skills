@@ -32,6 +32,15 @@ makes this gate reachable off Claude Code (#37) — there is no sixth fallback,
 and `GH_VERIFY_ROOT` is not one: it points at a `gh-verify` checkout, while the
 wrapper is a file of *this* plugin.
 
+**Fixing the tier-5 `[FAIL]`.** Step 5's message names only the root it tried
+and points here (#64 moved this prose out of `SKILL.md`). The remedy: on
+Claude Code an unset or wrong `CLAUDE_PLUGIN_ROOT` is a broken install —
+reinstall the plugin; on Codex / Gemini CLI / Antigravity / Kimi / Hermes /
+OpenCode, `export CLAUDE_PLUGIN_ROOT=<the directory you read SKILL.md from>/../..`
+(the plugin root, which holds `lib/`) and re-run Step 5. Do not point
+`GH_VERIFY_ROOT` at it instead — the wrapper ships inside THIS plugin. Or skip
+the wrapper and run `/gh-verify:post-merge-verify <N>` by hand.
+
 The `[ -f ]` is not decoration. Without it a plugin root that does not hold the
 wrapper ran `sh <missing path>`, which prints a shell-level `No such file` and
 never reaches the `[FAIL]` — the registered-repo gate silently skipped, which
