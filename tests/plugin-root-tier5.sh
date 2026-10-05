@@ -147,7 +147,7 @@ sc=$(cd "$TMP" && env -u SHELL_COMMON HOME="$NOWHERE" DOTFILES_ROOT="$NOWHERE" \
 #    OPTIONAL step's failure knock out the value every required
 #    ${SHELL_COMMON:-...} after it reads.
 SOFT_SITES="skills/approve/lib/board-approved-sync.sh
-skills/commit/references/board-sync.md
+skills/commit/lib/board-sync.sh
 skills/create/references/project-board-sync.md
 skills/merge/references/project-board-sync.md
 skills/merge-emergency/references/project-board-sync.md
@@ -174,14 +174,15 @@ for f in $SOFT_SITES; do
 	}
 done
 
-# 5b. Behavioural, on one real site. commit/board-sync.md is the flattest of
-#     the six, so what runs here is the shipped text rather than a paraphrase.
+# 5b. Behavioural, on one real site. commit/lib/board-sync.sh is the flattest
+#     of the six, so what runs here is the shipped text rather than a paraphrase
+#     — sourced into one shell, so the SHELL_COMMON hand-back is observable.
 soft=$(awk '/^_HELPER="\$\{SHELL_COMMON:-/ { p = 1 } p { print } /^unset _sc_was _sc_prev$/ { exit }' \
-	"$ROOT/skills/commit/references/board-sync.md" | sed 's/<ISSUE_NUMBER>/1/')
+	"$ROOT/skills/commit/lib/board-sync.sh")
 case "$soft" in
-	*RESTORE*|'') printf 'FAIL  could not extract the soft block from commit/board-sync.md\n'; fail=1 ;;
+	*RESTORE*|'') printf 'FAIL  could not extract the soft block from commit/lib/board-sync.sh\n'; fail=1 ;;
 esac
-printf '%s\nprintf "LEFT=%%s\\n" "${SHELL_COMMON-UNSET}"\n' "$soft" > "$TMP/soft.sh"
+printf 'ISSUE_NUMBER=1\n%s\nprintf "LEFT=%%s\\n" "${SHELL_COMMON-UNSET}"\n' "$soft" > "$TMP/soft.sh"
 
 #     It must WARN and CONTINUE — exit 0, no silent skip, and the path named.
 #     Before the conversion a missing helper fell straight through the outer

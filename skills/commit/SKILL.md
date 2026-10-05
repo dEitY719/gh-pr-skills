@@ -33,33 +33,33 @@ GitHub auto-close and project-board automation (see issue dEitY719/dotfiles#392)
 
 ## Step 1: Inspect State (parallel) — ALWAYS FIRST
 
-Record `START_TS=$(date +%s)` immediately for elapsed-time tracking in Step 5.
-
-Runs **unconditionally** — the working tree is the source of truth. In a single
+Record `START_TS=$(date +%s)` immediately (Step 5 elapsed time). Runs **unconditionally** — the working tree is the source of truth. In a single
 message run: `git status` (never `-uall`), `git diff` (staged + unstaged),
 `git diff --staged` if anything is staged, and `git log --oneline -20` (to
 mimic the repo's commit style).
 
-In that same message, parse `[issue-number] [remote]` (dEitY719/dotfiles#1405) and bind the
-GitHub target for Step 5: read `references/github-target.md` and paste its
-snippet verbatim (exports `GH_HOST`/`TARGET_REPO`/`TARGET_HOST`/`REMOTE`, dEitY719/dotfiles#1403).
+In that same message, parse `[issue-number] [remote]` (dEitY719/dotfiles#1405) and bind the GitHub
+target for Step 5 (`GH_HOST`/`TARGET_REPO`/`TARGET_HOST`/`REMOTE`, dEitY719/dotfiles#1403; contract:
+`references/github-target.md`). Every `lib/` call in this skill opens with the first three lines:
+
+```bash
+_L=""; if [ -n "${HERMES_SKILL_DIR}" ]; then _L="${HERMES_SKILL_DIR}/lib"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then _L="$CLAUDE_PLUGIN_ROOT/skills/commit/lib"; fi
+[ -n "$_L" ] && [ -d "$_L" ] || { printf '[FAIL] gh-pr:commit: lib/ unresolved (%s) - export HERMES_SKILL_DIR=<skill dir> or CLAUDE_PLUGIN_ROOT=<plugin dir>\n' "${_L:-unset}" >&2; exit 1; }
+_gt=$(sh "$_L/github-target.sh" "<remote>") || exit 1; eval "$_gt"
+```
 
 ## Step 2: Resolve the Issue Number
 
-First hit wins: (1) explicit all-digit argument (`/gh-pr:commit 123` or "이슈
-123번 연결" in the latest message); (2) recent conversation — scan the last ~10
-messages for `#N` or "Issue #N created" (gh-issue:create's output); (3) none →
-skip the footer, do NOT invent an issue number.
+First hit wins: (1) explicit all-digit argument (`/gh-pr:commit 123` or "이슈 123번 연결"); (2) the last
+~10 messages' `#N` or "Issue #N created" (gh-issue:create); (3) none → skip the footer, never invent one.
 
 ## Step 3: Draft the Commit Message
 
-Read `references/commit-message-format.md` for the message template, HEREDOC
-pattern, and `Closes`/`Fixes` rules (`Refs`/`Resolves` forbidden); match the
-`git log` style. With no conversation context (manual edits), derive intent
-from the diff — paths and names tell you *what* changed; small additions get
-a short subject like `chore(aliases): add <name> shortcut` (body optional,
-mandatory footers still apply). Only ask the user when the diff is ambiguous
-or spans unrelated areas.
+Read `references/commit-message-format.md` for the template, HEREDOC pattern, and `Closes`/`Fixes` rules
+(`Refs`/`Resolves` forbidden); match the `git log` style. With no conversation context, derive intent from
+the diff (small additions: a short subject like `chore(aliases): add <name> shortcut`, mandatory footers
+still apply). Only ask the user when the diff is ambiguous or spans unrelated areas.
 
 ## Step 4: Stage and Commit
 
@@ -69,17 +69,16 @@ or spans unrelated areas.
 - **NEVER** `--amend` unless asked. **NEVER** `--no-verify` / `--no-gpg-sign` (hook failure: policy above).
 - See `references/commit-message-format.md` for the exact HEREDOC command.
 
-After `git commit` succeeds, emit the step-completion marker so the step-skip
-guard (`skill_completion_guard.py`, issue dEitY719/dotfiles#753) can verify this step ran:
-`printf '[step:gh-pr-commit/stage-commit] OK\n'`.
+After `git commit` succeeds, emit the step-skip-guard marker (`skill_completion_guard.py`,
+dEitY719/dotfiles#753): `printf '[step:gh-pr-commit/stage-commit] OK\n'`.
 
 ## Step 5: AI Metrics + Sync Project Board Status
 
 The ai-metrics comment POST (`GH_DISABLE_AI_METRICS` branch, token formula,
 soft-fail) follows [`references/ai-metrics-comment.md`](references/ai-metrics-comment.md).
-The project-board sync (`--only-from Backlog` guard, helper-fallback NF-1/dEitY719/dotfiles#724
-defense) follows [`references/board-sync.md`](references/board-sync.md) —
-skip it entirely when no issue footer was written. After both blocks, emit
+Board sync — only when an issue footer was written (`--only-from Backlog`, always exit 0; contract:
+[`references/board-sync.md`](references/board-sync.md)): after the Step 1 locator lines, run
+`GH_HOST="<host>" bash "$_L/board-sync.sh" <ISSUE_NUMBER>`. After both, emit
 `printf '[step:gh-pr-commit/metrics-board-sync] OK\n'`.
 
 ## Step 6: Verify

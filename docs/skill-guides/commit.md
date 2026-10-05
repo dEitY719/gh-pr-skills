@@ -53,7 +53,7 @@ Step 1 이 작업 트리 상태를 무조건 조회하므로 "뭘 바꿨나요?"
 1. **Step 1 — 상태 조회 (항상 먼저, 병렬).** `START_TS` 를 기록하고 한 메시지 안에서
    `git status`(`-uall` 금지), `git diff`, staged 가 있으면 `git diff --staged`,
    `git log --oneline -20`(저장소 커밋 스타일 모방용)을 실행한다. 같은 메시지에서
-   위치 인자를 파싱하고 `references/github-target.md` 스니펫을 그대로 붙여
+   위치 인자를 파싱하고 `lib/github-target.sh` 출력을 `eval` 해
    `GH_HOST` / `TARGET_REPO` / `TARGET_HOST` / `REMOTE` 를 export 한다(dEitY719/dotfiles#1403).
    지정한 remote 가 없으면 `git remote -v` 목록과 함께 중단한다 — `origin` 으로
    조용히 폴백하지 않는다.

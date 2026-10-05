@@ -19,30 +19,16 @@ board mutation goes to gh CLI's default host on a dual-host login (dEitY719/dotf
 That host comes from the `[remote]` positional's URL (`$REMOTE`, default
 `origin`), so `/gh-pr:commit <N> upstream` syncs `upstream`'s board (dEitY719/dotfiles#1405).
 
-```bash
-# Soft warn-and-skip loader (harness-skills#60). A missing helper, or one that
-# sources but defines nothing (interactive-guard regression, partial sourcing,
-# a rename), skips the board sync with ONE warning naming the path — no longer
-# silently (dEitY719/dotfiles#644 NF-1's silence hid a broken install). Without
-# the proof `_gh_project_status_sync` expands to nothing, `command not found`
-# (rc 127) is absorbed by `|| true`, and the sync no-ops — dEitY719/dotfiles#724.
-_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
-[ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
-_sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                              # save
-unset -f _gh_project_status_sync 2>/dev/null || :
-unalias _gh_project_status_sync 2>/dev/null || :
-export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"                     # before the load
-[ -r "$_HELPER" ] && . "$_HELPER"
-if [ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]; then
-    _gh_project_status_sync issue <ISSUE_NUMBER> "In progress" --only-from Backlog || true
-else                                                                                 # tier 5, soft
-    if [ -n "$_sc_was" ]; then export SHELL_COMMON="$_sc_prev"; else unset SHELL_COMMON; fi
-    printf '[gh-commit] no usable shell-common at %s — board sync skipped; the commit itself is unaffected.\n' \
-        "$_HELPER" >&2
-fi
-unset _sc_was _sc_prev
-```
+The sync lives in `lib/board-sync.sh <ISSUE_NUMBER>` (relative to
+`skills/commit/`); `SKILL.md` Step 5 holds the call. It runs
+`_gh_project_status_sync issue <N> "In progress" --only-from Backlog` through
+the soft warn-and-skip loader (harness-skills#60): a missing helper, or one
+that sources but defines nothing, skips the sync with ONE
+`[gh-commit] no usable shell-common at <path>` warning on stderr — never
+silently (dEitY719/dotfiles#644, dEitY719/dotfiles#724) — and the failure arm
+restores `SHELL_COMMON` rather than clearing it. A non-numeric argument is one
+warning and no call. It **always exits 0**: the commit itself is unaffected.
+`tests/commit-lib.sh` and `tests/plugin-root-tier5.sh` §5 are its guards.
 
 If the repo has no projectV2 board (auto-detected) the helper silently
 returns 0. Opt out with `GH_PROJECT_STATUS_SYNC=0`.
