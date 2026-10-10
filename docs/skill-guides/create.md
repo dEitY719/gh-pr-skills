@@ -35,7 +35,8 @@ remote 이름이고 순서는 무관하다.
 | `--no-stack` | off | stacked 신호가 있어도 base 를 repo 기본 브랜치로 강제 |
 | `--base <branch>` | repo 기본 | base 브랜치 명시. stacked 자동 탐지를 우회 |
 | `GH_DISABLE_AI_METRICS=1` (env) | off | Step 4 의 ai-metrics 푸터 생략 |
-| `GH_PR_LINT_BYPASS=1` (env) | off | Step 4.5 lint 게이트 생략 |
+| `GH_PR_LINT_BYPASS=1` (env) | off | Step 4.5 전체 생략 — lint **와** `pr-gate` 테스트 게이트 모두 |
+| `GH_PR_TEST_BYPASS=1` (env) | off | `pr-gate` 테스트 게이트만 생략(lint 는 실행). 테스트를 직접 돌린 뒤에만 쓰고, 보고에 반드시 적는다 |
 | `-h` / `--help` / `help` | — | help 를 그대로 출력하고 중단. API 호출 없음 |
 
 `--no-stack` 과 `--base` 는 상호 배타적이다 — 같이 주면 push 전에 `rc=2` 로 중단한다.
@@ -70,7 +71,13 @@ opt-in 했고(`.github/workflows/stacked-closes-rollup.yml`, `CLAUDE.md`/`AGENTS
    기존 커밋이 쓰는 언어에 맞춘다. `references/ai-metrics-footer.md` 로 푸터를
    덧붙인다(soft-fail). **Step 4.5 는 push 전에** `lib/lint-guard.sh` 로
    `_gh_pr_lint_run "$BASE_BRANCH"` 를 실행해 lint 에러면 hard-fail 한다
-   (도구 없음 / 변경 없음 / `GH_PR_LINT_BYPASS=1` 이면 자동 skip).
+   (도구 없음 / 변경 없음 / `GH_PR_LINT_BYPASS=1` 이면 lint skip).
+   lint 가 통과하면 — **lint 도구가 하나도 없어도** — repo 의 `pr-gate` mise task 를
+   `mise run pr-gate` 로 실행한다(dEitY719/dotfiles#2054). task 가 없으면 조용히 skip,
+   task 는 선언됐는데 `mise` 가 없으면 skip 로그만 남기고 막지 않는다. 변경 없음 /
+   `GH_PR_LINT_BYPASS=1` 이면 pr-gate 도 돌지 않는다. pr-gate 가 실패하면 lint 실패와
+   똑같이 push 전에 중단한다. `GH_PR_TEST_BYPASS=1` 은 pr-gate 만 건너뛴다 — 테스트를
+   직접 돌려 통과를 확인한 뒤에만 쓰고, 그 사실을 보고에 적는다.
 4. **Step 5 — push 후 생성.** upstream 상태별 push 정책: upstream 없음 또는
    mispair(`@{u}` != `<remote>/<current-branch>`) → `git push -u "$REMOTE" HEAD`,
    upstream 있고 앞서 있으면 `git push`, **diverge 했으면 중단하고 사용자에게
@@ -112,7 +119,7 @@ Summary 에서 빠뜨리지 않는다. 5커밋 PR 은 5개 관심사를 전부 �
 
 **거부 조건** — base 브랜치 위에 있으면("먼저 피처 브랜치를 만드세요"), `<base>..HEAD`
 range 가 비어 있으면("nothing to PR"), `--no-stack` 과 `--base` 를 같이 주면(`rc=2`),
-자동 탐지된 부모 PR 이 `OPEN` 이 아니면(`rc=5`), Step 4.5 lint 가 실패하면 —
+자동 탐지된 부모 PR 이 `OPEN` 이 아니면(`rc=5`), Step 4.5 lint 또는 `pr-gate` 가 실패하면 —
 모두 push 전에 `[FAIL] <이유>` + `Next: <복구>` 로 중단한다.
 
 **host / repo 타게팅(dEitY719/dotfiles#1403 / dEitY719/dotfiles#1405)** — 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST"` 와

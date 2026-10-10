@@ -264,7 +264,8 @@
             <li><code>&lt;base&gt;..HEAD</code> 가 비어 있지 않아야 한다 — <code>nothing-to-pr</code> 이면 중단.</li>
             <li><code>--no-stack</code> 과 <code>--base</code> 를 같이 주면 push 전에 <code>rc=2</code> 로 중단.</li>
             <li>자동 탐지된 부모 PR 은 <code>OPEN</code> 이어야 한다 (<code>rc=5</code>).</li>
-            <li>Step 4.5 lint 게이트가 <strong>push 전에</strong> 통과해야 한다 (<code>GH_PR_LINT_BYPASS=1</code> 로 skip).</li>
+            <li>Step 4.5 lint 게이트가 <strong>push 전에</strong> 통과해야 한다 (<code>GH_PR_LINT_BYPASS=1</code> 로 lint·pr-gate 모두 skip).</li>
+            <li>lint 다음 — lint 도구가 없어도 — repo 의 <code>pr-gate</code> mise task 가 있으면 <code>mise run pr-gate</code> 가 통과해야 한다. task 가 없거나 <code>mise</code> 가 없으면 skip. <code>GH_PR_TEST_BYPASS=1</code> 은 pr-gate 만 건너뛰며, 테스트를 직접 돌린 뒤에만 쓰고 보고에 적는다.</li>
             <li>upstream 이 diverge 했으면 중단하고 사용자에게 묻는다 — 스스로 force-push 하지 않는다.</li>
           </ul>
         </div>

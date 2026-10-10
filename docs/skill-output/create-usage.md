@@ -27,7 +27,8 @@ base 분기 이후의 모든 커밋  ──▶  /gh-pr:create  ──▶  Pull R
   - `<base>..HEAD` 가 비어 있으면 `nothing-to-pr`.
   - `--no-stack` 과 `--base` 동시 지정은 push 전에 `rc=2`.
   - 자동 탐지된 부모 PR 이 `OPEN` 이 아니면 `rc=5`.
-  - Step 4.5 lint 게이트가 **push 전에** 통과해야 한다(`GH_PR_LINT_BYPASS=1` 로 skip).
+  - Step 4.5 lint 게이트가 **push 전에** 통과해야 한다(`GH_PR_LINT_BYPASS=1` 로 lint·pr-gate 모두 skip).
+  - lint 다음 — lint 도구가 없어도 — repo 의 `pr-gate` mise task 가 있으면 `mise run pr-gate` 가 통과해야 한다. task 가 없거나 `mise` 가 없으면 skip. `GH_PR_TEST_BYPASS=1` 은 pr-gate 만 건너뛰며, 테스트를 직접 돌린 뒤에만 쓰고 보고에 적는다.
   - upstream 이 diverge 했으면 중단하고 사용자에게 묻는다 — 스스로 force-push 하지 않는다.
 
 ## 3. 결과 (실행 시)

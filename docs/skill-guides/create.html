@@ -300,7 +300,8 @@
             <tr><td><code>--no-stack</code></td><td>off</td><td>stacked 신호가 있어도 base 를 repo 기본 브랜치로 강제</td></tr>
             <tr><td><code>--base &lt;branch&gt;</code></td><td>repo 기본</td><td>base 브랜치 명시. stacked 자동 탐지를 우회</td></tr>
             <tr><td><code>GH_DISABLE_AI_METRICS=1</code></td><td>off</td><td>Step 4 의 ai-metrics 푸터 생략</td></tr>
-            <tr><td><code>GH_PR_LINT_BYPASS=1</code></td><td>off</td><td>Step 4.5 lint 게이트 생략</td></tr>
+            <tr><td><code>GH_PR_LINT_BYPASS=1</code></td><td>off</td><td>Step 4.5 전체 생략 — lint <strong>와</strong> <code>pr-gate</code> 테스트 게이트 모두</td></tr>
+            <tr><td><code>GH_PR_TEST_BYPASS=1</code></td><td>off</td><td><code>pr-gate</code> 테스트 게이트만 생략(lint 는 실행). 테스트를 직접 돌린 뒤에만 쓰고, 보고에 반드시 적는다</td></tr>
             <tr><td><code>-h</code> / <code>--help</code> / <code>help</code></td><td>—</td><td>help 를 그대로 출력하고 중단. API 호출 없음</td></tr>
           </tbody>
         </table>
@@ -376,7 +377,13 @@
             기존 커밋이 쓰는 언어에 맞춘다. <code>references/ai-metrics-footer.md</code> 로 푸터를 덧붙인다(soft-fail).</p>
             <p><strong>Step 4.5 는 push 전에</strong> <code>lib/lint-guard.sh</code> 로
             <code>_gh_pr_lint_run "$BASE_BRANCH"</code> 를 실행해 lint 에러면 hard-fail 한다 —
-            도구 없음 / 변경 없음 / <code>GH_PR_LINT_BYPASS=1</code> 이면 자동 skip.</p>
+            도구 없음 / 변경 없음 / <code>GH_PR_LINT_BYPASS=1</code> 이면 lint skip.</p>
+            <p>lint 가 통과하면 — <strong>lint 도구가 하나도 없어도</strong> — repo 의 <code>pr-gate</code> mise task 를
+            <code>mise run pr-gate</code> 로 실행한다(dEitY719/dotfiles#2054). task 가 없으면 조용히 skip,
+            task 는 선언됐는데 <code>mise</code> 가 없으면 skip 로그만 남기고 막지 않는다. 변경 없음 /
+            <code>GH_PR_LINT_BYPASS=1</code> 이면 pr-gate 도 돌지 않는다. pr-gate 가 실패하면 lint 실패와
+            똑같이 push 전에 중단한다. <code>GH_PR_TEST_BYPASS=1</code> 은 pr-gate 만 건너뛴다 — 테스트를
+            직접 돌려 통과를 확인한 뒤에만 쓰고, 그 사실을 보고에 적는다.</p>
           </div>
         </div>
 
@@ -464,7 +471,7 @@
             <li><code>&lt;base&gt;..HEAD</code> range 가 비어 있으면 — "nothing to PR".</li>
             <li><code>--no-stack</code> 과 <code>--base</code> 를 같이 주면 <code>rc=2</code>.</li>
             <li>자동 탐지된 부모 PR 이 <code>OPEN</code> 이 아니면 <code>rc=5</code>.</li>
-            <li>Step 4.5 lint 가 실패하면.</li>
+            <li>Step 4.5 lint 또는 <code>pr-gate</code> 가 실패하면.</li>
           </ul>
           <p style="margin-top:12px;">모두 <strong>push 전에</strong> <code>[FAIL] &lt;이유&gt;</code> + <code>Next: &lt;복구&gt;</code> 로 중단한다.</p>
         </div>
