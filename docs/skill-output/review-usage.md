@@ -22,7 +22,7 @@ PR diff  ──▶  /gh-pr:review  ──▶  집계 코멘트 1개
 
 - **입력** — 대상 PR 의 diff(`gh pr diff`)와 메타데이터. `--paths` 를 주면 그 경로로 필터된 diff.
 - **게이트** — PR 이 `OPEN` + non-draft, 선택한 AI CLI 가 PATH 에 존재,
-  `--ai opencode` / `--ai hermes` 는 internal PC, `gh auth status` 가 0.
+  `--ai opencode` 는 `DOTFILES_OPENCODE_REVIEW_MODEL` 설정, `gh auth status` 가 0.
   CI 상태는 게이트가 아니고 자기가 올린 PR 도 막히지 않는다(판정 미제출이므로).
 
 ## 3. 결과 (실행 시)

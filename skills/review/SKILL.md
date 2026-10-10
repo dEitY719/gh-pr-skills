@@ -45,7 +45,7 @@ Argument shape + KR aliases + exit codes: `references/parser-contract.md` — it
 Run these checks before expensive work:
 
 Read `references/preflight.md` and apply every gate it lists — PR state, the
-`--ai` binary, the internal-PC restriction, `gh auth status`, and what is not a gate.
+`--ai` binary, the opencode model env, `gh auth status`, and what is not a gate.
 
 ## Step 3: Load Review Preset
 

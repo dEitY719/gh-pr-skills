@@ -49,8 +49,8 @@
 | `security` | `보안` | injection, secrets, authz, supply chain |
 | `performance` | `성능` | N+1, hot-loop I/O, allocation, caching |
 
-`--ai opencode` 와 `--ai hermes` 는 internal PC 전용이다
-(`~/.dotfiles-setup-mode` 가 `internal` 이 아니면 exit 1).
+`--ai opencode` 와 `--ai hermes` 는 PC 종류 제한이 없다 — CLI 가 없거나
+`DOTFILES_OPENCODE_REVIEW_MODEL` 이 비어 있으면 그 실행만 실패한다.
 
 ## 동작 단계
 
