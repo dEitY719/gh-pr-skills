@@ -61,13 +61,45 @@ runtime small and avoids dragging in pre-existing lint debt that the PR
 did not introduce.
 
 If the changed set is empty (e.g. cherry-pick that yields no diff), the
-guard logs `no changed files vs <base> — skip` and returns 0.
+guard logs `no changed files vs <base> — skip` and returns 0 — the test gate
+below does not run either.
+
+## Test gate: `pr-gate` (dEitY719/dotfiles#2054)
+
+After lint, `_gh_pr_lint_run` hands off to `_gh_pr_lint__pr_gate`, which runs
+the repo's full tests through a `pr-gate` mise task. Repos opt in by defining
+that task; repos without it are untouched. Order and conditions, as the
+vendored `lib/vendor/shell-common/functions/gh_pr_lint.sh` implements them:
+
+1. It runs only when lint did not fail. A lint failure returns 1 first.
+2. It **still runs when no lint tool was detected** — "no lint" is not
+   "nothing to check".
+3. `GH_PR_TEST_BYPASS=1` → logs `test gate bypassed (GH_PR_TEST_BYPASS=1)`,
+   returns 0.
+4. Task detection: `mise task info pr-gate` succeeds, **or** the repo-root
+   `mise.toml` / `.mise.toml` declares `[tasks.pr-gate]` (also the quoted
+   `[tasks."pr-gate"]`). The grep covers an untrusted config, where
+   `mise task info` errors: the gate then runs and mise's trust error fails
+   it loudly instead of silently dropping it. No task → return 0, silently.
+5. Task declared but `mise` not on `PATH` → logs
+   `pr-gate declared but mise unavailable — skip`, returns 0. The gate does
+   **not** block in that case.
+6. Otherwise `mise run pr-gate` runs. Pass → `pr-gate passed`, 0. Non-zero →
+   `pr-gate FAILED — fix the tests and re-run, or set GH_PR_TEST_BYPASS=1 to skip`
+   on stderr, return 1, and Step 4.5 stops before the push like a lint
+   failure does.
+
+**`GH_PR_TEST_BYPASS=1` is not a way past red tests.** Use it only after you
+ran the repo's tests yourself in this session and they passed — e.g. the
+suite was just run and re-running it through mise would only repeat it. State
+the bypass, and the test run that justifies it, in the report to the user.
 
 ## Bypass
 
 | Env var | Effect |
 |---|---|
-| `GH_PR_LINT_BYPASS=1` | Skip the guard entirely. Logs `bypassed (GH_PR_LINT_BYPASS=1)` and returns 0. Use for emergency pushes when the lint debt is known and tracked elsewhere. |
+| `GH_PR_LINT_BYPASS=1` | Skip the guard entirely — lint **and** the `pr-gate` test gate. Logs `bypassed (GH_PR_LINT_BYPASS=1)` and returns 0. Use for emergency pushes when the lint debt is known and tracked elsewhere. |
+| `GH_PR_TEST_BYPASS=1` | Skip only the `pr-gate` test gate; lint still runs. Only after running the tests yourself, and report it (§ Test gate). |
 | `GH_PR_LINT_TOOLS=auto` | Default — auto-detect tools per the priority list. |
 | `GH_PR_LINT_TOOLS=tox,shellcheck` | Restrict to a comma-list of tools. Each named tool is still subject to its own detection rule (existence + applicable changed files). |
 
@@ -75,14 +107,16 @@ guard logs `no changed files vs <base> — skip` and returns 0.
 
 On any tool's non-zero exit, the guard records a failure but continues
 running remaining tools so the user sees every failure in one pass.
-After all tools finish, if any failed:
+After all tools finish, if any failed (or the `pr-gate` task failed):
 
 1. Return 1 from `_gh_pr_lint_run`.
 2. The caller (skill Step 4.5) prints
    `gh-pr:create stopped at Step 4.5 (lint guard).` and exits non-zero **before
    pushing**.
 3. The user fixes the listed errors and re-runs `/gh-pr:create`, or sets
-   `GH_PR_LINT_BYPASS=1` for a one-shot escape.
+   `GH_PR_LINT_BYPASS=1` for a one-shot escape (`GH_PR_TEST_BYPASS=1` for a
+   pr-gate failure, under the § Test gate rule). The vendored lint message
+   still names `/gh:pr` — known migration debt, CLAUDE.md item 5.
 
 ## Skip matrix
 
@@ -90,7 +124,10 @@ After all tools finish, if any failed:
 |---|---|
 | `GH_PR_LINT_BYPASS=1` | skip + log |
 | Empty `git diff --name-only "$BASE...HEAD"` | skip + log |
-| No detected tool applies (no tox.ini, no shellcheck/actionlint/pre-commit) | skip + log |
+| No detected tool applies (no tox.ini, no shellcheck/actionlint/pre-commit) | lint skip + log; `pr-gate` still evaluated |
+| `GH_PR_TEST_BYPASS=1` | lint runs; `pr-gate` skip + log |
+| No `pr-gate` mise task | `pr-gate` skipped silently |
+| `pr-gate` declared, `mise` not installed | `pr-gate` skip + log (does not block) |
 | Tool detected but its file-type filter yields zero matches | tool not run; other tools still evaluated |
 
 ## Why fail-loud over warn-only

@@ -7,7 +7,8 @@
 | `--no-stack` | Force a non-stacked PR even when stacked-PR signals fire. | off |
 | `--base <branch>` | Explicit base branch; bypasses stacked-PR detection. | repo default |
 | `GH_DISABLE_AI_METRICS=1` (env) | Skip ai-metrics footer append in Step 4. | off |
-| `GH_PR_LINT_BYPASS=1` (env) | Skip Step 4.5 lint guard. | off |
+| `GH_PR_LINT_BYPASS=1` (env) | Skip Step 4.5 entirely — lint **and** the `pr-gate` test gate. | off |
+| `GH_PR_TEST_BYPASS=1` (env) | Skip only Step 4.5's `pr-gate` test gate; lint still runs. Use only after running the repo's tests yourself, and report the bypass (`references/lint-guard.md` § Test gate). | off |
 | `DOTFILES_ROOT` (env) | Root used to source `gh_pr_lint.sh`. | `$HOME/dotfiles` |
 | `-h`/`--help`/`help` | Print `references/help.md` verbatim and stop. | — |
 

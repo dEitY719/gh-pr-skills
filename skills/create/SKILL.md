@@ -60,8 +60,8 @@ Read `references/pr-body-template.md` for title rules and body markdown; match
 the language of existing commits. Then follow `references/ai-metrics-footer.md`
 verbatim to compute `TOKENS`/`HUMAN_H`/`ELAPSED` and append the footer to `$BODY`
 (soft-fail; honours `GH_DISABLE_AI_METRICS=1`, dEitY719/dotfiles#399). Step 4.5, **before** the Step 5
-push: `bash "$_L/lint-guard.sh" <BASE_BRANCH>` — exit 1 stops the run (lint errors or a broken
-install); auto-skips on no-tools / empty change set / `GH_PR_LINT_BYPASS=1` (`references/lint-guard.md`).
+push: `bash "$_L/lint-guard.sh" <BASE_BRANCH>` — lint, then the repo's `pr-gate` mise task (even with no lint tools);
+exit 1 (lint/pr-gate failure, broken install) stops the run. `GH_PR_TEST_BYPASS=1` skips only pr-gate — only after you ran the tests, and say so in the report (`references/lint-guard.md`).
 
 ## Step 5: Push and Create
 
