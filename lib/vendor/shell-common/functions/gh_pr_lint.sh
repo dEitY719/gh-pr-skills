@@ -1,7 +1,7 @@
 #!/bin/sh
 # VENDORED — do not edit here.
 # SSOT: dEitY719/dotfiles shell-common/functions/gh_pr_lint.sh
-# Synced 2026-09-05T10:16Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# Synced 2026-10-10T03:07Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
 # shell-common/functions/gh_pr_lint.sh
 # Optional pre-push lint guard for the `gh:pr` skill (issue #396, design
@@ -11,18 +11,24 @@
 # runs detected tools against the PR's changed files only, and hard-fails on
 # any lint error. Bypass via GH_PR_LINT_BYPASS=1.
 #
+# Test gate (#2054): after lint passes, if the repo defines a `pr-gate` mise
+# task, `mise run pr-gate` runs and a failure blocks the PR. Repos without
+# that task are unaffected. SSOT: docs/.ssot/local-test-policy.md.
+#
 # Usage:
 #   _gh_pr_lint_run <base-branch>
 #
 # Env overrides:
-#   GH_PR_LINT_BYPASS=1            — skip the entire guard (escape hatch)
+#   GH_PR_LINT_BYPASS=1            — skip the entire guard, lint + tests
+#   GH_PR_TEST_BYPASS=1            — skip only the `pr-gate` test gate
 #   GH_PR_LINT_TOOLS=auto          — auto-detect (default)
 #   GH_PR_LINT_TOOLS=tox,shellcheck — comma-list of tools to force-run
 #                                    (still subject to per-tool detection)
 #
 # Return codes:
-#   0 — all detected tools passed, or skipped (no tools / bypass / no changes)
-#   1 — at least one tool failed; caller should block the push
+#   0 — all detected tools (and pr-gate) passed, or skipped (no tools /
+#       no pr-gate task / bypass / no changes)
+#   1 — a lint tool or pr-gate failed; caller should block the push
 #   2 — usage error (missing base-branch argument)
 #
 # NOTE: This file intentionally has NO interactive guard. It is a pure
@@ -228,12 +234,9 @@ EOF
     fi
 
     if [ "$_ran_any" = "0" ]; then
+        # No lint is not "nothing to check" — the test gate below still runs.
         _gh_pr_lint__log "no lint tools detected — skip"
-        unset _base _changed _ran_any _failed
-        return 0
-    fi
-
-    if [ "$_failed" = "1" ]; then
+    elif [ "$_failed" = "1" ]; then
         printf '\n' >&2
         _gh_pr_lint__log "FAILED — fix lint errors and re-run /gh:pr, or set GH_PR_LINT_BYPASS=1 to skip" >&2
         unset _base _changed _ran_any _failed
@@ -241,7 +244,47 @@ EOF
     fi
 
     unset _base _changed _ran_any _failed
-    return 0
+    _gh_pr_lint__pr_gate
+}
+
+_gh_pr_lint__has_pr_gate() {
+    # mise's own view covers every task source. `mise task info` errors on
+    # an untrusted config, though, which would silently drop the gate, so
+    # also grep the repo-root config: a declared gate then runs and mise's
+    # trust error fails it loudly instead.
+    if command -v mise >/dev/null 2>&1 \
+        && mise task info pr-gate </dev/null >/dev/null 2>&1; then
+        return 0
+    fi
+    _top=$(git rev-parse --show-toplevel 2>/dev/null) || _top=.
+    if grep -qsE '^\[tasks\."?pr-gate"?\]' "$_top/mise.toml" "$_top/.mise.toml"; then
+        unset _top
+        return 0
+    fi
+    unset _top
+    return 1
+}
+
+_gh_pr_lint__pr_gate() {
+    # PR-creation test gate (#2054): full tests moved off `git push` to here.
+    # Repos opt in by defining a `pr-gate` mise task; others are untouched.
+    if [ "${GH_PR_TEST_BYPASS:-0}" = "1" ]; then
+        _gh_pr_lint__log "test gate bypassed (GH_PR_TEST_BYPASS=1)"
+        return 0
+    fi
+    _gh_pr_lint__has_pr_gate || return 0
+    if ! command -v mise >/dev/null 2>&1; then
+        _gh_pr_lint__log "pr-gate declared but mise unavailable — skip"
+        return 0
+    fi
+    _gh_pr_lint__log "running mise run pr-gate (GH_PR_TEST_BYPASS=1 to skip)"
+    if mise run pr-gate </dev/null; then
+        _gh_pr_lint__log "pr-gate passed"
+        return 0
+    fi
+    printf '\n' >&2
+    _gh_pr_lint__log "pr-gate FAILED — fix the tests and re-run, or set GH_PR_TEST_BYPASS=1 to skip" >&2
+    return 1
 }
 
 # Self-check (issue #724): catch silent breakage where this file is sourceable

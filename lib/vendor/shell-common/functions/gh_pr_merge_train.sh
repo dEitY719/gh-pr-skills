@@ -1,8 +1,9 @@
 #!/bin/sh
 # VENDORED — do not edit here.
 # SSOT: dEitY719/dotfiles shell-common/functions/gh_pr_merge_train.sh
-# Synced 2026-10-05T02:45Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# Synced 2026-10-10T03:07Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
+# shellcheck disable=SC2016  # `_je` is a jq wrapper; its single-quoted args are jq programs
 # shell-common/functions/gh_pr_merge_train.sh
 # SSOT for the merge-train target filter (issue #1524).
 #
@@ -278,13 +279,25 @@ _gh_pr_merge_train_filter_targets() {
     printf '%s\n' "$_out"
 }
 
+# `jq -e` that fails closed on EMPTY stdin. jq 1.6 exits 0 when it reads no
+# input at all (jq 1.7 exits 4), so every `jq -e` predicate below would answer
+# "yes" for an unreadable / empty body. Same args as `jq -e`; rc 1 on empty.
+# Name is deliberately short: the naming hook flags long function names that
+# appear inside any double-quoted string on the same line.
+_je() {
+    local _je_in
+    _je_in=$(cat)
+    [ -n "$_je_in" ] || return 1
+    printf '%s' "$_je_in" | jq -e "$@"
+}
+
 # Read one PR object (the shape `gh pr view --json labels,...` answers with,
 # not an array) on stdin. 0 = it carries the `reply-pending` label, 1 =
 # it does not (including malformed / missing `labels`). See the header note
 # above for why this exists alongside `_gh_pr_merge_train_filter_targets`
 # instead of routing-table.md re-deriving the same jq expression by hand.
 _gh_pr_merge_train_has_reply_pending_label() {
-    jq -e '[ .labels[]?.name? ] | index("reply-pending")' >/dev/null 2>&1
+    _je '[ .labels[]?.name? ] | index("reply-pending")' >/dev/null 2>&1
 }
 
 # The two verdict-label predicates (#1564). Same contract as the sibling
@@ -293,11 +306,11 @@ _gh_pr_merge_train_has_reply_pending_label() {
 # gate that consumes them is a queue-level step rather than another clause in
 # `_gh_pr_merge_train_filter_targets`.
 _gh_pr_merge_train_has_review_blocked_label() {
-    jq -e '[ .labels[]?.name? ] | index("review-blocked")' >/dev/null 2>&1
+    _je '[ .labels[]?.name? ] | index("review-blocked")' >/dev/null 2>&1
 }
 
 _gh_pr_merge_train_has_review_passed_label() {
-    jq -e '[ .labels[]?.name? ] | index("review-passed")' >/dev/null 2>&1
+    _je '[ .labels[]?.name? ] | index("review-passed")' >/dev/null 2>&1
 }
 
 # The merge-queue finalize predicate (#1707).
@@ -338,7 +351,7 @@ _gh_pr_merge_train_needs_finalize() {
     [ -n "${ZSH_VERSION-}" ] && emulate -L sh
     local _json
     _json=$(cat)
-    printf '%s' "$_json" | jq -e '((.state // "") | ascii_upcase) == "MERGED"' \
+    printf '%s' "$_json" | _je '((.state // "") | ascii_upcase) == "MERGED"' \
         >/dev/null 2>&1 || return 1
     printf '%s' "$_json" | _gh_pr_merge_train_has_review_passed_label
 }
@@ -392,7 +405,7 @@ _gh_pr_merge_train_finalize_targets() {
 # the safety net that justifies the shortcut is not there either. A base with
 # no checks is a base this shortcut has no evidence about.
 _gh_pr_merge_train_behind_may_merge_directly() {
-    jq -e '[ .[]? | select(.type == "required_status_checks") ] as $r
+    _je '[ .[]? | select(.type == "required_status_checks") ] as $r
            | ($r | length) > 0
              and all($r[]; .parameters.strict_required_status_checks_policy == false)' \
         >/dev/null 2>&1
@@ -429,7 +442,7 @@ _gh_pr_merge_train_behind_may_merge_directly() {
 # own direction (no shortcut / no exemption), and an input that is unknown is
 # never evidence for either.
 _gh_pr_merge_train_base_strict_confirmed() {
-    jq -e '[ .[]? | select(.type == "required_status_checks") ] as $r
+    _je '[ .[]? | select(.type == "required_status_checks") ] as $r
            | ($r | length) > 0
              and all($r[]; .parameters.strict_required_status_checks_policy == true)' \
         >/dev/null 2>&1
@@ -473,7 +486,7 @@ _gh_pr_merge_train_base_strict_confirmed() {
 # does, and neither concern belongs in the other.
 _gh_pr_merge_train_base_ci_red() {
     [ "$#" -gt 0 ] || return 1
-    jq -e '[ .check_runs[]?
+    _je '[ .check_runs[]?
              | select(.name as $n | $ARGS.positional | index($n))
              | select(.status == "completed")
              | select([(.conclusion // "")]
@@ -905,7 +918,7 @@ _gh_pr_merge_train_readmit_own_pushes() {
 
     _raw=$(cat)
     [ -n "$_raw" ] || return 1
-    printf '%s' "$_raw" | jq -e 'type == "array"' >/dev/null 2>&1 || return 1
+    printf '%s' "$_raw" | _je 'type == "array"' >/dev/null 2>&1 || return 1
 
     # The four conditions, per element. The loop runs in a subshell (it is the
     # tail of a pipeline), so it carries its verdict out as PR numbers on
@@ -920,15 +933,15 @@ _gh_pr_merge_train_readmit_own_pushes() {
                 ;;
         esac
         # 1. already a target on its own merit — nothing was dropped.
-        printf '%s' "$_filtered" | jq -e --argjson n "$_num" \
+        printf '%s' "$_filtered" | _je --argjson n "$_num" \
             'any(.[]?; .number == $n)' >/dev/null 2>&1 && continue
         # 2. drafts are a D-1 skip row, not a quiet-period drop.
-        printf '%s' "$_elem" | jq -e '(.isDraft // false)' >/dev/null 2>&1 && continue
+        printf '%s' "$_elem" | _je '(.isDraft // false)' >/dev/null 2>&1 && continue
         # 3. the label always wins (#1708 AC2).
         printf '%s' "$_elem" | _gh_pr_merge_train_has_reply_pending_label && continue
         # 4. only undo the ORDINARY quiet-period drop, never the shared
         # filter's own fail-closed one (missing/unparseable updatedAt).
-        printf '%s' "$_elem" | jq -e '((.updatedAt // "") | fromdateiso8601?) != null' \
+        printf '%s' "$_elem" | _je '((.updatedAt // "") | fromdateiso8601?) != null' \
             >/dev/null 2>&1 || continue
         # 5. is this head the one the train itself pushed?
         _gh_pr_merge_train_pushed_sha_matches "$_dir" "$_num" \
