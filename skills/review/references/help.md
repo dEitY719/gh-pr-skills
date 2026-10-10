@@ -61,7 +61,7 @@ claude -p ...`.
 
 ## `--ai opencode`
 
-Internal-PC only. The lane takes its model from
+The lane takes its model from
 `DOTFILES_OPENCODE_REVIEW_MODEL` (env, else the gitignored
 `shell-common/env/internal.local.sh`; unset -> skipped with a warning),
 passes the prompt file with `--file`, and runs in an isolated temporary
@@ -69,10 +69,8 @@ directory via `--dir` so relative writes do not touch the PR checkout.
 
 ## `--ai hermes`
 
-Internal-PC only (internal AI coding CLI; setup module
-`hermes/`). Outside `_dotfiles_setup_mode == internal` the lane exits 1
-with `--ai hermes is internal-PC only (~/.dotfiles-setup-mode !=
-internal)`. The invocation is `hermes -z "<prompt>"` — the whole prompt
+Internal AI coding CLI (setup module `hermes/`). No PC-type gate: if the
+provider is unreachable the run just fails (dEitY719/dotfiles#2069). The invocation is `hermes -z "<prompt>"` — the whole prompt
 as one argv value, refused up front at 131072 bytes or more
 (`MAX_ARG_STRLEN`); no `--model` override is accepted. See
 `references/ai-cli-invocation.md` § `--ai hermes`.
@@ -82,8 +80,8 @@ as one argv value, refused up front at 131072 bytes or more
 - `/gh-pr:review --ai codex 99` — codex review of PR #99 (default preset)
 - `/gh-pr:review --ai agy --review thorough 99` — agy, thorough preset
 - `/gh-pr:review --ai claude --review 꼼꼼 99` — claude, KR alias → thorough
-- `/gh-pr:review --ai opencode 99` — opencode review on internal PC
-- `/gh-pr:review --ai hermes 99` — hermes review on internal PC
+- `/gh-pr:review --ai opencode 99` — opencode review
+- `/gh-pr:review --ai hermes 99` — hermes review
 - `/gh-pr:review --ai claude --user work 99` — claude as `work` account
 - `/gh-pr:review --ai claude --user work1 --review 보안 99` — work1 + security
 - `/gh-pr:review --ai codex --no-post-comment 99` — stdout only, no PR comment

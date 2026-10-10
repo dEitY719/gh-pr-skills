@@ -206,8 +206,9 @@ repo still need from dotfiles" answer stays in one place:
    listed in
    items 4 and 5; the one unvendorable case is
    `shell-common/tools/integrations/claude.sh`, which `review`'s
-   `--ai claude --user` / `--ai opencode` / `--ai hermes` lanes now `[ -f ]`-test
-   and refuse on rather than aborting the step.
+   `--ai claude --user` lane now `[ -f ]`-tests and refuses on rather than
+   aborting the step (the opencode / hermes internal-PC gate that also needed
+   it was removed upstream in dEitY719/dotfiles#2069).
 3. **Settled (#13).** `merge`'s Step 5 used to read its dispatch block from
    `${DOTFILES_ROOT:-$HOME/dotfiles}/claude/skills/gh-pr-post-merge-verify/references/dispatch.sh.md`,
    on the premise that dotfiles kept its originals until Phase 4. It did not —

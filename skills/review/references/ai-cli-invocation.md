@@ -20,12 +20,9 @@ command -v "$AI_BIN" >/dev/null 2>&1 || {
 ```
 
 `AI_BIN` is the literal command name: `codex`, `agy`, `claude`,
-`opencode`, or `hermes`. For `opencode` and `hermes`, first source
-`${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh`
-when needed and require `_dotfiles_setup_mode` to return `internal`; any
-other value fails with
-`--ai <name> is internal-PC only (~/.dotfiles-setup-mode != internal)`
-before invoking the CLI.
+`opencode`, or `hermes`. There is no internal/external PC gate on any
+lane (dEitY719/dotfiles#2069, dEitY719/gh-verify-skills#77 D-6): a missing
+CLI, an unset model env, or an unreachable provider just fails that run.
 
 ## stdin payload shape
 
@@ -166,13 +163,6 @@ omit `--user` and let the current shell's `CLAUDE_CONFIG_DIR` win.
 ## `--ai opencode`
 
 ```sh
-_CLAUDE_SH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
-[ -f "$_CLAUDE_SH" ] || { echo "--ai opencode needs shell-common/tools/integrations/claude.sh to evaluate the internal-PC gate (dotfiles-only, not vendored)" >&2; exit 1; }
-. "$_CLAUDE_SH"
-[ "$(_dotfiles_setup_mode)" = "internal" ] || {
-    echo "--ai opencode is internal-PC only (~/.dotfiles-setup-mode != internal)" >&2
-    exit 1
-}
 _OPENCODE_MODEL=$(_gh_pr_review_opencode_model)
 [ -n "$_OPENCODE_MODEL" ] || {
     echo "[WARN] --ai opencode skipped: DOTFILES_OPENCODE_REVIEW_MODEL is not set (env or shell-common/env/internal.local.sh)" >&2
@@ -214,20 +204,12 @@ process tree before that 540s bound fires.
 ## `--ai hermes`
 
 ```sh
-_CLAUDE_SH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
-[ -f "$_CLAUDE_SH" ] || { echo "--ai hermes needs shell-common/tools/integrations/claude.sh to evaluate the internal-PC gate (dotfiles-only, not vendored)" >&2; exit 1; }
-. "$_CLAUDE_SH"
-[ "$(_dotfiles_setup_mode)" = "internal" ] || {
-    echo "--ai hermes is internal-PC only (~/.dotfiles-setup-mode != internal)" >&2
-    exit 1
-}
-
 hermes -z "$(cat "$PROMPT_FILE")"
 ```
 
-`hermes` is the internal AI coding CLI (setup module: `hermes/`),
-so the lane is gated to internal PCs exactly like `opencode` — a stray
-binary on a personal PC cannot reach the internal provider.
+`hermes` is the internal AI coding CLI (setup module: `hermes/`). It is
+not gated by PC type: a binary that cannot reach its provider simply fails
+the run (non-zero exit, Step 6 skipped).
 
 `hermes -z` (long form `--oneshot`) is hermes's one-shot non-interactive
 flag. This is confirmed against real `hermes --help` output on an internal
@@ -274,8 +256,7 @@ skips Step 6; partial output is discarded.
 | `--ai` unknown | 2 | `Unknown --ai value: '<x>' (allowed: codex, agy, claude, opencode, hermes)` |
 | `--user` with codex/agy/opencode/hermes | 2 | `--user is only valid with --ai claude (codex/agy/opencode/hermes have no multi-account routing)` |
 | `--user <bogus>` with claude | 1 | `Unknown claude account: '<bogus>' (allowed: ...)` |
-| `--ai opencode` outside internal mode | 1 | `--ai opencode is internal-PC only (~/.dotfiles-setup-mode != internal)` |
-| `--ai hermes` outside internal mode | 1 | `--ai hermes is internal-PC only (~/.dotfiles-setup-mode != internal)` |
+| `--ai opencode` with `DOTFILES_OPENCODE_REVIEW_MODEL` unset | 1 | `[WARN] --ai opencode skipped: DOTFILES_OPENCODE_REVIEW_MODEL is not set (...)` |
 | AI CLI not on PATH | 1 | `Required CLI '<name>' not found in PATH` |
 | AI CLI non-zero exit | 1 | `External AI CLI '<name>' failed (exit <rc>): <noise-filtered first line>` + full tail + `/tmp/gh-pr-review-stderr.<pid>.<ai>.log` (issue dEitY719/dotfiles#694 Bug B — no longer surfaces codex's "Reading prompt from stdin…" banner as the failure cause) |
 | PR closed / merged / draft | 1 | `PR #<N> is <state>; aborting` |
