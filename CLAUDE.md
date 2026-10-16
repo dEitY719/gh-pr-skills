@@ -234,6 +234,12 @@ repo still need from dotfiles" answer stays in one place:
    regress unchecked). That job is the interim: a shared runner still belongs
    in `harness-skills`' reusable `skill-check.yml` so all fifteen repos get one,
    and this job should fold into it when that lands.
+   The bats suites moved here from dotfiles (dEitY719/dotfiles#2200) live in
+   `tests/bats/` and run in their own `bats.yml` workflow. Each fixture under
+   `tests/bats/fixtures/` runs the shipped `skills/*/lib/*.sh`, a fence of
+   `skills/*/references/*.md`, or the vendored helpers — never a hand copy;
+   the few decision-table mirrors carry drift guards. Run locally with
+   `BATS_LIB_PATH=<dir holding bats-support and bats-assert> bats -r tests/bats`.
 4. **Two dotfiles files are still cited, deliberately un-vendored.**
    `shell-common/tools/custom/pr_merge_train_cron.sh` (`merge-train`'s
    unattended trigger) and `shell-common/functions/gh_audit_builtin_workflows.sh`
