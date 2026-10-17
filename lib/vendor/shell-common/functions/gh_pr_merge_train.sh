@@ -1,10 +1,12 @@
 #!/bin/sh
 # VENDORED — do not edit here.
 # SSOT: dEitY719/dotfiles shell-common/functions/gh_pr_merge_train.sh
-# Synced 2026-10-10T03:07Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# Synced 2026-10-17T01:33Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
 # shellcheck disable=SC2016  # `_je` is a jq wrapper; its single-quoted args are jq programs
 # shell-common/functions/gh_pr_merge_train.sh
+# No interactive guard: sourced by the non-interactive cron dispatcher
+# tools/custom/pr_merge_train_cron.sh; a guard would hide every function.
 # SSOT for the merge-train target filter (issue #1524).
 #
 # Background (issue #1524, bug B):
