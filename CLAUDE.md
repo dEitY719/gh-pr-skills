@@ -204,11 +204,11 @@ repo still need from dotfiles" answer stays in one place:
    aimed away from any dotfiles checkout, so re-opening the hole fails loudly
    instead of silently. Anything still reached only from `$HOME/dotfiles` is
    listed in
-   items 4 and 5; the one unvendorable case is
-   `shell-common/tools/integrations/claude.sh`, which `review`'s
-   `--ai claude --user` lane now `[ -f ]`-tests and refuses on rather than
-   aborting the step (the opencode / hermes internal-PC gate that also needed
-   it was removed upstream in dEitY719/dotfiles#2069).
+   items 4 and 5. The `--ai claude --user` helper used to be the one
+   unvendorable case (`shell-common/tools/integrations/claude.sh`); since
+   dEitY719/dotfiles#2226 it comes from the guard-free, vendored
+   `tools/custom/lib/claude_accounts_auth.sh`, and `review`'s lane still
+   `[ -f ]`-tests it rather than aborting the step.
 3. **Settled (#13).** `merge`'s Step 5 used to read its dispatch block from
    `${DOTFILES_ROOT:-$HOME/dotfiles}/claude/skills/gh-pr-post-merge-verify/references/dispatch.sh.md`,
    on the premise that dotfiles kept its originals until Phase 4. It did not —

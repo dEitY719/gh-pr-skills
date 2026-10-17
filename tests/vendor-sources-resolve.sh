@@ -31,9 +31,9 @@ n=0
 #    Intentionally dotfiles-only targets, never to be vendored:
 #      env/internal.local.sh         per-host config, parsed (not sourced) and
 #                                    [ -r ]-guarded; public PCs have none
-#      tools/integrations/claude.sh  unvendorable; review's claude --user lane
-#                                    [ -f ]-tests it (CLAUDE.md migration debt 2)
-ALLOW='env/internal.local.sh tools/integrations/claude.sh'
+#    tools/integrations/claude.sh left this list in dEitY719/dotfiles#2226: the
+#    --user helper now sources the vendored tools/custom/lib/claude_accounts_auth.sh.
+ALLOW='env/internal.local.sh'
 refs=$(grep -rnoE '\$\{?SHELL_COMMON(:-[^}]*)?\}?/[A-Za-z0-9_./-]+\.sh' "$VENDOR" || :)
 while IFS= read -r hit; do
 	[ -n "$hit" ] || continue

@@ -109,17 +109,18 @@ automatically — no forced `personal` default.
 ## `--ai claude --user <name>`
 
 Routes through the SSOT helper `_claude_resolve_account` (defined in
-`shell-common/tools/integrations/claude.sh`) so the resolution path
-is identical to `claude-yolo --user <name>`.
+`shell-common/tools/custom/lib/claude_accounts_auth.sh` since
+dEitY719/dotfiles#2146) so the resolution path is identical to
+`claude-yolo --user <name>`.
 
 ```sh
 # Source the helper if not already in scope (login shells already source it).
-# Not vendored under lib/ — this file is dotfiles-only, so test before
-# sourcing: a missing helper must fail closed with a readable message,
-# not abort the step on a `.` of a nonexistent path.
-_CLAUDE_SH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/integrations/claude.sh"
-[ -f "$_CLAUDE_SH" ] || { echo "--user needs shell-common/tools/integrations/claude.sh (dotfiles-only, not vendored) — install dotfiles, or drop --user to run under the calling shell's own CLAUDE_CONFIG_DIR" >&2; exit 1; }
-. "$_CLAUDE_SH"
+# Guard-free and vendored under lib/vendor/ (dEitY719/dotfiles#2226), so this
+# resolves from a standalone install too; the [ -f ] still turns a missing
+# file into a readable refusal instead of a `.` of a nonexistent path.
+_CLAUDE_AUTH="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/tools/custom/lib/claude_accounts_auth.sh"
+[ -f "$_CLAUDE_AUTH" ] || { echo "--user needs shell-common/tools/custom/lib/claude_accounts_auth.sh — reinstall the plugin or dotfiles, or drop --user to run under the calling shell's own CLAUDE_CONFIG_DIR" >&2; exit 1; }
+. "$_CLAUDE_AUTH"
 
 CFG_DIR=$(_claude_resolve_account "$USER_ACCOUNT") || {
     ALLOWED=$(_claude_resolve_account --list | tr '\n' ' ')
