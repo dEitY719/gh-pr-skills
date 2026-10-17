@@ -24,8 +24,8 @@ a round trip the state you already hold has covered.
 
 | `mergeStateStatus` | `mergeable` | Action |
 |---|---|---|
-| `CLEAN` | `MERGEABLE` | `Skill(gh-pr:merge, "<N>")` directly |
-| `BEHIND` | `MERGEABLE` | `gh-resolve:outdated` in a scratch worktree → re-query → merge |
+| `CLEAN` | `MERGEABLE` | `Skill(gh-pr:merge, "<N> rebase <remote> --auto")` directly |
+| `BEHIND` | `MERGEABLE` | `$BEHIND_DIRECT = yes` → `Skill(gh-pr:merge, "<N> rebase <remote> --auto")` directly, same as `CLEAN`. Otherwise `gh-resolve:outdated` in a scratch worktree → re-query → merge |
 | `DIRTY` | `CONFLICTING` | `gh-resolve:conflict` in a scratch worktree → re-query → merge |
 | `UNSTABLE` | `MERGEABLE` | inspect `statusCheckRollup` — see below |
 | `BLOCKED` | — | record the reason, `[SKIPPED]` |
@@ -129,6 +129,62 @@ merge on the strength of a snapshot.
 of the array filter — same `gh_pr_merge_train.sh` sourced in Step 2, same
 predicates Step 3.5 ran, so the checks cannot drift apart the way the
 quiet-minutes number used to. Do not re-derive the `jq` here.
+
+## Every merge in this table is `--auto` (dEitY719/dotfiles#1707)
+
+The `CLEAN` row above, and the merge that follows remediation on the `BEHIND` /
+`DIRTY` / `UNSTABLE` rows, all call
+`Skill(gh-pr:merge, "<N> rebase <remote> --auto")`. `rebase` is written out
+because `--auto` is a flag and the positionals in front of it are positional —
+it is still D-4's default, not a strategy choice, and `<remote>` follows
+`github-target.md`'s own rule (the default `origin` may be omitted).
+
+`--auto` is what makes the train stop paying N serial CI cycles for N PRs
+(dEitY719/dotfiles#1707). Without it the train merges PR1, which advances `main`, which puts
+every remaining queued PR `BEHIND`, which forces a rebase and a full CI cycle
+per PR. With it the train enqueues and moves on, and the platform batches the
+builds. The train must therefore **not** wait for a `--auto` merge to land: a
+`[QUEUED]` answer is the expected one, and the PR is finished on a later tick
+by Step 0's finalize sweep.
+
+On a base with no merge queue `--auto` degrades to the plain merge
+`gh-pr:merge` has always run (its Step 3 retries without the flag), so this row
+behaves exactly as it did before dEitY719/dotfiles#1707 until the ruleset is actually flipped —
+see `merge-queue-investigation.md`, which is also where the manual activation
+step lives.
+
+## `BEHIND` skips the local rebase when the base says it may (dEitY719/dotfiles#1707)
+
+`$BEHIND_DIRECT` is set **once per distinct base branch** by Step 3.6, from the
+same `repos/{repo}/rules/branches/{base}` body `approval-gate.md` already
+fetches — it is not a per-PR lookup, and this row must not make one. `yes`
+means the shared predicate
+`_gh_pr_merge_train_behind_may_merge_directly` found
+`strict_required_status_checks_policy: false` on that base: GitHub does not
+require the head to be current, so it performs the rebase itself at merge time
+and a merely-behind PR merges without a local rebase and without a fresh CI
+cycle. That is the entire N-round-trips fix (dEitY719/dotfiles#1707).
+
+**The shortcut is a property of the base, never a universal rule.** It is read,
+not assumed, precisely so it cannot be wrong: a PR based on something other
+than `main`, a base where strict is still on, a future repo without the
+relaxation, or a rules lookup that simply failed all leave `$BEHIND_DIRECT` at
+`no`, and this row then behaves exactly as it did before dEitY719/dotfiles#1707 —
+`gh-resolve:outdated` in a scratch worktree. Fail-closed costs a rebase;
+guessing the other way costs three F-5 attempts against a refusal that cannot
+change.
+
+In practice this row goes quiet on a relaxed base rather than taking the fast
+path: `BEHIND` is GitHub saying "out of date **and this base requires
+otherwise**", so with strict off a behind-but-clean PR is reported `CLEAN` and
+routes down the first row. The `BEHIND` branch remains for the bases that still
+report it. Both halves — what changed, what it costs — are in
+`strict-mode-relaxation.md`.
+
+**`DIRTY` is completely unaffected.** A real content conflict is a real content
+conflict whatever the base's check policy says; it still routes through
+`gh-resolve:conflict` first, always, and no relaxation anywhere may weaken
+that.
 
 The two rebase rows (`BEHIND`, `DIRTY`) never operate on the current checkout.
 The train builds a detached scratch worktree for `headRefName` first and passes

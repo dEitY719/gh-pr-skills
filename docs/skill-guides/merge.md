@@ -70,7 +70,7 @@
    **전략을 조용히 바꾸지 않는다.**
 4. **Step 4 — 보드 동기화와 뒷정리.** PR 카드와 연결된 이슈 카드를 `Done` 으로 옮기고,
    머지된 브랜치의 로컬 worktree 에 유휴 herdr 탭이 있으면 `[INFO]` 힌트 한 줄을 찍고,
-   이제 읽을 사람이 없는 `review-passed` 라벨을 뗀 뒤, ai-metrics PR 코멘트를 남긴다.
+   ai-metrics PR 코멘트를 남긴 뒤, 마지막으로 이제 읽을 사람이 없는 `review-passed` 라벨을 뗀다.
    **전부 soft-fail** — 실패는 stderr 한 줄이고 보고나 종료 코드를 바꾸지 않는다.
 5. **Step 5 — 머지 SHA 조회 + 보고.** `mergeCommit.oid` 를 읽어 compact 보고를 출력한다.
    `null` 이면 1초 후 한 번 재시도하고, 그래도 없으면 `(pending)` 으로 찍고 PR URL 을 함께

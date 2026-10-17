@@ -8,12 +8,21 @@
 | 2 | strategy | `rebase` | One of `rebase`, `squash`, `merge` |
 | 3 | remote-name | `origin` | Git remote whose repo owns the PR |
 
+## Flags
+
+| Flag | Description |
+|------|-------------|
+| `--auto` | Hand the PR to the base branch's **merge queue** instead of blocking until it merges (dEitY719/dotfiles#1707). With no queue active it falls back to the ordinary immediate merge, so the flag is safe everywhere. When the PR is queued rather than merged, the skill prints `[QUEUED]` and runs none of the post-merge steps — `gh-pr:merge-train`'s Step 0 sweep finalizes it later. |
+| `--finalize` | Run **only** the post-merge completion sequence on an already-`MERGED` PR (board sync, tab hint, ai-metrics, `review-passed` cleanup, post-merge verify) and print `[FINALIZED]`. Refuses any PR that is not `MERGED`. Mutually exclusive with `--auto`. |
+
 ## Usage
 
 - `/gh-pr:merge 51` — rebase-merge PR #51 on `origin`'s repo (immediate, no confirmation)
 - `/gh-pr:merge 51 squash` — squash-merge
 - `/gh-pr:merge 51 merge` — create a merge commit (preserve history)
 - `/gh-pr:merge 51 rebase upstream` — rebase-merge against `upstream` remote
+- `/gh-pr:merge 51 rebase origin --auto` — enqueue rather than wait (merge-queue bases)
+- `/gh-pr:merge 51 rebase origin --finalize` — post-merge housekeeping only, for a PR the queue already merged
 - `/gh-pr:merge -h` / `--help` / `help` — print this help
 
 ## Strategy guide

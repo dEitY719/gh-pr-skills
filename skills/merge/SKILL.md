@@ -18,13 +18,11 @@ metadata:
 
 ## Help
 
-If arg #1 is `-h`/`--help`/`help`, output `references/help.md` verbatim and stop
-(no API calls). That file also tables the positionals
-`<pr-number> [rebase|squash|merge] [remote]` and the per-strategy guidance.
+If arg #1 is `-h`/`--help`/`help`, output `references/help.md` verbatim and stop (no API calls).
 
 ## Step 1: Parse Args + Resolve Repo
 
-Record `START_TS=$(date +%s)` immediately (Step 4 elapsed time). Argument rules — defaults and the refusal for each: `references/arg-parsing.md`. Bind
+Record `START_TS=$(date +%s)` immediately (Step 4 elapsed time). Argument rules: `references/arg-parsing.md`. Bind
 `TARGET_REPO` / `TARGET_HOST` / `GH_HOST` from the `[remote]` URL (contract: `references/github-target.md`);
 every `lib/` call in this skill opens with the first three lines:
 
@@ -41,9 +39,8 @@ Run in one message: `GH_HOST="$TARGET_HOST" gh pr view <N> --repo "$TARGET_REPO"
 and `GH_HOST="$TARGET_HOST" gh pr checks <N> --repo "$TARGET_REPO" --required`.
 
 Read `references/preflight-hard-stops.md` before merging: base-branch protection detection, every hard stop, and the one conditional exception, verbatim.
-
-The projectV2 board Status is **not** a merge gate (dEitY719/dotfiles#1513) — do not read it
-here. Rationale + the retired Step 2-B in `references/board-policy.md`.
+The projectV2 board Status is **not** a merge gate (dEitY719/dotfiles#1513; `references/board-policy.md`).
+`--finalize` skips Steps 2-3 after its `MERGED` check (`references/merge-queue.md`).
 
 ## Step 3: Merge (no confirmation)
 
@@ -53,11 +50,13 @@ GH_HOST="$TARGET_HOST" gh pr merge <N> --repo "$TARGET_REPO" --<strategy> --dele
 
 Flag mapping in `references/strategy-selection.md`. If `gh` returns "merge method is not allowed",
 print that file's repo-settings guidance and stop. **Never** silently switch strategies.
+With `--auto`, run `references/merge-queue.md`'s Step 3 block instead, then its Step 3.5
+block: `MERGED` continues, `[QUEUED]` / `[FAIL]` stop here — no Step 4, no Step 5.
 
 ## Step 4: Post-merge Housekeeping
 
-Four soft-fail side effects in one call (board → `Done`, herdr hint, `review-passed` cleanup,
-ai-metrics; always exit 0 — contract: `references/post-merge-housekeeping.md`). After the Step 1 lines:
+Board → `Done`, herdr hint, ai-metrics, `review-passed` cleanup **last** (order: `references/finalize-merged-pr.sh.md`),
+soft-fail in one call that always exits 0 (`references/post-merge-housekeeping.md`). After the Step 1 lines:
 `TARGET_HOST=<host> START_TS=<ts> bash "$_L/post-merge-housekeeping.sh" <N> <owner/repo> <headRefName>`.
 
 ## Step 5: Fetch Merge SHA + Report
@@ -66,11 +65,11 @@ ai-metrics; always exit 0 — contract: `references/post-merge-housekeeping.md`)
 GH_HOST="$TARGET_HOST" gh pr view <N> --repo "$TARGET_REPO" --json mergeCommit -q .mergeCommit.oid
 ```
 
-Print **only** the compact report (format in `references/strategy-selection.md` → "Final report format").
+Print **only** the compact report (format in `references/strategy-selection.md` → "Final report format");
+under `--finalize` its verdict line is `[FINALIZED] #<N>` instead of `[OK]`.
 
-**After** the report has printed, run the post-merge verification gate — a no-op
-for any repo outside the issue-watcher registry. Contract, the five positionals,
-the plugin-root tiers and every failure mode: `references/post-merge-verify.md`.
+**After** the report has printed, run the post-merge verification gate — a no-op outside the
+issue-watcher registry. Contract and every failure mode: `references/post-merge-verify.md`.
 
 ```bash
 if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
@@ -91,9 +90,10 @@ fi
 - Never ask for confirmation — running the skill is the confirmation.
 - Never merge an un-approved PR; redirect to `gh-pr:merge-emergency`. Never bypass CI.
 - Never swap strategy if the chosen one fails. Always `--delete-branch`.
+- Never run Step 4/5 for a PR that is not `MERGED`: a `[QUEUED]` PR keeps `review-passed` for the sweep.
 
 ## Related Skills
 
 `gh-pr:approve` produces the approval this skill gates on · `gh-pr:merge-emergency` is the admin-override
-path when approval cannot be obtained · `gh-verify:post-merge-verify` owns the dispatch block Step 5 stages
-via `lib/post-merge-verify-dispatch.sh` for registered repos, and stays a manual entry point (`/gh-verify:post-merge-verify <N>`).
+path · `gh-verify:post-merge-verify` owns the dispatch Step 5 stages, and stays a manual entry point
+(`/gh-verify:post-merge-verify <N>`) · `gh-pr:merge-train` is the only caller of `--auto` / `--finalize`.

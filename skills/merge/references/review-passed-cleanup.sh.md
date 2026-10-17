@@ -1,7 +1,10 @@
 # `review-passed` Cleanup — post-merge label removal (soft-fail)
 
-Runs inside Step 4 (post-merge housekeeping), after the board reconciliations
-and the herdr hint. Issue dEitY719/dotfiles#1636, F-5.
+Runs **last** inside Step 4 (post-merge housekeeping), after the board
+reconciliations, the herdr hint and the ai-metrics comment. Issue
+dEitY719/dotfiles#1636, F-5; moved last by PR dEitY719/dotfiles#1725 — while
+the label is on, `gh-pr:merge-train`'s Step 0 finalize sweep can still find a
+merged PR whose housekeeping never finished (`references/finalize-merged-pr.sh.md`).
 
 Why: `review-passed` is a claim about **one head commit of an open PR**, read
 by exactly one consumer — `gh-pr:merge-train`'s Step 3.5 gate. Once the PR is

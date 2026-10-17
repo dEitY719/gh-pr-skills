@@ -86,8 +86,13 @@ train was invoked with a non-default remote, so the whole train lands on one
 server:
 
 ```
-Skill(gh-pr:merge, "<N> rebase <remote>")
+Skill(gh-pr:merge, "<N> rebase <remote> --auto")
 ```
 
 With the default `origin` the positional may be omitted — the atoms already
 default to it.
+
+`--auto` (dEitY719/dotfiles#1707) is a flag, not a positional, so it sits after whatever
+positionals are present. `rebase` is written out here for the same reason: a
+flag cannot occupy the strategy slot. It is still D-4's default and not a
+strategy argument in the sense `constraints.md` forbids.

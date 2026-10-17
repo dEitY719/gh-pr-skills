@@ -9,14 +9,20 @@ assistant text — never a `Bash` heredoc, never `Write` (dEitY719/dotfiles#1270
 == merge train: <owner/repo> ==
 queue: <n> PR(s)  ·  approval gate: <verdict>  ·  quiet period: 11m
 
+[FINALIZED] #1461  chore(docs): ...                  (merge queue merged it on a previous tick)
 [MERGED]  #1466  refactor(issue-watcher): simplify   (BEHIND -> resolve-outdated -> merged)
-[MERGED]  #1467  fix(gh-pr-reply): ...               (CLEAN -> merged)
+[QUEUED]  #1467  fix(gh-pr-reply): ...               (CLEAN -> enqueued, not yet merged)
 [SKIPPED] #1462  test(issue-watcher): ...            checks still running (3 polls)
 [SKIPPED] #1470  fix(y): ...                         review-blocked — reviewer verdict is blocking
 [FAILED]  #1469  feat(x): ...                        conflict unresolved after 3 attempts
 
-merged 2 · skipped 2 · failed 1
+finalized 1 · merged 1 · queued 1 · skipped 2 · failed 1
 ```
+
+`[FINALIZED]` lines come from Step 0's sweep and describe PRs merged on an
+**earlier** tick, so they are printed first, above the queue this tick built.
+The counts line names every non-zero bucket; a run that queued nothing prints
+no `queued` term, exactly as it prints no `failed 0`.
 
 Rules:
 
@@ -62,6 +68,8 @@ is already the clause prefix there, so it drops out of the string itself:
 | Status | Meaning | Typical reason |
 |---|---|---|
 | `[MERGED]` | the PR is merged | — |
+| `[QUEUED]` | **added to the merge queue, not yet merged** (dEitY719/dotfiles#1707) — nothing went wrong and nothing is finished; the platform owns the merge from here, and Step 0's sweep will finalize the PR on a later tick | `enqueued, not yet merged` |
+| `[FINALIZED]` | a PR the merge queue merged on an **earlier** tick, whose post-merge completion steps ran on this one (dEitY719/dotfiles#1707) | `merge queue merged it on a previous tick` |
 | `[SKIPPED]` | not merged, **and expected to be retriable** next tick | `checks still running`, `mergeability still UNKNOWN`, `approval required (reviewDecision=<value>)`, `gh-pr:merge refuses reviewDecision=<value>`, `policy unreadable — approval assumed required`, `BLOCKED: <rule>`, `draft`, plus the two verdict-gate reasons and the four delegated-review reasons tabled below |
 | `[FAILED]` | not merged, **and something actually went wrong** | `conflict unresolved after 3 attempts`, `gh-pr:merge failed: <message>`, `CI fix failed after 3 attempts` |
 
@@ -105,6 +113,14 @@ distinguishes what a reader has to do about each:
 
 None of the four spends an F-5 attempt, and none is ever `[FAILED]`: a
 withheld approval is a working review, not a broken train.
+
+`[QUEUED]` is deliberately its own bucket rather than a flavour of the two
+either side of it (dEitY719/dotfiles#1707). Reporting it as `[MERGED]` would claim a merge that
+has not happened, and a reader chasing "which commit went in" would find
+nothing. Reporting it as `[SKIPPED]` would say the train declined to act, and
+the next tick would re-queue a PR the platform is already merging — the
+double-work `--auto` exists to remove. It spends no F-5 attempt and is never
+`[FAILED]`: handing a PR to the queue is the train succeeding at its new job.
 
 The `[SKIPPED]` / `[FAILED]` split is the load-bearing part of this output. A
 cron log full of `[SKIPPED] checks still running` is a healthy train waiting on

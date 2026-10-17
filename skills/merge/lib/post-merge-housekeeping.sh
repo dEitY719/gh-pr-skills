@@ -6,8 +6,8 @@
 #
 #   1. PR card -> Done, then linked Issue cards -> Done   (board, soft loader)
 #   2. herdr idle-tab hint for the merged branch's local worktree (read-only)
-#   3. drop the now-readerless `review-passed` label      (dEitY719/dotfiles#1636)
-#   4. ai-metrics PR comment (skipped when GH_DISABLE_AI_METRICS=1)
+#   3. ai-metrics PR comment (skipped when GH_DISABLE_AI_METRICS=1)
+#   4. drop the now-readerless `review-passed` label LAST (dEitY719/dotfiles#1636, PR dEitY719/dotfiles#1725)
 #
 # Contract: the merge already happened, so every step is soft — at most one
 # `[WARN]` / `[INFO]` line each (board diagnostics on stderr), and the script
@@ -116,27 +116,7 @@ if command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     fi
 fi
 
-# --- 3. Drop the now-readerless `review-passed` ---------------------------------
-_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
-if [ ! -f "$_SC/functions/gh_pr_edit_safe.sh" ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
-fi
-unset -f _gh_pr_edit_safe_label 2>/dev/null || :
-unalias _gh_pr_edit_safe_label 2>/dev/null || :
-export SHELL_COMMON="$_SC"                                                           # before the load
-# shellcheck disable=SC1091  # resolved at run time by the tier ladder above
-[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] && . "$_SC/functions/gh_pr_edit_safe.sh"
-if [ "$(command -v _gh_pr_edit_safe_label 2>/dev/null)" != _gh_pr_edit_safe_label ]; then # tier 5, soft
-    unset SHELL_COMMON
-    printf '[WARN] gh-pr:merge: no usable shell-common at %s — review-passed NOT cleaned up; the merge itself succeeded.\n' "$_SC"
-elif _rpc_err=$(_gh_pr_drop_label "$PR_NUMBER" review-passed \
-        "$TARGET_REPO" "$TARGET_HOST" 2>&1); then
-    : # removed, or verifiably never there — both are success, stay quiet
-else
-    echo "[WARN] merge 후 \`review-passed\` 정리 실패 — 머지 자체는 성공: ${_rpc_err}"
-fi
-
-# --- 4. ai-metrics PR comment ---------------------------------------------------
+# --- 3. ai-metrics PR comment ---------------------------------------------------
 ELAPSED=$(( ($(date +%s) - ${START_TS:-$(date +%s)}) / 60 ))
 if [ "${GH_DISABLE_AI_METRICS:-0}" = "1" ]; then
     : # ai-metrics comment skipped via GH_DISABLE_AI_METRICS
@@ -154,5 +134,27 @@ else
 </details>
 PR merge: ~$ELAPSED min" >/dev/null \
       || echo "[WARN] ai-metrics comment failed — continuing."
+fi
+
+# --- 4. Drop the now-readerless `review-passed` — LAST -------------------------
+# The label is what gh-pr:merge-train's Step 0 finalize sweep matches on, so it
+# comes off only after every other write here (references/finalize-merged-pr.sh.md).
+_SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
+if [ ! -f "$_SC/functions/gh_pr_edit_safe.sh" ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
+fi
+unset -f _gh_pr_edit_safe_label 2>/dev/null || :
+unalias _gh_pr_edit_safe_label 2>/dev/null || :
+export SHELL_COMMON="$_SC"                                                           # before the load
+# shellcheck disable=SC1091  # resolved at run time by the tier ladder above
+[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] && . "$_SC/functions/gh_pr_edit_safe.sh"
+if [ "$(command -v _gh_pr_edit_safe_label 2>/dev/null)" != _gh_pr_edit_safe_label ]; then # tier 5, soft
+    unset SHELL_COMMON
+    printf '[WARN] gh-pr:merge: no usable shell-common at %s — review-passed NOT cleaned up; the merge itself succeeded.\n' "$_SC"
+elif _rpc_err=$(_gh_pr_drop_label "$PR_NUMBER" review-passed \
+        "$TARGET_REPO" "$TARGET_HOST" 2>&1); then
+    : # removed, or verifiably never there — both are success, stay quiet
+else
+    echo "[WARN] merge 후 \`review-passed\` 정리 실패 — 머지 자체는 성공: ${_rpc_err}"
 fi
 exit 0
