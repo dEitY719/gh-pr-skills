@@ -29,12 +29,24 @@ The serial dependency is the design (D-8): each merge invalidates the rest of
 the queue, so a parallel train would be racing its own merges into each other's
 base. Do not dispatch sub-agents per PR.
 
-## Never pass a merge strategy
+dEitY719/dotfiles#1707 made that invalidation **cheap for `BEHIND`** — a base with strict checks
+off rebases server-side, so nothing local is thrown away
+(`references/strict-mode-relaxation.md`) — but it did not make it *absent*, and
+it changed nothing at all for `DIRTY`, whose conflict resolution is still
+redone against a base that moved. Cheaper serial work is still serial work.
+
+## Never choose a merge strategy
 
 `required_linear_history` forbids merge commits, and rebase is `gh-pr:merge`'s
-default, so the train passes no strategy argument at all (D-4). Passing one
-explicitly would be a second place for the policy to drift out of sync with the
-repo's actual settings.
+default, so `rebase` is the only value the train ever passes (D-4). Choosing
+between strategies would be a second place for the policy to drift out of sync
+with the repo's actual settings.
+
+Since dEitY719/dotfiles#1707 the word `rebase` does appear in the call —
+`Skill(gh-pr:merge, "<N> rebase <remote> --auto")` — for a purely syntactic
+reason: `--auto` is a flag, and the strategy and remote positionals sit in
+front of it. It is still the default being restated, not a choice being made;
+if `gh-pr:merge`'s default ever changes, this line changes with it.
 
 ## Never form a review judgement of its own
 
@@ -74,6 +86,17 @@ Step 5 report, and that goes to the operator (or the cron log), not to GitHub.
 
 Corollary: **this skill makes no writes to GitHub of its own.** Every mutation
 it causes happens inside an atom skill that already owns that mutation's rules.
+
+Step 0's finalize sweep (dEitY719/dotfiles#1707) is bound by that corollary, not an exception to
+it. The sweep itself is one read-only call — `gh search prs --merged --label
+review-passed` — and the shared `_gh_pr_merge_train_finalize_targets` filter
+(the array-level form of `_gh_pr_merge_train_needs_finalize`) over its output.
+Every write it triggers (board sync, ai-metrics comment, `review-passed`
+delete, tab close, post-merge-verify dispatch) happens inside
+`gh-pr:merge --finalize`, running the sequence defined in
+`../../merge/references/finalize-merged-pr.sh.md` — the same sequence the
+immediate merge path runs. A raw `gh api` mutation in the train, even a "small"
+label delete, would be the start of a second implementation of that sequence.
 
 ## Never bypass a gate that belongs to `gh-pr:merge`
 

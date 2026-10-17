@@ -7,6 +7,7 @@
 #   (b) github-target: a non-GitHub remote URL stops with empty stdout
 #   (c) housekeeping: board Done for the PR and its closing issue, review-passed
 #       dropped, one ai-metrics POST carrying the gh-pr-merge marker
+#   (c2) the review-passed drop is the last write
 #   (d) GH_DISABLE_AI_METRICS=1 posts nothing
 #   (e) failing gh / failing label drop: one [WARN] each, exit 0
 #   (f) no shell-common anywhere, bad arguments: warnings, exit 0
@@ -78,6 +79,10 @@ drop 9 review-passed o/r github.com' ] || bad "(c) calls: $(cat "$TMP/call.log")
 grep -q '^api repos/o/r/issues/9/comments -X POST -f body=' "$TMP/gh.log" || bad "(c) no ai-metrics POST: $(cat "$TMP/gh.log")"
 grep -q 'ai-metrics:gh-pr-merge' "$TMP/gh.log" || bad "(c) ai-metrics marker missing"
 [ -z "$out" ] || bad "(c) clean run printed: $out"
+
+# (c2) review-passed is dropped LAST, after the ai-metrics POST (dEitY719/dotfiles#1725)
+r SHELL_COMMON="$TMP/sc" CALL_LOG="$TMP/gh.log" bash "$H" 9 o/r feat/x
+[ "$(tail -n 1 "$TMP/gh.log")" = 'drop 9 review-passed o/r github.com' ] || bad "(c2) label not last: $(cat "$TMP/gh.log")"
 
 # (d)
 r SHELL_COMMON="$TMP/sc" GH_DISABLE_AI_METRICS=1 bash "$H" 9 o/r feat/x

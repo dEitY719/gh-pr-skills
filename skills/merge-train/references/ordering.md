@@ -26,6 +26,11 @@ That is wrong here, and the reason is mechanical:
 > **Every merge invalidates every PR still in the queue.** So the LLM work must
 > happen as late as possible.
 
+(Invalidation still happens after dEitY719/dotfiles#1707 — every merge still moves the base. What
+changed is its *price*: on a base with strict checks off it costs a `BEHIND` PR
+nothing, and it costs a `DIRTY` PR exactly as much as it always did. The
+sentence above is about the expensive half, and the expensive half is `DIRTY`.)
+
 Resolve `DIRTY` first and each subsequent merge can re-conflict it — the same
 file, resolved again, against a base that has moved. Resolve it **last** and it
 is resolved exactly once, against the **final** base. One expensive operation
@@ -56,6 +61,35 @@ you reach the second PR, and acting on it would route the PR down the wrong row
 of the D-1 table.
 
 Treat the Step 2 queue as an **ordering**, not as a state snapshot.
+
+### The merge queue does not change D-2 or D-3 (dEitY719/dotfiles#1707)
+
+`--auto` addresses the **merge wait** — the train no longer blocks until each
+PR lands, so the platform can batch the builds. D-2 and D-3 are about the cost
+of **local remediation**, which the queue does not touch: a `DIRTY` PR still
+needs an LLM to resolve real content conflicts, that work is still invalidated
+by every merge ahead of it, and it is therefore still done last and
+just-in-time. Both reasonings survive intact; they were never about waiting.
+
+### What did move: `BEHIND` costs no local rebase on a relaxed base (dEitY719/dotfiles#1707)
+
+D-3's arithmetic above counts a rebase per PR per merge. On a base with
+`strict_required_status_checks_policy: false` — which `main` now is
+(`references/strict-mode-relaxation.md`) — **the `BEHIND` term drops out
+entirely**: GitHub rebases server-side at merge time, so a merely-behind PR
+never pays a local rebase or a CI cycle, no matter how many merges landed ahead
+of it. The row usually stops appearing at all, because GitHub reports such a PR
+as `CLEAN`.
+
+So read the "clean up just-in-time" rationale as being about **`DIRTY`** now.
+That row is unchanged and unchangeable: an LLM still has to resolve real
+content conflicts, that work is still invalidated by every merge ahead of it,
+and it is therefore still ordered last (D-2) and done at the last moment (D-3).
+No relaxation and no queue resolves a content conflict.
+
+D-2's ordering itself is untouched. `BEHIND` still sorts at rank 2 — it is now
+a cheaper rank, not a differently-ordered one, and on a relaxed base the PRs
+that would have filled it arrive as `CLEAN` at rank 1 anyway.
 
 ## D-6 — the 11-minute quiet period
 

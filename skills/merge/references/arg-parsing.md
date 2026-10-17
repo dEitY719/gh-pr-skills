@@ -8,3 +8,6 @@ below are relative to `skills/merge/`, the same way SKILL.md writes them.
 - `remote` — default `origin`. Bind `TARGET_REPO` **and** `TARGET_HOST` from
   that one remote URL and `export GH_HOST` per `references/github-target.md`
   (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). Missing remote → list `git remote -v`, stop (no silent fallback).
+- `--auto` / `--finalize` — optional flags, any position after the positionals
+  (dEitY719/dotfiles#1707). Semantics and the mutual-exclusion refusal:
+  `references/merge-queue.md`.
