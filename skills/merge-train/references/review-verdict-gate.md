@@ -31,7 +31,7 @@ every tick.
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
-if [ ! -f "$_SC/functions/gh_pr_merge_train.sh" ]; then
+if [ ! -f "$_SC/lib/gh_pr_merge_train.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:merge-train] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
             "$_SC" >&2
@@ -42,7 +42,7 @@ fi
 unset -f _gh_pr_merge_train_filter_targets 2>/dev/null || :
 unalias _gh_pr_merge_train_filter_targets 2>/dev/null || :
 export SHELL_COMMON="$_SC"                                                           # before the load
-[ -f "$_SC/functions/gh_pr_merge_train.sh" ] && . "$_SC/functions/gh_pr_merge_train.sh"
+[ -f "$_SC/lib/gh_pr_merge_train.sh" ] && . "$_SC/lib/gh_pr_merge_train.sh"
 [ "$(command -v _gh_pr_merge_train_filter_targets 2>/dev/null)" = _gh_pr_merge_train_filter_targets ] || { # tier 5
     unset SHELL_COMMON
     printf '[gh-pr:merge-train] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
@@ -50,7 +50,7 @@ export SHELL_COMMON="$_SC"                                                      
     return 1 2>/dev/null || exit 1
 }
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
-if [ ! -f "$_SC/functions/gh_pr_edit_safe.sh" ]; then
+if [ ! -f "$_SC/lib/gh_pr_edit_safe.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:merge-train] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
             "$_SC" >&2
@@ -61,7 +61,7 @@ fi
 unset -f _gh_pr_edit_safe_label 2>/dev/null || :
 unalias _gh_pr_edit_safe_label 2>/dev/null || :
 export SHELL_COMMON="$_SC"                                                           # before the load
-[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] && . "$_SC/functions/gh_pr_edit_safe.sh"
+[ -f "$_SC/lib/gh_pr_edit_safe.sh" ] && . "$_SC/lib/gh_pr_edit_safe.sh"
 [ "$(command -v _gh_pr_edit_safe_label 2>/dev/null)" = _gh_pr_edit_safe_label ] || { # tier 5
     unset SHELL_COMMON
     printf '[gh-pr:merge-train] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
@@ -143,7 +143,7 @@ a future tool all advance the head with no hook this repo controls. Any of
 those leaves a stale `review-passed` that the presence-only check above would
 happily trust.
 
-`_gh_pr_merge_train_review_passed_stale` (`shell-common/functions/gh_pr_merge_train.sh`)
+`_gh_pr_merge_train_review_passed_stale` (`shell-common/lib/gh_pr_merge_train.sh`)
 closes that gap by verifying instead of trusting: it reads the last
 `<!-- review-verdict:review-passed:<sha> -->` marker POSTED BY THE PIPELINE'S
 OWN LOGIN — see "Marker authorship" below — that

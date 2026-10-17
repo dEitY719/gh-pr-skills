@@ -25,8 +25,8 @@ bad() { printf 'FAIL  %s\n' "$*"; fail=1; }
 git init -q "$TMP/repo"
 git -C "$TMP/repo" remote add origin git@ghe.example:own/repo.git
 git -C "$TMP/repo" remote add upstream https://github.com/up/stream.git
-mkdir -p "$TMP/sc/functions"
-cat > "$TMP/sc/functions/gh_project_status.sh" <<'EOF'
+mkdir -p "$TMP/sc/lib"
+cat > "$TMP/sc/lib/gh_project_status.sh" <<'EOF'
 _gh_project_status_sync() { printf 'args=%s\n' "$*" >> "$SYNC_LOG"; }
 EOF
 

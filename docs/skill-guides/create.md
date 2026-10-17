@@ -130,7 +130,7 @@ gh CLI 자신의 `gh repo set-default` 를 따르므로, github.com 과 GHES 양
 "고치지" 말고 host 부터 확인한다.
 
 **알려진 마이그레이션 부채** — Step 4.5 는 dotfiles 의
-`shell-common/functions/gh_pr_lint.sh` 를, Step 6 의 라벨 적용은
+`shell-common/lib/gh_pr_lint.sh` 를, Step 6 의 라벨 적용은
 `gh_pr_edit_safe.sh` 를 source 한다. dotfiles 체크아웃이 없는 머신에서는 해당 단계가
 degrade 된다. 라벨 wrapper 는 classic project board 가 붙은 저장소에서 `gh pr edit
 --add-label` 이 GraphQL 경고와 함께 exit 1 로 라벨을 통째로 흘리는 문제(dEitY719/dotfiles#326)를

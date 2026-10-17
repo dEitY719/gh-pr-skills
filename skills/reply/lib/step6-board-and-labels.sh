@@ -68,13 +68,13 @@ fi
 # tests/plugin-root-tier5.sh §5 holds verbatim: SAVE, UNSETF, UNALIAS, EXPORT,
 # LOAD, PROOF — and a failure arm that RESTORES SHELL_COMMON, never unsets it.
 # `--only-from` keeps a card already at In review / Approved / Done where it is.
-_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
+_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/lib/gh_project_status.sh" # tier 1
 [ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
+    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/lib/gh_project_status.sh" # tier 2
 _sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                          # save
 unset -f _gh_project_status_sync 2>/dev/null || :
 unalias _gh_project_status_sync 2>/dev/null || :
-export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"                 # before the load
+export SHELL_COMMON="${_HELPER%/lib/gh_project_status.sh}"                 # before the load
 # shellcheck disable=SC1090  # resolved at run time by the tier ladder above
 [ -r "$_HELPER" ] && . "$_HELPER"
 if [ "$(command -v _gh_project_status_sync 2>/dev/null)" != _gh_project_status_sync ]; then # tier 5, soft
@@ -95,13 +95,13 @@ unset _sc_was _sc_prev
 # gh_pr_edit_safe.sh header, "Verdict-label invalidation" (dEitY719/dotfiles#1563).
 # `review-blocked` is NOT touched here — the gate decides it. Same soft loader
 # shape, own save variables so the board loader's six-step sequence stays unique.
-_DL="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_pr_edit_safe.sh"   # tier 1
+_DL="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/lib/gh_pr_edit_safe.sh"   # tier 1
 [ -f "$_DL" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-    || _DL="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_pr_edit_safe.sh" # tier 2
+    || _DL="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/lib/gh_pr_edit_safe.sh" # tier 2
 _dl_was=${SHELL_COMMON+set} _dl_prev="${SHELL_COMMON-}"                          # save
 unset -f _gh_pr_drop_label 2>/dev/null || :
 unalias _gh_pr_drop_label 2>/dev/null || :
-export SHELL_COMMON="${_DL%/functions/gh_pr_edit_safe.sh}"                       # before the load
+export SHELL_COMMON="${_DL%/lib/gh_pr_edit_safe.sh}"                       # before the load
 # shellcheck disable=SC1090  # resolved at run time by the tier ladder above
 [ -r "$_DL" ] && . "$_DL"
 if [ "$(command -v _gh_pr_drop_label 2>/dev/null)" != _gh_pr_drop_label ]; then  # tier 5, soft

@@ -100,7 +100,7 @@
   라벨 없이 남으며, 라벨 쓰기 실패도 "미검증" 으로 읽힌다.
 - `reply-pending` 라벨은 Step 2.5 와 Step 6 두 지점에서 제거된다. 남아 있으면
   `/gh-pr:merge-train` 이 그 PR 을 건너뛰어 머지 트레인에서 빠진다.
-- **마이그레이션 부채** — 이 스킬은 dotfiles 의 `shell-common/functions/` 헬퍼
+- **마이그레이션 부채** — 이 스킬은 dotfiles 의 `shell-common/{functions,lib}/` 헬퍼
   (`gh_pr_review.sh`, `gh_host.sh`, `gh_pr_edit_safe.sh`,
   `gh_pr_reply_targeted_review.sh` 등)를 source 한다. dotfiles 체크아웃이 없는
   머신에서는 해당 단계가 degrade 한다.

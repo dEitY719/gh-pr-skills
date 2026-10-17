@@ -1,9 +1,9 @@
 #!/bin/sh
 # VENDORED — do not edit here.
-# SSOT: dEitY719/dotfiles shell-common/functions/gh_pr_reply_targeted_review.sh
-# Synced 2026-10-05T02:45Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# SSOT: dEitY719/dotfiles shell-common/lib/gh_pr_reply_targeted_review.sh
+# Synced 2026-10-17T02:20Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
-# shell-common/functions/gh_pr_reply_targeted_review.sh
+# shell-common/lib/gh_pr_reply_targeted_review.sh
 # NOTE: This file intentionally has NO interactive guard: pure function
 # definitions with no output at file scope, sourced non-interactively by
 # gh:pr-reply skill's Bash tool calls (see below).
@@ -62,7 +62,7 @@ elif [ -n "${BASH_VERSION-}" ]; then
 else
     _drg_self=""
 fi
-_drg_helper="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/dotfiles_root.sh"
+_drg_helper="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/lib/dotfiles_root.sh"
 if [ -r "$_drg_helper" ]; then
     . "$_drg_helper" || true
 fi
@@ -391,7 +391,7 @@ EOF
 _gh_pr_reply_login_bodies() {
     if ! command -v _devx_pr_review_all_login_bodies >/dev/null 2>&1; then
         # shellcheck source=/dev/null
-        . "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/devx_pr_review_all.sh" 2>/dev/null || :
+        . "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/lib/devx_pr_review_all.sh" 2>/dev/null || :
     fi
     if ! command -v _devx_pr_review_all_login_bodies >/dev/null 2>&1; then
         cat >/dev/null
@@ -913,7 +913,7 @@ _gh_pr_reply_apply_review_passed() {
 
     if ! command -v devx_pr_review_all_write_label >/dev/null 2>&1; then
         # shellcheck source=/dev/null
-        . "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/devx_pr_review_all.sh" 2>/dev/null || :
+        . "${SHELL_COMMON:-$HOME/dotfiles/shell-common}/lib/devx_pr_review_all.sh" 2>/dev/null || :
     fi
     if ! command -v devx_pr_review_all_write_label >/dev/null 2>&1; then
         printf '[WARN] devx_pr_review_all_write_label 사용 불가 — PR #%s 무라벨 유지\n' "$_pr"

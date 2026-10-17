@@ -16,7 +16,7 @@ represent a human deciding "this PR is reviewed and ready":
 
 ## Why `--self-record` needs the bypass
 
-`shell-common/functions/gh_project_status.sh` fail-closes any
+`shell-common/lib/gh_project_status.sh` fail-closes any
 `_gh_project_status_sync pr <N> "Approved"` whose `reviewDecision` is not
 `APPROVED` (dEitY719/dotfiles#393). GitHub refuses self-approval server-side, so a solo
 repo's own PR is stuck at `reviewDecision == ""` no matter what. The
@@ -94,5 +94,5 @@ Board: not promoted (request-changes / analysis-only path)
 
 - `references/board-policy.md` — what the `Approved` column means.
 - `references/self-pr-handling.md` — the `--self-record` procedure.
-- `shell-common/functions/gh_project_status.sh` — dEitY719/dotfiles#393 write-side guard.
+- `shell-common/lib/gh_project_status.sh` — dEitY719/dotfiles#393 write-side guard.
 - `docs/.ssot/github-project-board.md` — column semantics SSOT.

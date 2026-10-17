@@ -15,7 +15,7 @@ snapshot; only the namespace moved, from `gh:` to `gh-pr:`, and the directory
 names lost their now-redundant prefixes.
 
 Because behaviour was held fixed, some coupling to the dotfiles checkout came
-across with it — several skills source `shell-common/functions/*.sh`, and `merge`
+across with it — several skills source `shell-common/{lib,functions}/*.sh`, and `merge`
 reads a post-merge dispatch block. Both are enumerated in
 [`CLAUDE.md`](CLAUDE.md) → "Known migration debt"; the dispatch block is settled
 (vendored under `lib/vendor/`), the `shell-common` coupling is Phase 4 work.

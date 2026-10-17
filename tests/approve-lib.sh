@@ -19,7 +19,7 @@ trap 'rm -rf "$TMP"' EXIT INT TERM
 fail=0
 bad() { printf 'FAIL  %s\n' "$*"; fail=1; }
 
-mkdir -p "$TMP/bin" "$TMP/sc/functions"
+mkdir -p "$TMP/bin" "$TMP/sc/lib"
 cat > "$TMP/bin/gh" <<'EOF'
 #!/bin/sh
 printf '%s\n' "$*" >> "$GH_LOG"
@@ -27,7 +27,7 @@ printf '%s\n' "$*" >> "$GH_LOG"
 exit 0
 EOF
 chmod +x "$TMP/bin/gh"
-cat > "$TMP/sc/functions/gh_project_status.sh" <<'EOF'
+cat > "$TMP/sc/lib/gh_project_status.sh" <<'EOF'
 _gh_project_status_sync() {
     printf 'args=%s bypass=%s host=%s\n' "$*" "${_GH_PROJECT_STATUS_GUARD_APPROVED_BYPASS-}" "$GH_HOST" >> "$SYNC_LOG"
 }

@@ -22,7 +22,7 @@ trap 'rm -rf "$TMP"' EXIT INT TERM
 fail=0
 bad() { printf 'FAIL  %s\n' "$*"; fail=1; }
 
-mkdir -p "$TMP/bin" "$TMP/sc/functions"
+mkdir -p "$TMP/bin" "$TMP/sc/lib"
 cat > "$TMP/bin/gh" <<'EOF'
 #!/bin/sh
 printf '%s\n' "$*" >> "$GH_LOG"
@@ -30,11 +30,11 @@ printf '%s\n' "$*" >> "$GH_LOG"
 exit 0
 EOF
 chmod +x "$TMP/bin/gh"
-cat > "$TMP/sc/functions/gh_project_status.sh" <<'EOF'
+cat > "$TMP/sc/lib/gh_project_status.sh" <<'EOF'
 _gh_project_status_sync() { printf 'sync %s\n' "$*" >> "$CALL_LOG"; }
 _gh_pr_closing_issue_numbers() { echo 5; }
 EOF
-cat > "$TMP/sc/functions/gh_pr_edit_safe.sh" <<'EOF'
+cat > "$TMP/sc/lib/gh_pr_edit_safe.sh" <<'EOF'
 _gh_pr_edit_safe_label() { :; }
 _gh_pr_drop_label() {
     printf 'drop %s\n' "$*" >> "$CALL_LOG"

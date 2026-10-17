@@ -95,7 +95,7 @@ that would have filled it arrive as `CLEAN` at rank 1 anyway.
 
 Drop every PR whose `updatedAt` is within `11` minutes of now. The number lives
 in exactly one place — `_gh_pr_merge_train_quiet_minutes` in
-`shell-common/functions/gh_pr_merge_train.sh` (overridable with
+`shell-common/lib/gh_pr_merge_train.sh` (overridable with
 `GH_PR_MERGE_TRAIN_QUIET_MINUTES`) — and the `11` written here is a citation of
 it, not a second definition.
 
@@ -150,7 +150,7 @@ The hard skip is **bounded**, and the bound is what makes the backstop below
 real rather than aspirational. The window is
 `_gh_pr_merge_train_reply_pending_stale_minutes` — default `90` minutes,
 overridable with `GH_PR_MERGE_TRAIN_REPLY_PENDING_STALE_MINUTES`, defined in
-the same `shell-common/functions/gh_pr_merge_train.sh` as the quiet period, and
+the same `shell-common/lib/gh_pr_merge_train.sh` as the quiet period, and
 the `90` written here is a citation of it, not a second definition.
 
 Measured against the same `updatedAt` the quiet period reads: adding a label
@@ -187,7 +187,7 @@ cannot cover:
 
 `shell-common/tools/custom/pr_merge_train_cron.sh` and this skill call the
 **literal same function**, `_gh_pr_merge_train_filter_targets` in
-`shell-common/functions/gh_pr_merge_train.sh` (issue dEitY719/dotfiles#1524). Before that fix
+`shell-common/lib/gh_pr_merge_train.sh` (issue dEitY719/dotfiles#1524). Before that fix
 the dispatcher had the filter as real `jq` and this skill had it as prose, so
 the prose half could be — and was — silently skipped by the LLM executing it.
 They cannot drift now: there is one implementation.
@@ -205,14 +205,14 @@ Step 2 of `SKILL.md` pastes this block verbatim before applying the D-2 sort abo
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"
-if [ ! -f "$_SC/functions/gh_pr_merge_train.sh" ]; then
+if [ ! -f "$_SC/lib/gh_pr_merge_train.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || { printf '[gh-pr:merge-train] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' "$_SC" >&2; return 1 2>/dev/null || exit 1; }
     _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"
 fi
 unset -f _gh_pr_merge_train_filter_targets 2>/dev/null || :
 unalias _gh_pr_merge_train_filter_targets 2>/dev/null || :
 export SHELL_COMMON="$_SC"
-[ -f "$_SC/functions/gh_pr_merge_train.sh" ] && . "$_SC/functions/gh_pr_merge_train.sh"
+[ -f "$_SC/lib/gh_pr_merge_train.sh" ] && . "$_SC/lib/gh_pr_merge_train.sh"
 [ "$(command -v _gh_pr_merge_train_filter_targets 2>/dev/null)" = _gh_pr_merge_train_filter_targets ] || { unset SHELL_COMMON; printf '[gh-pr:merge-train] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' "$_SC" >&2; return 1 2>/dev/null || exit 1; }
 GH_HOST="$TARGET_HOST" gh pr list --repo "$TARGET_REPO" --author @me --state open \
   --limit 50 --json number,updatedAt,isDraft,mergeable,mergeStateStatus,baseRefName,title,labels \

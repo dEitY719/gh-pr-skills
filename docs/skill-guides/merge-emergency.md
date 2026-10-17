@@ -110,7 +110,7 @@ SKILL.md 의 Step 1~7 요약.
   admin 머지가 잘못된 서버로 라우팅되면 되돌릴 수 없고, 감사 기록마저 엉뚱한 서버에 남는다.
 - **머지 후 72시간 안에 회고를 채운다.** 근본 원인, 정상 경로가 불가능했던 이유, 후속 액션을
   incident 이슈에 적고 닫는다.
-- **알려진 마이그레이션 부채** — 이 스킬은 dotfiles 의 `shell-common/functions/*.sh`
+- **알려진 마이그레이션 부채** — 이 스킬은 dotfiles 의 `shell-common/lib/*.sh`
   (`gh_host.sh`, `gh_project_status.sh`)를 source 한다. dotfiles 체크아웃이 없는 머신에서는
   해당 단계가 soft-fail 로 저하된다(보드 동기화는 조용히 건너뛴다).
 

@@ -266,7 +266,7 @@
         <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span><strong>NF-2("자가 인증 금지") 완화는 이 경로에 한정된다.</strong> <code>review-passed</code> 는 외부 AI CLI 재호출 없이 이 스킬의 판단으로 붙는다. 다만 fail-closed 방향은 그대로다 &mdash; 미해결 BLOCKER 가 하나라도 있으면 라벨은 없고, 외부 리뷰 근거가 없는 PR 은 라벨 없이 남으며, 라벨 쓰기 실패도 "미검증" 으로 읽힌다.</span></li>
         <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span><code>reply-pending</code> 라벨은 Step 2.5 와 Step 6 두 지점에서 제거된다. 남아 있으면 <code>/gh-pr:merge-train</code> 이 그 PR 을 건너뛰어 머지 트레인에서 빠진다.</span></li>
       </ul>
-      <div class="note"><strong>마이그레이션 부채</strong> &mdash; 이 스킬은 dotfiles 의 <code>shell-common/functions/</code> 헬퍼(<code>gh_pr_review.sh</code>, <code>gh_host.sh</code>, <code>gh_pr_edit_safe.sh</code>, <code>gh_pr_reply_targeted_review.sh</code> 등)를 source 한다. dotfiles 체크아웃이 없는 머신에서는 해당 단계가 degrade 한다.</div>
+      <div class="note"><strong>마이그레이션 부채</strong> &mdash; 이 스킬은 dotfiles 의 <code>shell-common/{functions,lib}/</code> 헬퍼(<code>gh_pr_review.sh</code>, <code>gh_host.sh</code>, <code>gh_pr_edit_safe.sh</code>, <code>gh_pr_reply_targeted_review.sh</code> 등)를 source 한다. dotfiles 체크아웃이 없는 머신에서는 해당 단계가 degrade 한다.</div>
     </section>
 
     <footer class="page">

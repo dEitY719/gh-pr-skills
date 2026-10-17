@@ -18,11 +18,11 @@
 # one test narrows PATH to a dir without mkdir/ln before it runs the hint.
 herdr_notify_setup() {
     local _sc="${TEST_TEMP_HOME:?}/sc"
-    mkdir -p "$_sc/functions"
+    mkdir -p "$_sc/lib"
     printf '%s\n' '_gh_project_status_sync() { :; }' \
-        '_gh_pr_closing_issue_numbers() { :; }' >"$_sc/functions/gh_project_status.sh"
+        '_gh_pr_closing_issue_numbers() { :; }' >"$_sc/lib/gh_project_status.sh"
     printf '%s\n' '_gh_pr_edit_safe_label() { :; }' \
-        '_gh_pr_drop_label() { :; }' >"$_sc/functions/gh_pr_edit_safe.sh"
+        '_gh_pr_drop_label() { :; }' >"$_sc/lib/gh_pr_edit_safe.sh"
     install_herdr_lookup_stub "${TEST_TEMP_HOME}/dotfiles"
 }
 

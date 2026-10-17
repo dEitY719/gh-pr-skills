@@ -15,7 +15,7 @@
   needed, stop and ask.
 - To mutate PR labels or body, route through `_gh_pr_edit_safe_label` /
   `_gh_pr_edit_safe_body` / `_gh_pr_drop_label`
-  (`shell-common/functions/gh_pr_edit_safe.sh`) — bare `gh pr edit --add-label`
+  (`shell-common/lib/gh_pr_edit_safe.sh`) — bare `gh pr edit --add-label`
   / `--body-file` silently exits 1 on classic-Projects repos (issue dEitY719/dotfiles#326 Bug B).
   The Step 6 `review-passed` / `review-blocked` invalidation goes through
   `_gh_pr_drop_label`, the one shared REST-DELETE primitive every

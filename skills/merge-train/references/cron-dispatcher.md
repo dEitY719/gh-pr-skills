@@ -62,7 +62,7 @@ That name is `mt-<repo>` — **no PR or issue number in it**. The name *is* the
 lock, so a per-tick discriminator would make every tick compute a different
 string, find no running train, and start a second one merging onto the same
 base. It is built by `herdr_agent_name`
-(`shell-common/functions/herdr_agent_name.sh`), the SSOT shared with
+(`shell-common/lib/herdr_agent_name.sh`), the SSOT shared with
 `issue_watcher_cron.sh` and `gh-verify:post-merge-verify`.
 
 The workspace label is the *same string* as the agent name (dEitY719/dotfiles#1549) — no longer
@@ -76,7 +76,7 @@ against `^[a-z][a-z0-9_-]{0,31}$`, which has no room for a host, so a second
 host or a second owner sharing a repo name collides on both names now, not
 just the agent name. The trade-off and its expiry condition (a short digest
 appended to both names together) are recorded at the helper
-(`shell-common/functions/herdr_agent_name.sh`).
+(`shell-common/lib/herdr_agent_name.sh`).
 
 An agent that still **resolves** — `idle`, but also `done` or a status herdr
 does not name — means the previous train's pane is still open and still holds
@@ -97,7 +97,7 @@ gone, the name is released) earns a new workspace/tab/agent.
   "worth waking a session?" heuristic; this skill re-derives the real queue and
   re-runs the filter authoritatively (`ordering.md`). Both call the *same*
   function — `_gh_pr_merge_train_filter_targets` in
-  `shell-common/functions/gh_pr_merge_train.sh` (dEitY719/dotfiles#1524) — so this is one
+  `shell-common/lib/gh_pr_merge_train.sh` (dEitY719/dotfiles#1524) — so this is one
   implementation run at two clocks, not two implementations that could drift.
   Duplicating the filter here as shell *or* as prose is exactly the bug dEitY719/dotfiles#1524
   removed.

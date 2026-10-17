@@ -1,9 +1,9 @@
 #!/bin/sh
 # VENDORED — do not edit here.
-# SSOT: dEitY719/dotfiles shell-common/functions/gh_pr_lint.sh
-# Synced 2026-10-17T01:33Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# SSOT: dEitY719/dotfiles shell-common/lib/gh_pr_lint.sh
+# Synced 2026-10-17T02:20Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
-# shell-common/functions/gh_pr_lint.sh
+# shell-common/lib/gh_pr_lint.sh
 # No interactive guard: gh-pr:create sources it from a non-interactive shell;
 # a guard would leave _gh_pr_lint_run undefined.
 # Optional pre-push lint guard for the `gh:pr` skill (issue #396, design

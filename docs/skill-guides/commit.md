@@ -110,7 +110,7 @@ GHES 양쪽에 로그인된 상태에서는 **에러 없이 조용히 엉뚱한 
 남긴다(dEitY719/dotfiles#1403). 놀라운 `gh` 결과를 `--repo` 를 빼서 우회하지 말고 host 부터 확인한다.
 
 **알려진 마이그레이션 부채** — Step 5 의 보드 sync 는 dotfiles 의
-`shell-common/functions/gh_project_status.sh` 를 source 한다. dotfiles 체크아웃이
+`shell-common/lib/gh_project_status.sh` 를 source 한다. dotfiles 체크아웃이
 없는 머신에서는 이 단계가 조용히 skip 된다. `[ -r ]` 는 통과했는데 함수가 정의되지
 않는 경우까지 방어하는 게이트가 들어 있고(dEitY719/dotfiles#724), 이는 커밋을 막지 않는 soft-fail 이다.
 `GH_PROJECT_STATUS_SYNC=0` 으로 명시적 opt-out 할 수 있다.

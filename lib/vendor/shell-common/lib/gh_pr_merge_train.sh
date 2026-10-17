@@ -1,10 +1,10 @@
 #!/bin/sh
 # VENDORED — do not edit here.
-# SSOT: dEitY719/dotfiles shell-common/functions/gh_pr_merge_train.sh
-# Synced 2026-10-17T01:33Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
+# SSOT: dEitY719/dotfiles shell-common/lib/gh_pr_merge_train.sh
+# Synced 2026-10-17T02:20Z by dEitY719/harness-skills scripts/sync-shell-common-vendor.sh — re-run that script to update.
 # shellcheck shell=bash
 # shellcheck disable=SC2016  # `_je` is a jq wrapper; its single-quoted args are jq programs
-# shell-common/functions/gh_pr_merge_train.sh
+# shell-common/lib/gh_pr_merge_train.sh
 # No interactive guard: sourced by the non-interactive cron dispatcher
 # tools/custom/pr_merge_train_cron.sh; a guard would hide every function.
 # SSOT for the merge-train target filter (issue #1524).
@@ -509,7 +509,7 @@ _gh_pr_merge_train_base_ci_red() {
 # hook this repo controls. So the fix lives on the READ side instead — verify
 # the label against the head it was actually issued for.
 #
-# `devx_pr_review_all_apply_label` (shell-common/functions/devx_pr_review_all.sh)
+# `devx_pr_review_all_apply_label` (shell-common/lib/devx_pr_review_all.sh)
 # is the ONLY writer of the sha marker below, posted once as a plain issue
 # comment at the moment it applies `review-passed`:
 #   <!-- review-verdict:review-passed:<head-sha> -->

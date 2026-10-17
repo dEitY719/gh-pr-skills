@@ -152,8 +152,8 @@ failure. That is the one piece worth automating, and it is Step 3.6.
 The shared predicates are `_gh_pr_merge_train_behind_may_merge_directly`,
 `_gh_pr_merge_train_base_strict_confirmed` and
 `_gh_pr_merge_train_base_ci_red`, in
-`shell-common/functions/gh_pr_merge_train.sh` (vendored at
-`lib/vendor/shell-common/functions/`) beside the label predicates —
+`shell-common/lib/gh_pr_merge_train.sh` (vendored at
+`lib/vendor/shell-common/lib/`) beside the label predicates —
 their full contracts are the comments above each. All are answered from calls
 the train makes **once per distinct base branch**, never per PR, so the guard
 adds no per-PR round trip. The rules body is the one
@@ -161,7 +161,7 @@ adds no per-PR round trip. The rules body is the one
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
-if [ ! -f "$_SC/functions/gh_pr_merge_train.sh" ]; then
+if [ ! -f "$_SC/lib/gh_pr_merge_train.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:merge-train] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
             "$_SC" >&2
@@ -172,7 +172,7 @@ fi
 unset -f _gh_pr_merge_train_filter_targets 2>/dev/null || :
 unalias _gh_pr_merge_train_filter_targets 2>/dev/null || :
 export SHELL_COMMON="$_SC"                                                           # before the load
-[ -f "$_SC/functions/gh_pr_merge_train.sh" ] && . "$_SC/functions/gh_pr_merge_train.sh"
+[ -f "$_SC/lib/gh_pr_merge_train.sh" ] && . "$_SC/lib/gh_pr_merge_train.sh"
 [ "$(command -v _gh_pr_merge_train_filter_targets 2>/dev/null)" = _gh_pr_merge_train_filter_targets ] || { # tier 5
     unset SHELL_COMMON
     printf '[gh-pr:merge-train] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \

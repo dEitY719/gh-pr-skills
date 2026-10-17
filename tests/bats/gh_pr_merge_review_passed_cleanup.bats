@@ -162,7 +162,7 @@ _stub_gh_fails() {
 
 @test "doc-guard: the dEitY719/dotfiles#1563 SSOT lists gh:pr-merge as a consumer of the primitive" {
     run grep -qE 'gh:pr-merge +Step 4' \
-        "${REPO_ROOT}/lib/vendor/shell-common/functions/gh_pr_edit_safe.sh"
+        "${REPO_ROOT}/lib/vendor/shell-common/lib/gh_pr_edit_safe.sh"
     assert_success
 }
 
