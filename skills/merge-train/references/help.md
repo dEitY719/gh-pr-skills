@@ -47,7 +47,7 @@
    window; predicate: `_gh_pr_merge_train_needs_finalize`.
 1. Binds `TARGET_REPO` / `TARGET_HOST` from one remote URL (`references/github-target.md`).
 2. Lists your own open PRs and runs them through the shared filter
-   `_gh_pr_merge_train_filter_targets` (`shell-common/functions/gh_pr_merge_train.sh`,
+   `_gh_pr_merge_train_filter_targets` (`shell-common/lib/gh_pr_merge_train.sh`,
    dEitY719/dotfiles#1524) — drafts, PRs carrying the `reply-pending` label, and anything
    updated in the last **11 minutes** (D-6) are dropped — then sorts
    `CLEAN` → `BEHIND` → `UNSTABLE` → `DIRTY`, ties by ascending number (D-2).

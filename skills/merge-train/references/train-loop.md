@@ -68,7 +68,7 @@ if command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     # both a session that had `cd`-ed inside its worktree and a worktree
     # reached through a symlink. A missing helper skips the close, silently,
     # like every other gate here.
-    PMT_LOOKUP_LIB="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/functions/herdr_agent_lookup.sh"
+    PMT_LOOKUP_LIB="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/lib/herdr_agent_lookup.sh"
     # shellcheck source=/dev/null
     if [ -r "$PMT_LOOKUP_LIB" ] && . "$PMT_LOOKUP_LIB"; then
         PMT_WT=$(git worktree list --porcelain 2>/dev/null | awk -v b="refs/heads/<head>" \
@@ -152,7 +152,7 @@ LAST_OID=$(GH_HOST="$TARGET_HOST" gh api --paginate "repos/$TARGET_REPO/pulls/$N
    `Skill(gh-pr:approve, "<N> <remote> --self-record")` once. Never twice, and
    never a retry (dEitY719/dotfiles#1519 F-7).
 2. **Read the verdict (dEitY719/dotfiles#1519 D-4)** — `_gh_project_status_query_current pr <N>
-   "$TARGET_REPO"` from `shell-common/functions/gh_project_status.sh`.
+   "$TARGET_REPO"` from `shell-common/lib/gh_project_status.sh`.
 3. **Decide:**
 
 | Board Status | Reviewed this tick? | Outcome |

@@ -108,7 +108,7 @@ Do NOT set `--draft` or `--reviewer` unless the user explicitly asked.
 
 Labels are applied **after** `gh pr create` via the
 `_gh_pr_edit_safe_label` wrapper (sourced from
-`shell-common/functions/gh_pr_edit_safe.sh`), because:
+`shell-common/lib/gh_pr_edit_safe.sh`), because:
 
 1. The label set must be validated against the repo's existing labels first
    (creating labels on the fly is forbidden).
@@ -155,7 +155,7 @@ even on the REST fallback path: it re-checks `gh label list` before POST.
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
-if [ ! -f "$_SC/functions/gh_pr_edit_safe.sh" ]; then
+if [ ! -f "$_SC/lib/gh_pr_edit_safe.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:create] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
             "$_SC" >&2
@@ -166,7 +166,7 @@ fi
 unset -f _gh_pr_edit_safe_label 2>/dev/null || :
 unalias _gh_pr_edit_safe_label 2>/dev/null || :
 export SHELL_COMMON="$_SC"                                                           # before the load
-[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] && . "$_SC/functions/gh_pr_edit_safe.sh"
+[ -f "$_SC/lib/gh_pr_edit_safe.sh" ] && . "$_SC/lib/gh_pr_edit_safe.sh"
 [ "$(command -v _gh_pr_edit_safe_label 2>/dev/null)" = _gh_pr_edit_safe_label ] || { # tier 5
     unset SHELL_COMMON
     printf '[gh-pr:create] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \

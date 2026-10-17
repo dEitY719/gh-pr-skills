@@ -444,7 +444,7 @@
 
         <div class="card">
           <h3><svg class="ic-warn" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>알려진 마이그레이션 부채</h3>
-          <p>Step 5 의 보드 sync 는 dotfiles 의 <code>shell-common/functions/gh_project_status.sh</code> 를 source 한다.
+          <p>Step 5 의 보드 sync 는 dotfiles 의 <code>shell-common/lib/gh_project_status.sh</code> 를 source 한다.
           dotfiles 체크아웃이 없는 머신에서는 이 단계가 조용히 skip 된다.
           <code>[ -r ]</code> 는 통과했는데 함수가 정의되지 않는 경우까지 방어하는 게이트가 들어 있고 (dEitY719/dotfiles#724),
           이는 커밋을 막지 않는 soft-fail 이다.</p>

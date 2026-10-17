@@ -189,11 +189,11 @@ repo still need from dotfiles" answer stays in one place:
    is gone, so CI enforces the shared default. `merge` had already come down
    from 197 (#5) by moving its Step 5 dispatch into
    `lib/post-merge-verify-dispatch.sh`. Do not raise the limit again.
-2. **Several skills source dotfiles' `shell-common/functions/*.sh`** —
+2. **Several skills source dotfiles' `shell-common/{lib,functions}/*.sh`** —
    `gh_project_status.sh`, `gh_pr_review.sh`, `gh_host.sh`,
    `gh_pr_merge_train.sh`, `gh_pr_edit_safe.sh`, and others. #3 / PR #4 made
    every call site two-tier — live dotfiles first, then the copies under
-   `lib/vendor/shell-common/functions/`, re-exporting `SHELL_COMMON` at the
+   `lib/vendor/shell-common/{lib,functions}/`, re-exporting `SHELL_COMMON` at the
    copy — so a standalone install degrades instead of failing. That fallback is
    only as complete as the vendor set: a vendored file that sources a
    *non*-vendored sibling misses silently once `SHELL_COMMON` points at
@@ -248,11 +248,11 @@ repo still need from dotfiles" answer stays in one place:
    did; the cron script is host setup that belongs in dotfiles, and the audit
    function is a manual pointer. Revisit only if a skill starts executing one.
 5. **One dead skill name survives in vendored code, and the fix is upstream.**
-   `lib/vendor/shell-common/functions/gh_pr_lint.sh:239` prints
+   `lib/vendor/shell-common/lib/gh_pr_lint.sh:239` prints
    `FAILED — fix lint errors and re-run /gh:pr` to the user; `/gh:pr` was
    renamed to `/gh-pr:create` in the split. It is the only old name in this repo
    that reaches a human. The file is vendored, SSOT
-   `dEitY719/dotfiles shell-common/functions/gh_pr_lint.sh:235`, so correct it
+   `dEitY719/dotfiles shell-common/lib/gh_pr_lint.sh:235`, so correct it
    there and re-copy — hand-editing the vendored copy is reverted by the next
    sync. Message string only; nothing dispatches on it. Every other old name
    here is the rename-mapping documentation "Cross-repo references" above

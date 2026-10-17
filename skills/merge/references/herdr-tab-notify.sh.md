@@ -15,7 +15,7 @@ read-only `list` (NF-2). A `working`/`blocked` agent prints nothing at
 all: silence, not a second info line (F-4).
 
 Implemented as step 2 of `lib/post-merge-housekeeping.sh` (relative to `skills/merge/`). Gates, in order: `herdr` and `jq` on
-PATH; a readable `${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/functions/herdr_agent_lookup.sh`
+PATH; a readable `${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/lib/herdr_agent_lookup.sh`
 (dEitY719/dotfiles#1569, sourced — never re-implemented); a local worktree on
 `refs/heads/$HEAD_REF` from `git worktree list --porcelain`;
 `herdr_agent_match_for_cwd "$(herdr_agent_physical_path "$WT_PATH")" idle`.
@@ -54,7 +54,7 @@ non-zero to the caller.
   future value, or absent) — nothing printed (F-4). Suggesting cleanup for a
   tab that is mid-run would be wrong, and a "still working" line would be
   noise.
-- **`shell-common/functions/herdr_agent_lookup.sh` unreadable** — the shared
+- **`shell-common/lib/herdr_agent_lookup.sh` unreadable** — the shared
   match predicate (dEitY719/dotfiles#1569) is not there to be sourced → nothing printed. The
   hint degrades to silence, never to a hand-rolled copy of the predicate.
 - **Two or more agents on the same worktree** — abnormal; the lookup takes
@@ -73,7 +73,7 @@ cleanup commands are printed for a human to decide on and run.
 
 `tests/bats/skills/gh_pr_merge_herdr_notify.bats` (dotfiles) enforces this
 mechanically: it greps the block, its fixture mirror and the shared
-`shell-common/functions/herdr_agent_lookup.sh` for the literal invocation
+`shell-common/lib/herdr_agent_lookup.sh` for the literal invocation
 substrings and fails if any of them appears — the guarantee now depends on
 that helper too, so the grep follows it there.
 

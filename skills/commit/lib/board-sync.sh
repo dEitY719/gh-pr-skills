@@ -27,13 +27,13 @@ esac
 # silently (dEitY719/dotfiles#644 NF-1's silence hid a broken install). Without
 # the proof `_gh_project_status_sync` expands to nothing, `command not found`
 # (rc 127) is absorbed by `|| true`, and the sync no-ops — dEitY719/dotfiles#724.
-_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
+_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/lib/gh_project_status.sh" # tier 1
 [ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
+    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/lib/gh_project_status.sh" # tier 2
 _sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                              # save
 unset -f _gh_project_status_sync 2>/dev/null || :
 unalias _gh_project_status_sync 2>/dev/null || :
-export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"                     # before the load
+export SHELL_COMMON="${_HELPER%/lib/gh_project_status.sh}"                     # before the load
 # shellcheck disable=SC1090  # resolved at run time by the tier ladder above
 [ -r "$_HELPER" ] && . "$_HELPER"
 if [ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]; then

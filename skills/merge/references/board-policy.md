@@ -30,7 +30,7 @@ was deleted rather than left as dead policy).
 
 - `gh-pr:approve`'s `references/board-policy.md` — full rule
   set, why fail-closed, the write-side guard rationale.
-- `shell-common/functions/gh_project_status.sh` — `Approved` write-side
+- `shell-common/lib/gh_project_status.sh` — `Approved` write-side
   guard (unchanged by dEitY719/dotfiles#1513).
 - `shell-common/functions/gh_audit_builtin_workflows.sh` — audits that
   the "Pull request linked to issue" builtin is OFF, so the guard isn't

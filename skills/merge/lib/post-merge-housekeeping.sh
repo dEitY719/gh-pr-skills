@@ -34,13 +34,13 @@ export GH_HOST="$TARGET_HOST"
 # sources but defines nothing (dEitY719/dotfiles#724), skips the board sync with
 # ONE warning naming the path — no longer silently (dEitY719/dotfiles#644 NF-1's
 # silence hid a broken install).
-_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
+_HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/lib/gh_project_status.sh" # tier 1
 [ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
+    || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/lib/gh_project_status.sh" # tier 2
 _sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                              # save
 unset -f _gh_project_status_sync 2>/dev/null || :
 unalias _gh_project_status_sync 2>/dev/null || :
-export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"                     # before the load
+export SHELL_COMMON="${_HELPER%/lib/gh_project_status.sh}"                     # before the load
 # shellcheck disable=SC1090  # resolved at run time by the tier ladder above
 [ -r "$_HELPER" ] && . "$_HELPER"
 if [ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]; then
@@ -75,7 +75,7 @@ if command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     # WIDENS what this hint notices, on purpose; widening is safe precisely
     # because the hint is read-only (NF-2) and costs one INFO line.
     # An unreadable helper is a silent skip like every other gate.
-    NOTIFY_LOOKUP_LIB="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/functions/herdr_agent_lookup.sh"
+    NOTIFY_LOOKUP_LIB="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/lib/herdr_agent_lookup.sh"
     # shellcheck source=/dev/null
     if [ -r "$NOTIFY_LOOKUP_LIB" ] && . "$NOTIFY_LOOKUP_LIB"; then
         # F-1: locate the local worktree checked out on the merged branch.
@@ -140,14 +140,14 @@ fi
 # The label is what gh-pr:merge-train's Step 0 finalize sweep matches on, so it
 # comes off only after every other write here (references/finalize-merged-pr.sh.md).
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
-if [ ! -f "$_SC/functions/gh_pr_edit_safe.sh" ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+if [ ! -f "$_SC/lib/gh_pr_edit_safe.sh" ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
     _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
 fi
 unset -f _gh_pr_edit_safe_label 2>/dev/null || :
 unalias _gh_pr_edit_safe_label 2>/dev/null || :
 export SHELL_COMMON="$_SC"                                                           # before the load
 # shellcheck disable=SC1091  # resolved at run time by the tier ladder above
-[ -f "$_SC/functions/gh_pr_edit_safe.sh" ] && . "$_SC/functions/gh_pr_edit_safe.sh"
+[ -f "$_SC/lib/gh_pr_edit_safe.sh" ] && . "$_SC/lib/gh_pr_edit_safe.sh"
 if [ "$(command -v _gh_pr_edit_safe_label 2>/dev/null)" != _gh_pr_edit_safe_label ]; then # tier 5, soft
     unset SHELL_COMMON
     printf '[WARN] gh-pr:merge: no usable shell-common at %s — review-passed NOT cleaned up; the merge itself succeeded.\n' "$_SC"

@@ -20,7 +20,7 @@ trap 'rm -rf "$TMP"' EXIT INT TERM
 fail=0
 bad() { printf 'FAIL  %s\n' "$*"; fail=1; }
 
-mkdir -p "$TMP/bin" "$TMP/sc/functions" "$TMP/home"
+mkdir -p "$TMP/bin" "$TMP/sc/lib" "$TMP/home"
 cat > "$TMP/bin/gh" <<'EOF'
 #!/bin/sh
 printf '%s\n' "$*" >> "${GH_LOG:-/dev/null}"
@@ -31,7 +31,7 @@ esac
 exit 0
 EOF
 chmod +x "$TMP/bin/gh"
-cat > "$TMP/sc/functions/gh_project_status.sh" <<'EOF'
+cat > "$TMP/sc/lib/gh_project_status.sh" <<'EOF'
 _gh_project_status_sync() { printf 'sync %s\n' "$*" >> "$SYNC_LOG"; }
 _gh_pr_closing_issue_numbers() { echo 5; }
 EOF

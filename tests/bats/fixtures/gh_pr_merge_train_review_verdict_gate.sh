@@ -22,7 +22,7 @@ VERDICT_DOC="${REPO_ROOT}/skills/merge-train/references/review-verdict-gate.md"
 ROUTING_DOC="${REPO_ROOT}/skills/merge-train/references/routing-table.md"
 
 # shellcheck source=/dev/null
-. "${REPO_ROOT}/lib/vendor/shell-common/functions/gh_pr_merge_train.sh"
+. "${REPO_ROOT}/lib/vendor/shell-common/lib/gh_pr_merge_train.sh"
 
 # Usage: _verdict_run <doc> <fence#> — eval the shipped block in a subshell
 # with the caller's PR_JSON / STATE / N / TARGET_* / HEAD_OID / ME bound.

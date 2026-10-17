@@ -17,8 +17,8 @@ VENDOR="$ROOT/lib/vendor/shell-common"
 fail=0
 n=0
 
-[ -d "$VENDOR/functions" ] || {
-	printf 'FAIL  no vendor directory at %s\n' "$VENDOR/functions"
+[ -d "$VENDOR/lib" ] || {
+	printf 'FAIL  no vendor directory at %s\n' "$VENDOR/lib"
 	exit 1
 }
 
@@ -27,20 +27,27 @@ n=0
 #    every subtree and every source shape — `${SHELL_COMMON:-...}/x.sh`,
 #    `$SHELL_COMMON/x.sh`, and guarded ones like `[ -r "$f" ] && . "$f"` with
 #    `f=${SHELL_COMMON:-...}/util/x.sh` (#78: gh_host.sh's [ -r ]-guarded
-#    util/setup_mode_read.sh went unvendored and this check never saw it).
+#    util/setup_mode_read.sh went unvendored and this check never saw it) —
+#    and the local alias `_sc="${SHELL_COMMON:-...}"` then `$_sc/x.sh`, the
+#    shape gh_pr_review.sh's --user helper uses since dEitY719/dotfiles#2226.
 #    Intentionally dotfiles-only targets, never to be vendored:
 #      env/internal.local.sh         per-host config, parsed (not sourced) and
 #                                    [ -r ]-guarded; public PCs have none
+#      env/claude.sh                 dotfiles account env, [ -f ]-guarded optional
+#                                    extra in gh_pr_review.sh --user
 #    tools/integrations/claude.sh left this list in dEitY719/dotfiles#2226: the
 #    --user helper now sources the vendored tools/custom/lib/claude_accounts_auth.sh.
-ALLOW='env/internal.local.sh'
-refs=$(grep -rnoE '\$\{?SHELL_COMMON(:-[^}]*)?\}?/[A-Za-z0-9_./-]+\.sh' "$VENDOR" || :)
+ALLOW='env/internal.local.sh env/claude.sh'
+alias_n=0
+refs=$(grep -rnoE '\$\{?(SHELL_COMMON(:-[^}]*)?|_sc)\}?/[A-Za-z0-9_./-]+\.sh' "$VENDOR" || :)
 while IFS= read -r hit; do
 	[ -n "$hit" ] || continue
 	loc=${hit%%:\$*}                      # <file>:<line>
-	rel=$(printf '%s\n' "$hit" | sed -E 's#.*SHELL_COMMON(:-[^}]*)?\}?/##')
+	rel=$(printf '%s\n' "$hit" | sed -E 's#.*(SHELL_COMMON(:-[^}]*)?|_sc)\}?/##')
 	case " $ALLOW " in *" $rel "*) continue ;; esac
 	n=$((n + 1))
+	# shellcheck disable=SC2016  # literal patterns, not expansions
+	case "$hit" in *'$_sc/'* | *'${_sc}/'*) alias_n=$((alias_n + 1)) ;; esac
 	[ -f "$VENDOR/$rel" ] || {
 		printf 'FAIL  %s sources %s, which is not vendored — it misses\n' "${loc#"$ROOT"/}" "$rel"
 		printf '      silently once SHELL_COMMON points at lib/vendor/\n'
@@ -57,12 +64,22 @@ EOF_REFS
 	fail=1
 }
 
+# The alias form must actually be seen: gh_pr_review.sh reaches
+# tools/custom/lib/claude_accounts_auth.sh only through `$_sc/`, so a regex
+# that stops matching it would pass this guard with that site unchecked.
+[ "$alias_n" -gt 0 ] || {
+	# shellcheck disable=SC2016  # literal pattern name, not an expansion
+	printf 'FAIL  no $_sc/*.sh source sites counted — the alias form\n'
+	printf '      (gh_pr_review.sh claude_accounts_auth.sh) escaped the closure check\n'
+	fail=1
+}
+
 # 2. Standalone install, for real. HOME aimed away from any dotfiles checkout and
 #    SHELL_COMMON at the vendor tier exactly as the fallback sets it, so only
 #    lib/vendor/ can answer. This is the write path the verdict labels go through.
 out=$(HOME=/nonexistent SHELL_COMMON="$VENDOR" sh -c '
-	. "$SHELL_COMMON/functions/gh_pr_reply_targeted_review.sh" 2>/dev/null || :
-	. "$SHELL_COMMON/functions/devx_pr_review_all.sh" 2>/dev/null || :
+	. "$SHELL_COMMON/lib/gh_pr_reply_targeted_review.sh" 2>/dev/null || :
+	. "$SHELL_COMMON/lib/devx_pr_review_all.sh" 2>/dev/null || :
 	command -v devx_pr_review_all_write_label >/dev/null 2>&1 && echo resolved
 ' 2>/dev/null) || :
 [ "$out" = resolved ] || {
@@ -72,6 +89,7 @@ out=$(HOME=/nonexistent SHELL_COMMON="$VENDOR" sh -c '
 }
 
 if [ "$fail" -eq 0 ]; then
-	printf 'ok    %s vendored SHELL_COMMON source sites resolve inside lib/vendor, standalone\n' "$n"
+	# shellcheck disable=SC2016  # literal $_sc, not an expansion
+	printf 'ok    %s vendored SHELL_COMMON source sites (%s via $_sc) resolve inside lib/vendor, standalone\n' "$n" "$alias_n"
 fi
 exit "$fail"

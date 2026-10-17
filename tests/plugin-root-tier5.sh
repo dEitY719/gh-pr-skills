@@ -26,7 +26,7 @@
 #   2. A real resolution block, run with no override and a cwd outside any
 #      checkout, stops at tier 5: non-zero, names the path it tried, and leaves
 #      SHELL_COMMON unset rather than pointing at "/". It stops there even when
-#      the cwd genuinely holds lib/vendor/shell-common/functions/gh_host.sh —
+#      the cwd genuinely holds lib/vendor/shell-common/lib/gh_host.sh —
 #      the negative case harness-skills#22 exists for.
 #
 #   sh tests/plugin-root-tier5.sh
@@ -57,9 +57,9 @@ cp "$ROOT/$SITE" "$TMP/block.sh"
 # The hostile half of the negative case: a pull request under review can add
 # lib/vendor/shell-common to its own tree, and $PWD is that checkout. Plant a
 # working gh_host.sh in the cwd — the block must still refuse it.
-mkdir -p "$TMP/lib/vendor/shell-common/functions"
+mkdir -p "$TMP/lib/vendor/shell-common/lib"
 printf '_gh_resolve_host() { printf %%s cwd-owned; }\n' \
-	> "$TMP/lib/vendor/shell-common/functions/gh_host.sh"
+	> "$TMP/lib/vendor/shell-common/lib/gh_host.sh"
 
 # One binding for the tier-1 override both runs below aim away from, so the
 # message assertion cannot drift from the value that produced it.
@@ -99,8 +99,8 @@ sc=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT -u SHELL_COMMON \
 #    "is this name runnable", and the exit-status form it replaced passed that
 #    in every shell. Anything less and a stray binary silently certifies a
 #    shell-common that never defined the function.
-mkdir -p "$TMP/root/lib/vendor/shell-common/functions" "$TMP/bin"
-: > "$TMP/root/lib/vendor/shell-common/functions/gh_host.sh"
+mkdir -p "$TMP/root/lib/vendor/shell-common/lib" "$TMP/bin"
+: > "$TMP/root/lib/vendor/shell-common/lib/gh_host.sh"
 printf '#!/bin/sh\nprintf imposter\n' > "$TMP/bin/_gh_resolve_host"
 chmod +x "$TMP/bin/_gh_resolve_host"
 set +e
@@ -192,14 +192,14 @@ case "$out" in
 	*) printf 'FAIL  the soft loader skipped silently — no warning: %s\n' "$out"; fail=1 ;;
 esac
 case "$out" in
-	*"$NOWHERE/dotfiles/shell-common/functions/gh_project_status.sh"*) ;;
+	*"$NOWHERE/dotfiles/shell-common/lib/gh_project_status.sh"*) ;;
 	*) printf 'FAIL  the soft warning does not name the path it tried: %s\n' "$out"; fail=1 ;;
 esac
 
 #     Handed a value an earlier hard block proved, it must hand it back. A tree
 #     without the board helper, so the block is forced down its failure arm
 #     rather than loading from tier 1 and never reaching the restore.
-mkdir -p "$TMP/proven/functions"
+mkdir -p "$TMP/proven/lib"
 out=$(cd "$TMP" && env -u CLAUDE_PLUGIN_ROOT HOME="$NOWHERE" \
 	SHELL_COMMON="$TMP/proven" sh "$TMP/soft.sh" 2>/dev/null) || :
 case "$out" in

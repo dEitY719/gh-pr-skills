@@ -15,7 +15,7 @@ push, surfacing failures before they hit the remote.
 ## Helper
 
 The detection and execution logic is implemented in
-`shell-common/functions/gh_pr_lint.sh` as `_gh_pr_lint_run <base>`.
+`shell-common/lib/gh_pr_lint.sh` as `_gh_pr_lint_run <base>`.
 `lib/lint-guard.sh <BASE_BRANCH>` (relative to `skills/create/`) loads it
 through the HARD tier ladder (tier 1 `$DOTFILES_ROOT`, tier 2 guarded
 `$CLAUDE_PLUGIN_ROOT/lib/vendor`, no cwd tier, tier 5 stops) and runs it.
@@ -69,7 +69,7 @@ below does not run either.
 After lint, `_gh_pr_lint_run` hands off to `_gh_pr_lint__pr_gate`, which runs
 the repo's full tests through a `pr-gate` mise task. Repos opt in by defining
 that task; repos without it are untouched. Order and conditions, as the
-vendored `lib/vendor/shell-common/functions/gh_pr_lint.sh` implements them:
+vendored `lib/vendor/shell-common/lib/gh_pr_lint.sh` implements them:
 
 1. It runs only when lint did not fail. A lint failure returns 1 first.
 2. It **still runs when no lint tool was detected** — "no lint" is not

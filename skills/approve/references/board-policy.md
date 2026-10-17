@@ -59,7 +59,7 @@ reachable approval signal at all — see enforcement point 2.)
 
 ### 1. Transition into the column (write side)
 
-`shell-common/functions/gh_project_status.sh` rejects any
+`shell-common/lib/gh_project_status.sh` rejects any
 `_gh_project_status_sync pr <N> "Approved"` call when
 `gh pr view --json reviewDecision` returns anything other than
 `APPROVED`. Failure mode is `exit 2` with a clear stderr line; bypass is
@@ -114,5 +114,5 @@ guard.
 ## See also
 
 - `references/board-approved-sync.sh.md` — Step 4.5 promotion block.
-- `shell-common/functions/gh_project_status.sh` — write-side guard impl.
+- `shell-common/lib/gh_project_status.sh` — write-side guard impl.
 - `docs/.ssot/github-project-board.md` — column semantics SSOT.

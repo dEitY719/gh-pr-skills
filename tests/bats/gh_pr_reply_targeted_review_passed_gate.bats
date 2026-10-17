@@ -15,7 +15,7 @@
 # pins the new policy explicitly instead of silently losing the old one.
 #
 # The fixture does NOT re-implement the gate — it sources the vendored
-# lib/vendor/shell-common/functions/{gh_pr_reply_targeted_review,devx_pr_review_all}.sh
+# lib/vendor/shell-common/lib/{gh_pr_reply_targeted_review,devx_pr_review_all}.sh
 # and evals the doc's own blocks, so a mirror cannot pass while either drifts
 # (dEitY719/dotfiles#1524's rule).
 #

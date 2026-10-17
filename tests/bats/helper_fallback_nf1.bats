@@ -27,7 +27,7 @@ teardown() {
 }
 
 @test "helper present → block runs sync and continues" {
-    local helper_dir="$TEST_TEMP_HOME/sc/functions"
+    local helper_dir="$TEST_TEMP_HOME/sc/lib"
     nf1_install_fake_helper "$helper_dir/gh_project_status.sh"
     export SHELL_COMMON="$TEST_TEMP_HOME/sc"
 
@@ -40,7 +40,7 @@ teardown() {
 @test "helper missing (SHELL_COMMON=/tmp/empty equivalent) → one warning, no command-not-found" {
     # NF-1 core guarantee from issue #644: skill body keeps running.
     export SHELL_COMMON="$TEST_TEMP_HOME/empty-sc"
-    [ ! -e "$SHELL_COMMON/functions/gh_project_status.sh" ] || {
+    [ ! -e "$SHELL_COMMON/lib/gh_project_status.sh" ] || {
         echo "precondition violated: fake SHELL_COMMON should not contain helper" >&2
         return 1
     }
@@ -50,7 +50,7 @@ teardown() {
     refute_output --partial "BLOCK_RAN sync_called"
     refute_output --partial "command not found"
     refute_output --partial "_gh_project_status_sync"
-    assert_output --partial "no usable shell-common at ${SHELL_COMMON}/functions/gh_project_status.sh"
+    assert_output --partial "no usable shell-common at ${SHELL_COMMON}/lib/gh_project_status.sh"
     assert_output --partial "BLOCK_COMPLETED"
 }
 
@@ -64,7 +64,7 @@ teardown() {
     assert_success
     refute_output --partial "BLOCK_RAN sync_called"
     refute_output --partial "command not found"
-    assert_output --partial "no usable shell-common at ${HOME}/dotfiles/shell-common/functions/gh_project_status.sh"
+    assert_output --partial "no usable shell-common at ${HOME}/dotfiles/shell-common/lib/gh_project_status.sh"
     assert_output --partial "BLOCK_COMPLETED"
 }
 
@@ -72,8 +72,8 @@ teardown() {
     # The loader names the helper path and proves the function it needs; the
     # vendored copy (tier 2) must still define that function.
     local lib="${REPO_ROOT}/skills/approve/lib/board-approved-sync.sh"
-    local helper="${REPO_ROOT}/lib/vendor/shell-common/functions/gh_project_status.sh"
-    run grep -F '/functions/gh_project_status.sh" # tier 1' "$lib"
+    local helper="${REPO_ROOT}/lib/vendor/shell-common/lib/gh_project_status.sh"
+    run grep -F '/lib/gh_project_status.sh" # tier 1' "$lib"
     assert_success
     run grep -F '[ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]' "$lib"
     assert_success

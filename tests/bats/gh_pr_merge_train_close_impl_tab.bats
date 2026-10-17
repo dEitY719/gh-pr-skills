@@ -19,7 +19,7 @@
 #   6. anti-starvation regression: the live count does not grow across N merges
 #   7. the shipped block carries no inline match predicate (dEitY719/dotfiles#1569)
 # The predicate itself (cwd OR foreground_cwd, path boundary, physical path)
-# belongs to dotfiles' shell-common/functions/herdr_agent_lookup.sh and is
+# belongs to dotfiles' shell-common/lib/herdr_agent_lookup.sh and is
 # tested there; this suite runs against fixtures/herdr_agent_lookup_stub.sh.
 
 load 'test_helper'

@@ -109,7 +109,7 @@
 - **알려진 마이그레이션 부채** — `merge-train/SKILL.md` 는 148줄로 100줄 progressive-disclosure
   한도를 넘긴다(마이그레이션 중 동작 변경 금지라 그대로 넘어왔다). 해결책은 한도를 올리는 것이
   아니라 `references/` 로 상세를 옮기는 Phase 4 작업이다. 또한 dotfiles 의
-  `shell-common/functions/gh_pr_merge_train.sh` 등을 source 하므로, dotfiles 체크아웃이 없는
+  `shell-common/lib/gh_pr_merge_train.sh` 등을 source 하므로, dotfiles 체크아웃이 없는
   머신에서는 해당 단계가 저하된다.
 
 ## 관련 스킬

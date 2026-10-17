@@ -62,7 +62,7 @@ the `Next:` line — never after it.
 - **Answered** — count of comments classified QUESTION.
 - **By reviewer** — one row per reviewer, rendered from
   `printf '%s\n' "$ORIGINS" | _gh_pr_reply_origin_tally`
-  (`shell-common/functions/gh_pr_reply_targeted_review.sh`). This is the row
+  (`shell-common/lib/gh_pr_reply_targeted_review.sh`). This is the row
   that makes "codex's 2 BLOCKERs are fixed, agy's 3 suggestions were
   declined" readable at a glance — the flat pair above cannot express it,
   which is exactly how PR dEitY719/dotfiles#1609 got a stuck `review-blocked` (dEitY719/dotfiles#1616).

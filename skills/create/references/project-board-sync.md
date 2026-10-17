@@ -132,7 +132,7 @@ wrapper — no auth state changes, no API mutation.
 
 ## Where the helper lives
 
-`shell-common/functions/gh_project_status.sh` — shared between `gh-pr:create`,
+`shell-common/lib/gh_project_status.sh` — shared between `gh-pr:create`,
 `gh-pr:reply`, and other PR/issue lifecycle skills. The script **sources**
 this file; do not duplicate the helper's implementation. The bash that
 *calls* the helper is `lib/project-board-sync.sh`; Step 7 of `SKILL.md` runs it.

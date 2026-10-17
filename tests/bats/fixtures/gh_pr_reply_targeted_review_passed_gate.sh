@@ -17,7 +17,7 @@
 # shellcheck disable=SC2034,SC1091  # vars are read by the eval'd shipped blocks or the .bats; sources resolve at run time
 
 GATE_DOC="${REPO_ROOT}/skills/reply/references/review-passed-gate.md"
-_V="${REPO_ROOT}/lib/vendor/shell-common/functions"
+_V="${REPO_ROOT}/lib/vendor/shell-common/lib"
 # shellcheck source=/dev/null
 . "$_V/gh_pr_reply_targeted_review.sh"
 # shellcheck source=/dev/null

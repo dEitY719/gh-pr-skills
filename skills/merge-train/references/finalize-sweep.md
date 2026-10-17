@@ -6,7 +6,7 @@ merged — they are not candidates, they are unfinished business.
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
-if [ ! -f "$_SC/functions/gh_pr_merge_train.sh" ]; then
+if [ ! -f "$_SC/lib/gh_pr_merge_train.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:merge-train] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
             "$_SC" >&2
@@ -17,7 +17,7 @@ fi
 unset -f _gh_pr_merge_train_filter_targets 2>/dev/null || :
 unalias _gh_pr_merge_train_filter_targets 2>/dev/null || :
 export SHELL_COMMON="$_SC"                                                           # before the load
-[ -f "$_SC/functions/gh_pr_merge_train.sh" ] && . "$_SC/functions/gh_pr_merge_train.sh"
+[ -f "$_SC/lib/gh_pr_merge_train.sh" ] && . "$_SC/lib/gh_pr_merge_train.sh"
 [ "$(command -v _gh_pr_merge_train_filter_targets 2>/dev/null)" = _gh_pr_merge_train_filter_targets ] || { # tier 5
     unset SHELL_COMMON
     printf '[gh-pr:merge-train] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
@@ -36,8 +36,8 @@ Each number that comes out gets **one**
 `[FINALIZED] #<N> <title>` line in the Step 5 report.
 
 `_gh_pr_merge_train_finalize_targets` is the **shared** array-level filter in
-`shell-common/functions/gh_pr_merge_train.sh` (vendored at
-`lib/vendor/shell-common/functions/`), same shape as Step 2's
+`shell-common/lib/gh_pr_merge_train.sh` (vendored at
+`lib/vendor/shell-common/lib/`), same shape as Step 2's
 `_gh_pr_merge_train_filter_targets` — run it, do not paraphrase it. It answers
 "MERGED **and** still carrying `review-passed`" for the whole list in one pass
 (the same rule `_gh_pr_merge_train_needs_finalize` answers for a single PR),

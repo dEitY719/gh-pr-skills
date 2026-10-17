@@ -17,7 +17,7 @@
 #                                         state-changing invocation
 # The match predicate itself (cwd OR foreground_cwd, path boundary, physical
 # path — dEitY719/dotfiles#1569) belongs to dotfiles'
-# shell-common/functions/herdr_agent_lookup.sh and is tested there
+# shell-common/lib/herdr_agent_lookup.sh and is tested there
 # (tests/bats/functions/herdr_agent_lookup.bats); this suite runs the hint
 # against fixtures/herdr_agent_lookup_stub.sh, an exact-match double.
 

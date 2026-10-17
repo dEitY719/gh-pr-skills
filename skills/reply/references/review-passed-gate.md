@@ -5,7 +5,7 @@
 외부 AI CLI 재호출 없이, 자기 판단만으로.
 
 이 문서가 그 절차의 SSOT 다. 구현체는
-`shell-common/functions/gh_pr_reply_targeted_review.sh`.
+`shell-common/lib/gh_pr_reply_targeted_review.sh`.
 
 ## 여기까지 온 경로
 
@@ -40,7 +40,7 @@ Step 3 에서 코멘트 하나를 분류할 때마다 출처를 함께 남긴다
 
 ```bash
 _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                                   # tier 1
-if [ ! -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ]; then
+if [ ! -f "$_SC/lib/gh_pr_reply_targeted_review.sh" ]; then
     [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
         printf '[gh-pr:reply] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
             "$_SC" >&2
@@ -51,7 +51,7 @@ fi
 unset -f _gh_pr_reply_origin_line 2>/dev/null || :
 unalias _gh_pr_reply_origin_line 2>/dev/null || :
 export SHELL_COMMON="$_SC"                                                           # before the load
-[ -f "$_SC/functions/gh_pr_reply_targeted_review.sh" ] && . "$_SC/functions/gh_pr_reply_targeted_review.sh"
+[ -f "$_SC/lib/gh_pr_reply_targeted_review.sh" ] && . "$_SC/lib/gh_pr_reply_targeted_review.sh"
 [ "$(command -v _gh_pr_reply_origin_line 2>/dev/null)" = _gh_pr_reply_origin_line ] || { # tier 5
     unset SHELL_COMMON
     printf '[gh-pr:reply] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \

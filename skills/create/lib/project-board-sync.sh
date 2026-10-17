@@ -39,13 +39,13 @@ if [ "$hook_skip" -eq 0 ]; then
     # path — no longer silently (dEitY719/dotfiles#644 NF-1's silence hid a
     # broken install). `|| true` alone would absorb `command not found`
     # (rc 127) and the whole reconciliation would no-op — dEitY719/dotfiles#724.
-    _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/functions/gh_project_status.sh" # tier 1
+    _HELPER="${SHELL_COMMON:-$HOME/dotfiles/shell-common}/lib/gh_project_status.sh" # tier 1
     [ -f "$_HELPER" ] || [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] \
-        || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/functions/gh_project_status.sh" # tier 2
+        || _HELPER="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common/lib/gh_project_status.sh" # tier 2
     _sc_was=${SHELL_COMMON+set} _sc_prev="${SHELL_COMMON-}"                      # save
     unset -f _gh_project_status_sync 2>/dev/null || :
     unalias _gh_project_status_sync 2>/dev/null || :
-    export SHELL_COMMON="${_HELPER%/functions/gh_project_status.sh}"             # before the load
+    export SHELL_COMMON="${_HELPER%/lib/gh_project_status.sh}"             # before the load
     # shellcheck disable=SC1090  # resolved at run time by the tier ladder above
     [ -r "$_HELPER" ] && . "$_HELPER"
     if [ "$(command -v _gh_project_status_sync 2>/dev/null)" = _gh_project_status_sync ]; then
@@ -61,7 +61,7 @@ if [ "$hook_skip" -eq 0 ]; then
             # gh_project_status.sh only sources it on the GH_HOST-unset
             # path, which Step 1a-0's export already bypassed.
             _SC="${SHELL_COMMON:-$HOME/dotfiles/shell-common}"                   # tier 1
-            if [ ! -f "$_SC/functions/gh_host.sh" ]; then
+            if [ ! -f "$_SC/lib/gh_host.sh" ]; then
                 [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                            # tier 5
                     printf '[gh-pr:create] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
                         "$_SC" >&2
@@ -73,7 +73,7 @@ if [ "$hook_skip" -eq 0 ]; then
             unalias _gh_resolve_host 2>/dev/null || :
             export SHELL_COMMON="$_SC"                                           # before the load
             # shellcheck disable=SC1091  # resolved at run time by the tier ladder above
-            [ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
+            [ -f "$_SC/lib/gh_host.sh" ] && . "$_SC/lib/gh_host.sh"
             [ "$(command -v _gh_resolve_host 2>/dev/null)" = _gh_resolve_host ] || { # tier 5
                 unset SHELL_COMMON
                 printf '[gh-pr:create] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
