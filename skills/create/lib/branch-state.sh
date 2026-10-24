@@ -175,19 +175,25 @@ _bs_dispatch() {
             # feature branch with the session's untracked files piled on main.
             # git-dir == git-common-dir only there (a linked worktree's git-dir
             # is <common>/worktrees/<name>); compare resolved absolute paths.
+            # Fail closed: a path that does not resolve is treated as the main checkout.
             _gd=$(CDPATH='' cd -- "$(git rev-parse --git-dir)" && pwd -P)
             _cd=$(CDPATH='' cd -- "$(git rev-parse --git-common-dir)" && pwd -P)
-            if [ "$_gd" = "$_cd" ]; then
+            if [ -z "$_gd" ] || [ -z "$_cd" ] || [ "$_gd" = "$_cd" ]; then
                 _top=$(git rev-parse --show-toplevel)
                 {
                     printf "error: commits on '%s' in the MAIN checkout (%s) — refusing to auto-branch here (no switch -c, no branch -f).\n" \
                         "$BASE_BRANCH" "$_top"
                     printf 'Recover manually (nothing was run):\n'
                     # Absolute path: a relative ../ would resolve against cwd, which may be a subdirectory.
-                    printf '  1. move the commits to a new worktree:  git worktree add -b %s %s-%s HEAD\n' \
+                    printf "  1. move the commits to a new worktree:  git worktree add -b %s '%s-%s' HEAD\n" \
                         "$NEW_BRANCH" "$_top" "${NEW_BRANCH//\//-}"
-                    printf '  2. then reset the main checkout:        git reset --keep %s/%s\n' \
-                        "$REMOTE" "$BASE_BRANCH"
+                    if [ "$DECISION" = "auto-branch-and-rewind" ]; then
+                        printf '  2. then reset the main checkout:        git reset --keep %s/%s\n' \
+                            "$REMOTE" "$BASE_BRANCH"
+                    else    # warn-only: some local commits did not move, a reset would drop them
+                        printf "  2. do NOT reset '%s': it holds commits that did not move — inspect git log %s/%s..%s first.\n" \
+                            "$BASE_BRANCH" "$REMOTE" "$BASE_BRANCH" "$BASE_BRANCH"
+                    fi
                     printf 'warning: untracked and uncommitted changes stay in the main checkout — clean them up yourself.\n'
                 } >&2
                 exit 3

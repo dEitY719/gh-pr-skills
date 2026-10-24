@@ -119,20 +119,30 @@ checks whether it runs in the main checkout, and if so refuses:
   compared as resolved absolute paths (`cd ... && pwd -P`). A linked
   worktree's git-dir is `<common>/worktrees/<name>`, so the two differ there.
   Branch names and path conventions play no part — this identifies the main
-  checkout deterministically.
+  checkout deterministically. It fails closed: if either path does not
+  resolve, the run is treated as the main checkout and refused.
 - **Effect:** no `git switch -c`, no `git branch -f`, no `BRANCH_STATE=` line,
   **exit 3**. Step 1b reports `[FAIL]` and stops — no push, no PR.
 - **stderr guidance** (printed, never run):
-  1. `git worktree add -b <NEW_BRANCH> <parent-of-toplevel>/<project>-<slug> HEAD`
+  1. `git worktree add -b <NEW_BRANCH> '<parent-of-toplevel>/<project>-<slug>' HEAD`
      — move the commits to a new worktree (`<slug>` is `<NEW_BRANCH>` with
-     `/` → `-`; the path is absolute so a subdirectory cwd cannot misplace it).
-  2. `git reset --keep <remote>/<base>` — then reset the main checkout.
+     `/` → `-`; the path is absolute so a subdirectory cwd cannot misplace it,
+     and quoted so a toplevel with spaces still copy-pastes).
+  2. `git reset --keep <remote>/<base>` — then reset the main checkout. Only on
+     `auto-branch-and-rewind`; on `auto-branch-warn-only` the line says **not**
+     to reset, because the base still holds commits that did not move.
   3. A warning that untracked and uncommitted changes stay in the main
      checkout and must be cleaned up by hand.
 
 There is deliberately **no automatic move** into a worktree: the commits could
 be moved, but untracked and uncommitted changes would stay behind on main, and
 an automatic move would hide exactly that.
+
+**Behaviour change for single-clone users.** A user who never creates a
+worktree and commits on the base branch no longer gets the F-2 auto-branch:
+they get exit 3 and the guidance above. That is the decision of #86 — the
+auto-branch in the main checkout is the exact slip it exists to stop — and
+there is no opt-out flag.
 
 ### Rewind guard
 
