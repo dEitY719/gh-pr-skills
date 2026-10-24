@@ -30,8 +30,10 @@ The Step 1b dispatch (`branch-state.sh dispatch`) is **not** bats-covered
 — it performs live `git switch -c` and `git branch -f` mutations, which the
 fixture's no-live-git philosophy deliberately excludes, and this repo's skill
 bats suites have no scratch-repo harness for branch mutation to reuse. `tests/create-lib.sh` covers it in a
-throwaway scratch repo instead (on-base auto-branch + rewind, nothing-to-pr,
-existing-branch refusal).
+throwaway scratch repo instead (nothing-to-pr, main-checkout refusal, then —
+inside a linked worktree — existing-branch refusal and on-base auto-branch +
+rewind). The main-checkout guard lives in the dispatch, not in a mirrored
+function, so the dotfiles bats mirror needs no change for it.
 
 ## F-1 — upstream / branch-name mismatch
 
@@ -101,6 +103,35 @@ testable.
 
 Implemented in `lib/branch-state.sh` (`gh_pr_commit_type`, `gh_pr_branch_name`).
 
+### Main-checkout guard (#86)
+
+The auto-branch above is only safe inside a **linked worktree**: it changes
+that worktree and nothing else. In the **main checkout** it would leave the
+main checkout sitting on the feature branch, with whatever untracked files the
+session created piled onto it — one slip (committing on main) silently turned
+into the normal state.
+
+So on `auto-branch-and-rewind` / `auto-branch-warn-only` the dispatch first
+checks whether it runs in the main checkout, and if so refuses:
+
+- **Criterion:** `git rev-parse --git-dir` == `git rev-parse --git-common-dir`,
+  compared as resolved absolute paths (`cd ... && pwd -P`). A linked
+  worktree's git-dir is `<common>/worktrees/<name>`, so the two differ there.
+  Branch names and path conventions play no part — this identifies the main
+  checkout deterministically.
+- **Effect:** no `git switch -c`, no `git branch -f`, no `BRANCH_STATE=` line,
+  **exit 3**. Step 1b reports `[FAIL]` and stops — no push, no PR.
+- **stderr guidance** (printed, never run):
+  1. `git worktree add -b <NEW_BRANCH> ../<project>-<slug> HEAD` — move the
+     commits to a new worktree (`<slug>` is `<NEW_BRANCH>` with `/` → `-`).
+  2. `git reset --keep <remote>/<base>` — then reset the main checkout.
+  3. A warning that untracked and uncommitted changes stay in the main
+     checkout and must be cleaned up by hand.
+
+There is deliberately **no automatic move** into a worktree: the commits could
+be moved, but untracked and uncommitted changes would stay behind on main, and
+an automatic move would hide exactly that.
+
 ### Rewind guard
 
 Rewinding the local base branch is **mandatory, not optional** — this is the
@@ -156,7 +187,8 @@ git log HEAD..origin/"$BASE_BRANCH" --oneline  # how far behind base (rebase nee
 
 `branch-state.sh dispatch` (env `BASE_BRANCH`, `REMOTE`, `ISSUE_NUMBER`)
 decides from `git rev-list "$REMOTE/$BASE_BRANCH..$BASE_BRANCH"` and
-`..HEAD`; on `auto-branch-*` it `git switch -c`s the generated name —
+`..HEAD`; on `auto-branch-*` it first applies the main-checkout guard above
+(exit 3 there), then `git switch -c`s the generated name —
 **guarded**: if that branch already exists it exits 1 before any rewind, since
 HEAD is still the base branch — then rewinds per the guard above and prints
 the recovery hint. Its last stdout line is always `BRANCH_STATE=<outcome>`.
@@ -169,7 +201,9 @@ the recovery hint. Its last stdout line is always `BRANCH_STATE=<outcome>`.
   `origin/$BASE_BRANCH`".
 - `auto-branch-and-rewind` / `auto-branch-warn-only` — a feature branch is
   created from the local-only commits, the local base branch is rewound to
-  `origin/$BASE_BRANCH` when the rewind guard allows, and the run continues.
+  `origin/$BASE_BRANCH` when the rewind guard allows, and the run continues —
+  in a linked worktree only. In the main checkout the dispatch exits 3 instead
+  (see "Main-checkout guard"): `[FAIL]`, stop.
 
 `ISSUE_NUMBER` may still be empty at this point (Step 3 resolves it from the
 conversation); the fallback `<type>/<YYYYMMDD>-<short-sha>` form covers that.

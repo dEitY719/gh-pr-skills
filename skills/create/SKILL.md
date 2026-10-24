@@ -47,7 +47,7 @@ _sp=$(bash "$_L/stacked-pr.sh" <args>) || exit $?; eval "$_sp"
 `references/branch-state.md` in one message, then
 `BASE_BRANCH=<base> REMOTE=<remote> ISSUE_NUMBER=<N> bash "$_L/branch-state.sh" dispatch`. Its last
 line `BRANCH_STATE=` is `not-on-base` / `nothing-to-pr` (stop) / `auto-branch-*` (the F-2
-recovery already switched branches); the upstream mispair check feeds Step 5's push policy (F-1).
+recovery switched branches); exit 3 (main checkout, #86) = `[FAIL]` + its stderr, stop. Mispair feeds Step 5 (F-1).
 
 ## Steps 2-3: Analyze ALL Commits + Resolve Issue
 
