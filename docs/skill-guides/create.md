@@ -60,7 +60,9 @@ opt-in 했고(`.github/workflows/stacked-closes-rollup.yml`, `CLAUDE.md`/`AGENTS
    `rc=5` 부모 PR 이 `OPEN` 아님, `rc=6` 부모가 이미 stacked).
    *1b*: `lib/branch-state.sh dispatch` 로 커밋 range 와 push 상태를 조사한다.
    결과는 `not-on-base`(정상 진행) / `nothing-to-pr`(중단) /
-   `auto-branch-and-rewind` / `auto-branch-warn-only` 중 하나다.
+   `auto-branch-and-rewind` / `auto-branch-warn-only` 중 하나다. 단 `auto-branch-*` 가
+   main 체크아웃(linked worktree 가 아님)에서 걸리면 브랜치를 건드리지 않고 `rc=3` 으로
+   중단하며, worktree 로 옮기는 복구 명령을 stderr 에 안내한다(#86).
 2. **Step 2-3 — 모든 커밋 분석 + 이슈 결정.** `git log <base>..HEAD` 를 읽어 주제별로
    묶는다. **PR 본문은 최신 커밋 하나가 아니라 range 전체를 반영해야 한다.**
    이슈 우선순위는 `gh-pr:commit` 과 동일: 명시 인자 → 최근 대화의 `#N` →

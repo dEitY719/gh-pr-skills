@@ -32,8 +32,9 @@ fixture's no-live-git philosophy deliberately excludes, and this repo's skill
 bats suites have no scratch-repo harness for branch mutation to reuse. `tests/create-lib.sh` covers it in a
 throwaway scratch repo instead (nothing-to-pr, main-checkout refusal, then —
 inside a linked worktree — existing-branch refusal and on-base auto-branch +
-rewind). The main-checkout guard lives in the dispatch, not in a mirrored
-function, so the dotfiles bats mirror needs no change for it.
+rewind). The main-checkout guard lives in the dispatch, which
+`tests/bats/fixtures/gh_pr_push_policy.sh` strips at the `# --- Dispatch`
+marker, so the bats suite needs no change for it.
 
 ## F-1 — upstream / branch-name mismatch
 
@@ -122,8 +123,9 @@ checks whether it runs in the main checkout, and if so refuses:
 - **Effect:** no `git switch -c`, no `git branch -f`, no `BRANCH_STATE=` line,
   **exit 3**. Step 1b reports `[FAIL]` and stops — no push, no PR.
 - **stderr guidance** (printed, never run):
-  1. `git worktree add -b <NEW_BRANCH> ../<project>-<slug> HEAD` — move the
-     commits to a new worktree (`<slug>` is `<NEW_BRANCH>` with `/` → `-`).
+  1. `git worktree add -b <NEW_BRANCH> <parent-of-toplevel>/<project>-<slug> HEAD`
+     — move the commits to a new worktree (`<slug>` is `<NEW_BRANCH>` with
+     `/` → `-`; the path is absolute so a subdirectory cwd cannot misplace it).
   2. `git reset --keep <remote>/<base>` — then reset the main checkout.
   3. A warning that untracked and uncommitted changes stay in the main
      checkout and must be cleaned up by hand.
@@ -191,7 +193,7 @@ decides from `git rev-list "$REMOTE/$BASE_BRANCH..$BASE_BRANCH"` and
 (exit 3 there), then `git switch -c`s the generated name —
 **guarded**: if that branch already exists it exits 1 before any rewind, since
 HEAD is still the base branch — then rewinds per the guard above and prints
-the recovery hint. Its last stdout line is always `BRANCH_STATE=<outcome>`.
+the recovery hint. On exit 0 its last stdout line is `BRANCH_STATE=<outcome>`.
 
 ### Outcomes
 

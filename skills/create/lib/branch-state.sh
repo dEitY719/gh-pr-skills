@@ -7,8 +7,8 @@
 #
 # dispatch     decides what to do when the session sits on the base branch
 #              (F-2) and, for auto-branch-*, switches to the generated branch
-#              and rewinds the local base when the guard allows. Its LAST
-#              stdout line is always `BRANCH_STATE=<outcome>`:
+#              and rewinds the local base when the guard allows. On exit 0 its
+#              LAST stdout line is `BRANCH_STATE=<outcome>`:
 #                not-on-base | nothing-to-pr (stop: nothing to PR)
 #                | auto-branch-and-rewind | auto-branch-warn-only
 #              exit 0, or 1 when the generated branch already exists (HEAD is
@@ -175,16 +175,17 @@ _bs_dispatch() {
             # feature branch with the session's untracked files piled on main.
             # git-dir == git-common-dir only there (a linked worktree's git-dir
             # is <common>/worktrees/<name>); compare resolved absolute paths.
-            _gd=$(cd "$(git rev-parse --git-dir)" && pwd -P)
-            _cd=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
+            _gd=$(CDPATH='' cd -- "$(git rev-parse --git-dir)" && pwd -P)
+            _cd=$(CDPATH='' cd -- "$(git rev-parse --git-common-dir)" && pwd -P)
             if [ "$_gd" = "$_cd" ]; then
                 _top=$(git rev-parse --show-toplevel)
                 {
                     printf "error: commits on '%s' in the MAIN checkout (%s) — refusing to auto-branch here (no switch -c, no branch -f).\n" \
                         "$BASE_BRANCH" "$_top"
                     printf 'Recover manually (nothing was run):\n'
-                    printf '  1. move the commits to a new worktree:  git worktree add -b %s ../%s-%s HEAD\n' \
-                        "$NEW_BRANCH" "$(basename "$_top")" "$(printf '%s' "$NEW_BRANCH" | tr '/' '-')"
+                    # Absolute path: a relative ../ would resolve against cwd, which may be a subdirectory.
+                    printf '  1. move the commits to a new worktree:  git worktree add -b %s %s/%s-%s HEAD\n' \
+                        "$NEW_BRANCH" "$(dirname "$_top")" "$(basename "$_top")" "$(printf '%s' "$NEW_BRANCH" | tr '/' '-')"
                     printf '  2. then reset the main checkout:        git reset --keep %s/%s\n' \
                         "$REMOTE" "$BASE_BRANCH"
                     printf 'warning: untracked and uncommitted changes stay in the main checkout — clean them up yourself.\n'
