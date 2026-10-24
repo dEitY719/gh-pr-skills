@@ -184,8 +184,8 @@ _bs_dispatch() {
                         "$BASE_BRANCH" "$_top"
                     printf 'Recover manually (nothing was run):\n'
                     # Absolute path: a relative ../ would resolve against cwd, which may be a subdirectory.
-                    printf '  1. move the commits to a new worktree:  git worktree add -b %s %s/%s-%s HEAD\n' \
-                        "$NEW_BRANCH" "$(dirname "$_top")" "$(basename "$_top")" "$(printf '%s' "$NEW_BRANCH" | tr '/' '-')"
+                    printf '  1. move the commits to a new worktree:  git worktree add -b %s %s-%s HEAD\n' \
+                        "$NEW_BRANCH" "$_top" "${NEW_BRANCH//\//-}"
                     printf '  2. then reset the main checkout:        git reset --keep %s/%s\n' \
                         "$REMOTE" "$BASE_BRANCH"
                     printf 'warning: untracked and uncommitted changes stay in the main checkout — clean them up yourself.\n'
