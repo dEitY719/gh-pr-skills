@@ -36,7 +36,8 @@ _gh_project_status_sync() { printf 'sync %s\n' "$*" >> "$SYNC_LOG"; }
 _gh_pr_closing_issue_numbers() { echo 5; }
 EOF
 
-G() { git -C "$TMP/w" "$@"; }
+W="$TMP/w" # repo r()/G() act on; switches to a linked worktree below (#86)
+G() { git -C "$W" "$@"; }
 git init -q --bare "$TMP/remote.git"
 git init -q -b main "$TMP/w"
 G config user.email t@t; G config user.name t
@@ -47,7 +48,7 @@ G push -q origin main 2>/dev/null
 # r <env...>: run in the work repo with a clean env; $out (stdout), $err, $rc.
 r() {
     set +e
-    out=$(cd "$TMP/w" && env -u SHELL_COMMON -u CLAUDE_PLUGIN_ROOT HOME="$TMP/home" \
+    out=$(cd "$W" && env -u SHELL_COMMON -u CLAUDE_PLUGIN_ROOT HOME="$TMP/home" \
         DOTFILES_ROOT=/nonexistent PATH="$TMP/bin:$PATH" TARGET_HOST=github.com \
         GH_REPO=o/r REMOTE=origin SYNC_LOG="$TMP/sync.log" "$@" 2>"$TMP/err")
     rc=$?
@@ -100,6 +101,18 @@ pa() { bash "$L/branch-state.sh" push-action "$@"; }
 r env BASE_BRANCH=main ISSUE_NUMBER=65 bash "$L/branch-state.sh" dispatch
 [ "$rc:$out" = "0:BRANCH_STATE=nothing-to-pr" ] || bad "dispatch nothing-to-pr: rc=$rc $out"
 G commit -q --allow-empty -m 'feat(x): 한글 제목'
+# #86: the main checkout (git-dir == git-common-dir) is refused, nothing moves.
+ahead=$(G rev-parse main)
+r env BASE_BRANCH=main ISSUE_NUMBER=65 bash "$L/branch-state.sh" dispatch
+case "$rc:$err" in 3:*'git worktree add -b feat/issue-65 ../w-feat-issue-65 HEAD'*'git reset --keep origin/main'*untracked*) ;;
+    *) bad "dispatch main checkout: rc=$rc $err" ;; esac
+[ -z "$out" ] || bad "dispatch main checkout printed stdout: $out"
+[ "$(G rev-parse --abbrev-ref HEAD):$(G rev-parse main)" = "main:$ahead" ] || bad "dispatch main checkout moved HEAD or main"
+! G rev-parse -q --verify refs/heads/feat/issue-65 >/dev/null || bad "dispatch main checkout created the branch"
+# Linked worktree on the base: the auto-branch cases below must still run there.
+G switch -q --detach
+G worktree add -q "$TMP/wt" main
+W="$TMP/wt"
 G branch -q feat/issue-65
 r env BASE_BRANCH=main ISSUE_NUMBER=65 bash "$L/branch-state.sh" dispatch
 if [ "$rc" -ne 1 ] || [ "$(G rev-parse main)" = "$(G rev-parse origin/main)" ]; then
@@ -138,7 +151,7 @@ case "$rc:$err" in 0:*'delegated to PostToolUse hook'*) ;; *) bad "board sync ho
 [ ! -s "$TMP/sync.log" ] || bad "board sync ran despite the hook"
 
 # --- pr-tokens.sh ---------------------------------------------------------------
-# The work repo is on feat/issue-65, one empty commit over main: a log of a few
+# The work repo (linked worktree $TMP/wt) is on feat/issue-65, one empty commit over main: a log of a few
 # dozen chars, so the issue body decides the count.
 : > "$TMP/gh.log"
 r GH_LOG="$TMP/gh.log" bash "$L/pr-tokens.sh" "" main
@@ -153,5 +166,5 @@ case "$rc:$out:$err" in 0:1000:*'[WARN]'*) ;; *) bad "pr-tokens gh soft-fail: rc
 r bash "$L/pr-tokens.sh" 72
 [ "$rc:$out" = 1: ] || bad "pr-tokens without a base: rc=$rc out=$out"
 
-[ "$fail" -eq 0 ] && printf 'ok    create lib: target eval line, stacked rc contract 0/2-6, push policy rows, base-branch dispatch, lint guard, board sync shape and skips, pr token floor/rounding/soft-fail\n'
+[ "$fail" -eq 0 ] && printf 'ok    create lib: target eval line, stacked rc contract 0/2-6, push policy rows, base-branch dispatch (main checkout refused, linked worktree auto-branch), lint guard, board sync shape and skips, pr token floor/rounding/soft-fail\n'
 exit "$fail"

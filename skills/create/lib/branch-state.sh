@@ -12,7 +12,9 @@
 #                not-on-base | nothing-to-pr (stop: nothing to PR)
 #                | auto-branch-and-rewind | auto-branch-warn-only
 #              exit 0, or 1 when the generated branch already exists (HEAD is
-#              then still the base branch and nothing was rewound).
+#              then still the base branch and nothing was rewound), or 3 when
+#              an auto-branch-* run sits in the main checkout (#86: refused,
+#              nothing switched or rewound, recovery guidance on stderr).
 # push-action  prints the Step 5 push command for the upstream state (F-1):
 #              `push -u <remote> HEAD` | `push` | `STOP` (ask before force).
 #
@@ -169,6 +171,26 @@ _bs_dispatch() {
                 "$ISSUE_NUMBER" \
                 "$(git log -1 --format=%ad --date=format:%Y%m%d "$FIRST")" \
                 "$(git rev-parse --short "$FIRST")")
+            # #86: never auto-branch the main checkout — it would stay on the
+            # feature branch with the session's untracked files piled on main.
+            # git-dir == git-common-dir only there (a linked worktree's git-dir
+            # is <common>/worktrees/<name>); compare resolved absolute paths.
+            _gd=$(cd "$(git rev-parse --git-dir)" && pwd -P)
+            _cd=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
+            if [ "$_gd" = "$_cd" ]; then
+                _top=$(git rev-parse --show-toplevel)
+                {
+                    printf "error: commits on '%s' in the MAIN checkout (%s) — refusing to auto-branch here (no switch -c, no branch -f).\n" \
+                        "$BASE_BRANCH" "$_top"
+                    printf 'Recover manually (nothing was run):\n'
+                    printf '  1. move the commits to a new worktree:  git worktree add -b %s ../%s-%s HEAD\n' \
+                        "$NEW_BRANCH" "$(basename "$_top")" "$(printf '%s' "$NEW_BRANCH" | tr '/' '-')"
+                    printf '  2. then reset the main checkout:        git reset --keep %s/%s\n' \
+                        "$REMOTE" "$BASE_BRANCH"
+                    printf 'warning: untracked and uncommitted changes stay in the main checkout — clean them up yourself.\n'
+                } >&2
+                exit 3
+            fi
             # MUST be guarded: on failure (e.g. $NEW_BRANCH already exists from a
             # partial earlier run) HEAD is still the base branch, and rewinding it
             # below would yank commits out from under the user's feet.
