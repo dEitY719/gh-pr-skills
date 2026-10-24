@@ -103,8 +103,10 @@ r env BASE_BRANCH=main ISSUE_NUMBER=65 bash "$L/branch-state.sh" dispatch
 G commit -q --allow-empty -m 'feat(x): 한글 제목'
 # #86: the main checkout (git-dir == git-common-dir) is refused, nothing moves.
 ahead=$(G rev-parse main)
+mkdir -p "$TMP/w/sub"; W="$TMP/w/sub" # from a subdirectory: relative git-dir vs absolute common-dir
 r env BASE_BRANCH=main ISSUE_NUMBER=65 bash "$L/branch-state.sh" dispatch
-case "$rc:$err" in 3:*'git worktree add -b feat/issue-65 /'*'/w-feat-issue-65 HEAD'*'git reset --keep origin/main'*untracked*) ;;
+W="$TMP/w"
+case "$rc:$err" in 3:*"git worktree add -b feat/issue-65 '/"*"/w-feat-issue-65' HEAD"*'git reset --keep origin/main'*untracked*) ;;
     *) bad "dispatch main checkout: rc=$rc $err" ;; esac
 [ -z "$out" ] || bad "dispatch main checkout printed stdout: $out"
 [ "$(G rev-parse --abbrev-ref HEAD):$(G rev-parse main)" = "main:$ahead" ] || bad "dispatch main checkout moved HEAD or main"
