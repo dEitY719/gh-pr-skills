@@ -351,7 +351,9 @@
             </div>
             <p style="margin-top:12px;"><strong>1b</strong> — <code>lib/branch-state.sh dispatch</code> 로 커밋 range 와 push 상태를 조사한다.
             결과는 <code>not-on-base</code>(정상 진행) / <code>nothing-to-pr</code>(중단) /
-            <code>auto-branch-and-rewind</code> / <code>auto-branch-warn-only</code> 중 하나다.</p>
+            <code>auto-branch-and-rewind</code> / <code>auto-branch-warn-only</code> 중 하나다.
+            단 <code>auto-branch-*</code> 가 main 체크아웃(linked worktree 가 아님)에서 걸리면 브랜치를 건드리지 않고
+            <code>rc=3</code> 으로 중단하며, worktree 로 옮기는 복구 명령을 stderr 에 안내한다(#86).</p>
           </div>
         </div>
 
