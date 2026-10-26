@@ -50,8 +50,8 @@ cases 6c/6d cover both directions.
 ## The registry gate
 
 The script is a **no-op for any repo missing** from
-`${IW_WATCHED_REPOS:-${HOME}/.agent-factory/avatars/issue-watcher/watched-repos.json}`
-— the untracked registry `issue_watcher_cron.sh` also reads (dEitY719/dotfiles#1555).
+`${IW_WATCHED_REPOS:-${HOME}/.avatars/issue-watcher/watched-repos.json}`
+— the untracked registry `avatar_issue_watcher.sh` also reads (dEitY719/dotfiles#1555).
 No registry, no `jq`, or an unlisted repo: no output, no dispatch, and no
 `[WARN]` either. That path is byte-identical to how merges behaved before
 dEitY719/dotfiles#1511.
