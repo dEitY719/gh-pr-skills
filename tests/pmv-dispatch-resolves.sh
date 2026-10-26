@@ -325,6 +325,37 @@ case "$out" in
 		fail=1 ;;
 esac
 
+# 9. The registry DEFAULT path (#88). Every case above injects IW_WATCHED_REPOS,
+#    so a stale default — dotfiles#2273 moved the watch list to
+#    ~/.avatars/issue-watcher/ — left every merge of a registered repo silently
+#    unverified. With the variable unset and HOME on a temp dir, a repo listed
+#    only at the new path must reach the gate (loud [FAIL]: no plugin root), and
+#    one listed only at the retired path must not.
+# Split so the retired path never appears whole in this repo (#88 grep criterion).
+RETIRED=".agent-factory/avatars""/issue-watcher"
+mkdir -p "$TMP/home/.avatars/issue-watcher" "$TMP/home/$RETIRED"
+cp "$TMP/watched.json" "$TMP/home/.avatars/issue-watcher/watched-repos.json"
+for runner in "$DISPATCH 42 o/r head base origin" "$TMP/step5.sh"; do
+	# shellcheck disable=SC2086 # runner is "<script> [args]" by construction
+	out=$(env -u IW_WATCHED_REPOS -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
+		HOME="$TMP/home" sh $runner 2>&1) || :
+	case "$out" in
+		*'[FAIL]'*) ;;
+		*) printf 'FAIL  %s did not read the default ~/.avatars/issue-watcher/watched-repos.json: %s\n' \
+			"${runner%% *}" "$out"
+			fail=1 ;;
+	esac
+done
+mv "$TMP/home/.avatars/issue-watcher/watched-repos.json" \
+	"$TMP/home/$RETIRED/watched-repos.json"
+out=$(env -u IW_WATCHED_REPOS -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
+	HOME="$TMP/home" sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
+[ -z "$out" ] || { printf 'FAIL  the wrapper still reads the retired ~/.agent-factory watch list: %s\n' "$out"; fail=1; }
+if hits=$(grep -rnF "$RETIRED" "$ROOT/lib" "$ROOT/skills"); then
+	printf 'FAIL  the retired watch-list path is still named:\n%s\n' "$hits"
+	fail=1
+fi
+
 if [ "$fail" -eq 0 ]; then
 	printf 'ok    vendored dispatch carries the harness-skills#36/#37 convention and names its source commit\n'
 printf 'ok    post-merge dispatch resolves standalone (%s-line bash fence), declines a planted cwd copy, validates its five arguments, and stays loud with no plugin root\n' "$n"

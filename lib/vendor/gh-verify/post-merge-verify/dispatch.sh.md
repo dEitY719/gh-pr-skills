@@ -1,7 +1,7 @@
 <!-- VENDORED — do not edit here. -->
 <!-- SSOT: dEitY719/gh-verify-skills skills/post-merge-verify/references/dispatch.sh.md -->
-<!-- Source commit: a3dd0162370f6763a7748e5da214d5ce0ad9e78a (2026-10-03) -->
-<!-- Synced 2026-10-05 — no sync script covers this tree; re-copy from the SSOT at the -->
+<!-- Source commit: 5fe2524797d54dcb589d7ff4bf3154b8d89f2caf (2026-10-26) -->
+<!-- Synced 2026-10-26 — no sync script covers this tree; re-copy from the SSOT at the -->
 <!-- commit above, then update BOTH lines. tests/pmv-dispatch-resolves.sh asserts the -->
 <!-- copy still carries the plugin-root convention, which is what caught the last drift. -->
 <!-- Read by skills/merge/SKILL.md Step 5 when no live gh-verify is on the box. -->
@@ -11,16 +11,16 @@
 
 Step 3 pastes this. It expects `PR_NUMBER`, `TARGET_REPO` and `TARGET_HOST`
 already bound (Step 1), and it is a no-op for any repo missing from
-`${IW_WATCHED_REPOS:-${HOME}/.agent-factory/avatars/issue-watcher/watched-repos.json}`
-— the same untracked registry `issue_watcher_cron.sh` reads (issue dEitY719/dotfiles#1555).
+`${IW_WATCHED_REPOS:-${HOME}/.avatars/issue-watcher/watched-repos.json}`
+— the same untracked registry `avatar_issue_watcher.sh` reads (issue dEitY719/dotfiles#1555).
 
 `gh-pr:merge` Step 5 does not paste a copy: it extracts the **first** `bash`
 fence below and sources it, so this file stays the single source (dEitY719/dotfiles#1565). Keep
 the dispatch in that first fence — the later snippets are documentation.
 
-Executable mirror + regression suite:
-dotfiles' `tests/bats/skills/_fixtures/gh_pr_post_merge_verify.sh` and
-`tests/bats/skills/gh_pr_post_merge_verify.bats`. Change one, change both.
+Regression suite: `tests/bats/gh_pr_post_merge_verify.bats`. It extracts this
+first fence the same way and runs it against stub `herdr`/`git`, so there is no
+mirror to keep in sync (dEitY719/dotfiles#2200).
 In-repo, `tests/dispatch-fence.sh` extracts the first fence with the consumer's
 own `awk` and asserts the contract it relies on — that the extraction is
 non-empty, that the body parses under `sh`/`bash`/`zsh`/`dash` and shellcheck,
@@ -53,7 +53,7 @@ repos.
 
 ```bash
 # --- 0. F-1 gate. Unregistered repo => do nothing at all, no output. -------
-WATCHED_FILE="${IW_WATCHED_REPOS:-${HOME}/.agent-factory/avatars/issue-watcher/watched-repos.json}" # untracked, array-schema, shared with issue_watcher_cron.sh (dEitY719/dotfiles#1555)
+WATCHED_FILE="${IW_WATCHED_REPOS:-${HOME}/.avatars/issue-watcher/watched-repos.json}" # untracked, array-schema, shared with avatar_issue_watcher.sh (dEitY719/dotfiles#1555)
 VERIFY_SKILL=""
 # An unbound registry key is a broken caller, not an opt-out: `select(.repo ==
 # "")` matches nothing, so the outcome table would read it as "unwatched repo"
@@ -108,13 +108,13 @@ pmv_error_code() { jq -r '.error.code // empty' 2>/dev/null || return 0; }
 # twice and splitting them is how a fix keeps missing a third site:
 #   `tab create` -> `agent start`  the pane answers before its shell is
 #       interactive, so the start is refused with `agent_pane_busy`
-#       (issue_watcher_cron.sh's _IW_START_RETRY_SLEEP comment documents it).
+#       (avatar_issue_watcher.sh's _IW_START_RETRY_SLEEP comment documents it).
 #   `agent start` -> `agent prompt`  herdr answers `"agent_status":"idle"`
 #       straight away, but a freshly drawn claude TUI is idle while its
 #       key-input loop is still unattached, so the prompt is swallowed (dEitY719/dotfiles#1560).
 # Measured on herdr 0.7.5: ~5s fails every time, ~13s lands. 13 is the repo
 # standard — the twins are _IW_SETTLE_SECONDS / _IW_START_RETRY_SLEEP in
-# shell-common/tools/custom/issue_watcher_cron.sh and _PMT_SETTLE_SECONDS /
+# shell-common/tools/custom/avatar_issue_watcher.sh and _PMT_SETTLE_SECONDS /
 # _PMT_START_RETRY_SLEEP in shell-common/tools/custom/pr_merge_train_cron.sh.
 # Change one, change all five: dEitY719/dotfiles#1530 / dEitY719/dotfiles#1549 and dEitY719/dotfiles#1560 / dEitY719/dotfiles#1571 are both the same
 # defect recurring because two of three dispatchers were fixed. The *number*
@@ -184,6 +184,30 @@ pmv_prompt_retryable() {
     timeout | agent_prompt_stalled) return 0 ;;
     esac
     return 1
+}
+
+# "Did the prompt that just failed land anyway?" (#85). A retryable code does
+# not mean "never typed in": dotfiles PR #2166 got `/gh-verify:merged` three
+# times — three verify comments and a false STUCK — because the session took
+# the first one and kept working past the wait. herdr's own view of the agent
+# decides: working / blocked / done, or a `completion_seq` past the one read
+# before the first send (a turn finished), means it took the prompt. Only a
+# baseline of `idle` is evidence: a session busy before the send (a reused
+# `agent_name_taken` one, a startup dialog) changes state and completes turns
+# of its own, so it keeps the pre-#85 retry and STUCK rather than a silent
+# [OK]. `completion_seq`, not `state_change_seq`: startup settling moves state
+# without completing a turn. An unreadable answer is "not landed" too.
+pmv_agent_probe() { # sets PMV_AGENT_STATUS / PMV_AGENT_SEQ from `herdr agent get`
+    _pmv_probe=$(herdr agent get "$1" 2>/dev/null |
+        jq -r '.result.agent | "\(.agent_status // "") \(.completion_seq // "")"' 2>/dev/null) || _pmv_probe=""
+    PMV_AGENT_STATUS="${_pmv_probe%% *}"
+    PMV_AGENT_SEQ="${_pmv_probe#* }"
+}
+pmv_prompt_landed() { # pmv_prompt_landed <agent> <status-before> <seq-before>
+    [ "$2" = idle ] || return 1
+    pmv_agent_probe "$1"
+    case "$PMV_AGENT_STATUS" in working | blocked | done) return 0 ;; esac
+    [ -n "$3" ] && [ -n "$PMV_AGENT_SEQ" ] && [ "$PMV_AGENT_SEQ" -gt "$3" ] 2>/dev/null
 }
 
 pmv_escalate_prompt_stall() {
@@ -454,21 +478,35 @@ fi
 # dash form (`/gh-verify-merged`) is "Unknown command" (#69).
 VERIFY_PROMPT="/${VERIFY_SKILL} ${PR_NUMBER}"
 PROMPT_TRY=1
+pmv_agent_probe "$PMV_AGENT"
+PMV_STATUS0="$PMV_AGENT_STATUS"
+PMV_SEQ0="$PMV_AGENT_SEQ"
 while :; do
     PROMPT_JSON=$(herdr agent prompt "$PMV_AGENT" "$VERIFY_PROMPT" \
         --wait --until idle --timeout "${PMV_PROMPT_TIMEOUT_MS:-900000}" 2>&1)
     PROMPT_RC=$?
     [ "$PROMPT_RC" -eq 0 ] && break
     PROMPT_CODE=$(printf '%s' "$PROMPT_JSON" | pmv_error_code)
-    if pmv_prompt_retryable "$PROMPT_CODE" &&
-        [ "$PROMPT_TRY" -lt "$PMV_PROMPT_ATTEMPT_MAX" ]; then
-        printf '[WARN] gh-verify:post-merge-verify: herdr agent prompt %s failed (%s) — retrying after %ss settle (%s/%s).\n' \
-            "$PMV_AGENT" "${PROMPT_CODE:-unknown}" "$PMV_SETTLE_SECONDS" "$PROMPT_TRY" "$PMV_PROMPT_ATTEMPT_MAX"
-        PROMPT_TRY=$((PROMPT_TRY + 1))
-        pmv_settle
-        continue
+    # The raw answer, on one line, so a [WARN] below can be told apart after the
+    # fact — #85 could not say whether it saw `timeout` or `agent_prompt_stalled`.
+    printf '[WARN] gh-verify:post-merge-verify: herdr agent prompt %s answered (rc %s): %s\n' \
+        "$PMV_AGENT" "$PROMPT_RC" "$(printf '%s' "$PROMPT_JSON" | tr '\n' ' ')"
+    pmv_prompt_retryable "$PROMPT_CODE" || break
+    # Settle BEFORE asking whether it landed: a prompt herdr gave up on can still
+    # be picked up seconds later, and probing first would re-send over it.
+    pmv_settle
+    if pmv_prompt_landed "$PMV_AGENT" "$PMV_STATUS0" "$PMV_SEQ0"; then
+        # It is running (or already ran): a re-send would start a second
+        # verification, and STUCK would be a false alarm (#85).
+        printf '[INFO] gh-verify:post-merge-verify: prompt landed (agent %s, status %s, completion_seq %s -> %s) despite %s — not re-sending.\n' \
+            "$PMV_AGENT" "${PMV_AGENT_STATUS:-?}" "${PMV_SEQ0:-?}" "${PMV_AGENT_SEQ:-?}" "${PROMPT_CODE:-unknown}"
+        PROMPT_RC=0
+        break
     fi
-    break
+    [ "$PROMPT_TRY" -lt "$PMV_PROMPT_ATTEMPT_MAX" ] || break
+    printf '[WARN] gh-verify:post-merge-verify: herdr agent prompt %s failed (%s) — retrying after %ss settle (%s/%s).\n' \
+        "$PMV_AGENT" "$PROMPT_CODE" "$PMV_SETTLE_SECONDS" "$PROMPT_TRY" "$PMV_PROMPT_ATTEMPT_MAX"
+    PROMPT_TRY=$((PROMPT_TRY + 1))
 done
 if [ "${PROMPT_RC:-0}" -ne 0 ]; then
     PROMPT_CODE=$(printf '%s' "$PROMPT_JSON" | pmv_error_code)
@@ -507,7 +545,7 @@ printf '  attach: herdr agent attach %s\n' "$PMV_AGENT"
 | `BASE_BRANCH` | caller | The merged PR's base branch (`baseRefName`). Empty → the main checkout's current branch, and a detached HEAD stops the run |
 | `REMOTE` | args, optional | The `[remote]` positional; default `origin`. `fetch`/`rebase` use it, never a hardcoded `origin` |
 | `PMV_PROMPT_TIMEOUT_MS` | env, optional | `herdr agent prompt --wait` cap, default 900000 (15 min) |
-| `PMV_PROMPT_ATTEMPT_MAX` | env, optional | Retry budget for `agent_prompt_stalled` / `timeout`, default 3 |
+| `PMV_PROMPT_ATTEMPT_MAX` | env, optional | Retry budget for `agent_prompt_stalled` / `timeout`, default 3. Spent only while `herdr agent get` shows the prompt never landed (#85) |
 | `PMV_SETTLE_SECONDS` | env, optional | Wait after each herdr call that brings something up, default 13; `0` disables both waits (dEitY719/dotfiles#1571) |
 
 `TARGET_REPO`/`TARGET_HOST` come from one and the same remote URL — a bare
@@ -550,8 +588,10 @@ one place that reports an unbound key, so a missing shell-common, a missing
 remote and a non-github URL all surface as the same single `[WARN]`.
 
 `--wait --until idle` waits for the dispatched session to settle, so the
-timeout is generous. Hitting it is a `[WARN]`, not a failure: the prompt has
-already landed, and the attach hint is still printed.
+timeout is generous. Hitting it (or `agent_prompt_stalled`) is not proof the
+prompt was lost: `herdr agent get` decides (#85). Landed → `[INFO]`, no
+re-send, `[OK]`; never landed → retry up to `PMV_PROMPT_ATTEMPT_MAX`, then the
+STUCK rename and notification. The attach hint is printed either way.
 
 `gh-pr:merge` already read both refs in its own Step 2 pre-flight and passes
 them down. Standalone, recover them from the same PR — host-pinned and
@@ -576,3 +616,4 @@ becomes the main checkout's own current branch, never a detached HEAD.
 | `herdr worktree list --cwd P --json` | `.result.source.source_workspace_id`, `.result.worktrees[].path`, `.open_workspace_id` |
 | `herdr tab create` | `pane_id` / `tab_id`, read by leaf name |
 | `herdr agent start` / `prompt` | `.error.code` on failure |
+| `herdr agent get <name>` | `.result.agent.agent_status`, `.result.agent.completion_seq` |

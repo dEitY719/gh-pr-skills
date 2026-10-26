@@ -61,7 +61,7 @@ REMOTE=$5
 # registry, or no jq — means do nothing at all: no output, no dispatch, and no
 # [WARN] either. An unwatched repo stays byte-identical to how it behaved
 # before dEitY719/dotfiles#1511.
-WATCHED_FILE="${IW_WATCHED_REPOS:-${HOME}/.agent-factory/avatars/issue-watcher/watched-repos.json}"
+WATCHED_FILE="${IW_WATCHED_REPOS:-${HOME}/.avatars/issue-watcher/watched-repos.json}"
 VERIFY_SKILL=""
 if command -v jq >/dev/null 2>&1 && [ -r "$WATCHED_FILE" ]; then
     VERIFY_SKILL=$(jq -r --arg r "$TARGET_REPO" \

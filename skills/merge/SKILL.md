@@ -78,7 +78,7 @@ if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                          
         <N> <owner/repo> <headRefName> <baseRefName> <remote>
 elif command -v jq >/dev/null 2>&1 && jq -e --arg r <owner/repo> \
     '(if type == "array" then . else (.repos // []) end) | any(.repo == $r)' \
-    "${IW_WATCHED_REPOS:-$HOME/.agent-factory/avatars/issue-watcher/watched-repos.json}" \
+    "${IW_WATCHED_REPOS:-$HOME/.avatars/issue-watcher/watched-repos.json}" \
     >/dev/null 2>&1; then
     printf '[FAIL] gh-pr:merge: no lib/post-merge-verify-dispatch.sh under CLAUDE_PLUGIN_ROOT (%s) — verification gate did NOT run for this REGISTERED repo; see references/post-merge-verify.md, or run /gh-verify:post-merge-verify <N> by hand.\n' \
         "${CLAUDE_PLUGIN_ROOT:-<unset>}" >&2                                         # tier 5

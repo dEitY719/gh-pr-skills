@@ -297,7 +297,7 @@ the difference between a five-minute bisect and an afternoon.
 ### 3. `gh-verify:post-merge-verify` — real on this repo, but advisory
 
 `gh-pr:merge` Step 5 dispatches it, gated on the watched-repos registry
-(`${IW_WATCHED_REPOS:-${HOME}/.agent-factory/avatars/issue-watcher/watched-repos.json}`).
+(`${IW_WATCHED_REPOS:-${HOME}/.avatars/issue-watcher/watched-repos.json}`).
 **This repo is registered** — checked, not assumed:
 
 ```json
