@@ -336,23 +336,28 @@ RETIRED=".agent-factory/avatars""/issue-watcher"
 NEW="$TMP/home/.avatars/issue-watcher"
 mkdir -p "$NEW" "$TMP/home/$RETIRED"
 cp "$TMP/watched.json" "$NEW/watched-repos.json"
-for runner in "$DISPATCH 42 o/r head base origin" "$TMP/step5.sh"; do
-	# shellcheck disable=SC2086 # runner is "<script> [args]" by construction
-	out=$(env -u IW_WATCHED_REPOS -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
-		HOME="$TMP/home" sh $runner 2>&1) || :
-	case "$out" in
-		*'[FAIL]'*) ;;
-		*) printf 'FAIL  %s did not read the default ~/.avatars/issue-watcher/watched-repos.json: %s\n' \
-			"${runner%% *}" "$out"
-			fail=1 ;;
-	esac
+pmv9() { # pmv9 <script> [args] -- default registry only, no plugin root
+	env -u IW_WATCHED_REPOS -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
+		HOME="$TMP/home" sh "$@" 2>&1 || :
+}
+for at in new retired; do
+	for who in wrapper step5; do
+		case "$who" in
+			wrapper) out=$(pmv9 "$DISPATCH" 42 o/r head base origin) ;;
+			step5) out=$(pmv9 "$TMP/step5.sh") ;;
+		esac
+		case "$at:$out" in
+			new:*'[FAIL]'* | retired:) ;;
+			new:*) printf 'FAIL  %s did not read the default ~/.avatars/issue-watcher/watched-repos.json: %s\n' "$who" "$out"
+				fail=1 ;;
+			*) printf 'FAIL  %s still reads the retired ~/.agent-factory watch list: %s\n' "$who" "$out"
+				fail=1 ;;
+		esac
+	done
+	[ "$at" = retired ] || mv "$NEW/watched-repos.json" "$TMP/home/$RETIRED/watched-repos.json"
 done
-mv "$NEW/watched-repos.json" \
-	"$TMP/home/$RETIRED/watched-repos.json"
-out=$(env -u IW_WATCHED_REPOS -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
-	HOME="$TMP/home" sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
-[ -z "$out" ] || { printf 'FAIL  the wrapper still reads the retired ~/.agent-factory watch list: %s\n' "$out"; fail=1; }
-if hits=$(grep -rnF "$RETIRED" "$ROOT/lib" "$ROOT/skills"); then
+#    The whole tree, docs and README included; this file spells it split above.
+if hits=$(grep -rnF --exclude-dir=.git "$RETIRED" "$ROOT"); then
 	printf 'FAIL  the retired watch-list path is still named:\n%s\n' "$hits"
 	fail=1
 fi
