@@ -43,7 +43,7 @@ For each PR `N` in the Step 2 queue order:
 `gh-pr:merge` Step 5 already closes this tab as part of its post-merge
 verification dispatch. This is the belt-and-braces half: run it anyway, right
 after a successful merge, because a tab that stays open is not a cosmetic leak.
-`_iw_live_agents` in `shell-common/tools/custom/issue_watcher_cron.sh` counts a
+`_iw_live_agents` in `shell-common/tools/custom/avatar_issue_watcher.sh` counts a
 `wt/issue-*` worktree as running whenever a herdr agent sits on it, so enough
 merged-but-open tabs exhaust `_IW_MAX_PER_REPO` and issue-watcher silently
 stops dispatching for that repo — the pipeline starves itself. On 2026-08-27 a

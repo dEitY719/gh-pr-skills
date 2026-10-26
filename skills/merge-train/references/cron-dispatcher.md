@@ -29,7 +29,7 @@ a pane.
 
 ## Why the train runs inside a claude session, not in the shell
 
-This is the one structural difference from `issue_watcher_cron.sh`, and it is
+This is the one structural difference from `avatar_issue_watcher.sh`, and it is
 deliberate.
 
 The issue watcher's dispatches are **independent and parallel**: it opens a
@@ -63,7 +63,7 @@ lock, so a per-tick discriminator would make every tick compute a different
 string, find no running train, and start a second one merging onto the same
 base. It is built by `herdr_agent_name`
 (`shell-common/lib/herdr_agent_name.sh`), the SSOT shared with
-`issue_watcher_cron.sh` and `gh-verify:post-merge-verify`.
+`avatar_issue_watcher.sh` and `gh-verify:post-merge-verify`.
 
 The workspace label is the *same string* as the agent name (dEitY719/dotfiles#1549) — no longer
 `mt-<host>-<owner>-<repo>`. Before dEitY719/dotfiles#1549 the label kept its own host-qualified
