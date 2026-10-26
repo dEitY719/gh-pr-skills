@@ -333,8 +333,9 @@ esac
 #    one listed only at the retired path must not.
 # Split so the retired path never appears whole in this repo (#88 grep criterion).
 RETIRED=".agent-factory/avatars""/issue-watcher"
-mkdir -p "$TMP/home/.avatars/issue-watcher" "$TMP/home/$RETIRED"
-cp "$TMP/watched.json" "$TMP/home/.avatars/issue-watcher/watched-repos.json"
+NEW="$TMP/home/.avatars/issue-watcher"
+mkdir -p "$NEW" "$TMP/home/$RETIRED"
+cp "$TMP/watched.json" "$NEW/watched-repos.json"
 for runner in "$DISPATCH 42 o/r head base origin" "$TMP/step5.sh"; do
 	# shellcheck disable=SC2086 # runner is "<script> [args]" by construction
 	out=$(env -u IW_WATCHED_REPOS -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
@@ -346,7 +347,7 @@ for runner in "$DISPATCH 42 o/r head base origin" "$TMP/step5.sh"; do
 			fail=1 ;;
 	esac
 done
-mv "$TMP/home/.avatars/issue-watcher/watched-repos.json" \
+mv "$NEW/watched-repos.json" \
 	"$TMP/home/$RETIRED/watched-repos.json"
 out=$(env -u IW_WATCHED_REPOS -u CLAUDE_PLUGIN_ROOT -u GH_VERIFY_ROOT \
 	HOME="$TMP/home" sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
