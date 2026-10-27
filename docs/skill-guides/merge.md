@@ -33,6 +33,7 @@
 | 1 | `<pr-number>` 또는 `-h`/`--help`/`help` | 필수 | 양의 정수. 없거나 잘못되면 usage 를 가리키고 정지 |
 | 2 | 전략 | `rebase` | `rebase` / `squash` / `merge` 중 하나. 그 외는 허용값을 출력하고 정지 |
 | 3 | remote 이름 | `origin` | PR 이 속한 저장소의 git remote |
+| 플래그 | `--no-post-verify` | 없음 | 호출자가 검증을 직접 맡을 때(예: `gh-flow:wave` 조율자가 `gh-verify:merged` 를 돌림). Step 5 의 post-merge 검증 dispatch 를 건너뛰고 `post-merge verify skipped (caller owns verification)` 한 줄을 남긴다. 없으면 동작은 그대로다 (#90) |
 
 전략 선택 기준:
 
@@ -75,6 +76,9 @@
 5. **Step 5 — 머지 SHA 조회 + 보고.** `mergeCommit.oid` 를 읽어 compact 보고를 출력한다.
    `null` 이면 1초 후 한 번 재시도하고, 그래도 없으면 `(pending)` 으로 찍고 PR URL 을 함께
    낸다. 보고가 출력된 **뒤에** post-merge 검증 dispatch 블록이 실행된다(아래 참조).
+   `--no-post-verify` 를 주면 dispatch 대신 `post-merge verify skipped (caller owns verification)`
+   한 줄만 찍는다 — 등록된 저장소라도 herdr 탭·`pr-post-merge-verify/pr-<N>` 디렉터리를 만들지 않는다.
+   `gh-pr:merge-train` 은 이 플래그를 넘기지 않으므로 `--auto`/`--finalize` 경로의 검증은 그대로다.
 
 ## 주의사항과 제약
 

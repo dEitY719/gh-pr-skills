@@ -286,6 +286,7 @@
             <tr><td>1</td><td><code>&lt;pr-number&gt;</code> 또는 <code>-h</code>/<code>--help</code>/<code>help</code></td><td class="text-secondary">필수</td><td class="text-secondary">양의 정수. 없거나 잘못되면 usage 를 가리키고 정지</td></tr>
             <tr><td>2</td><td>전략</td><td><code>rebase</code></td><td class="text-secondary"><code>rebase</code> / <code>squash</code> / <code>merge</code> 중 하나. 그 외는 허용값을 출력하고 정지</td></tr>
             <tr><td>3</td><td>remote 이름</td><td><code>origin</code></td><td class="text-secondary">PR 이 속한 저장소의 git remote</td></tr>
+            <tr><td>플래그</td><td><code>--no-post-verify</code></td><td class="text-secondary">없음</td><td class="text-secondary">호출자가 검증을 직접 맡을 때(예: <code>gh-flow:wave</code> 조율자가 <code>gh-verify:merged</code> 를 돌림). Step 5 의 post-merge 검증 dispatch 를 건너뛰고 <code>post-merge verify skipped (caller owns verification)</code> 한 줄을 남긴다. 없으면 동작은 그대로다 (#90)</td></tr>
           </tbody>
         </table>
       </div>
@@ -315,7 +316,7 @@
         <article class="step"><div class="step-n">2</div><div><h4>사전 점검 (병렬)</h4><p><code>gh pr view --json state,isDraft,mergeable,mergeStateStatus,reviewDecision,baseRefName,headRefName,url</code> 과 <code>gh pr checks --required</code> 를 한 번에 돌리고, base 브랜치의 protection 유무를 <code>gh api repos/&lt;repo&gt;/branches/&lt;base&gt;/protection</code> 으로 감지한다(exit 0 = 있음, 403/404 = 없음).</p><p>projectV2 보드 Status 는 머지 게이트가 <strong>아니다</strong>(dEitY719/dotfiles#1513) &mdash; 여기서 읽지 않는다.</p></div></article>
         <article class="step"><div class="step-n">3</div><div><h4>머지 (확인 없음)</h4><p><code>GH_HOST="$TARGET_HOST" gh pr merge &lt;N&gt; --repo "$TARGET_REPO" --&lt;strategy&gt; --delete-branch</code></p><p><code>merge method is not allowed</code> 가 나오면 저장소 설정 안내를 출력하고 정지한다. <strong>전략을 조용히 바꾸지 않는다.</strong></p></div></article>
         <article class="step"><div class="step-n">4</div><div><h4>보드 동기화와 뒷정리</h4><p>PR 카드와 연결된 이슈 카드를 <code>Done</code> 으로 옮기고, 머지된 브랜치의 로컬 worktree 에 유휴 herdr 탭이 있으면 <code>[INFO]</code> 힌트 한 줄을 찍고, ai-metrics PR 코멘트를 남긴 뒤, 마지막으로 이제 읽을 사람이 없는 <code>review-passed</code> 라벨을 뗀다.</p><p><strong>전부 soft-fail</strong> &mdash; 실패는 stderr 한 줄이고 보고나 종료 코드를 바꾸지 않는다.</p></div></article>
-        <article class="step"><div class="step-n">5</div><div><h4>머지 SHA 조회 + 보고</h4><p><code>mergeCommit.oid</code> 를 읽어 compact 보고를 출력한다. <code>null</code> 이면 1초 후 한 번 재시도하고, 그래도 없으면 <code>(pending)</code> 으로 찍고 PR URL 을 함께 낸다.</p><p>보고가 출력된 <strong>뒤에</strong> post-merge 검증 dispatch 블록이 실행된다 &mdash; 아래 "주의사항과 제약" 참조.</p></div></article>
+        <article class="step"><div class="step-n">5</div><div><h4>머지 SHA 조회 + 보고</h4><p><code>mergeCommit.oid</code> 를 읽어 compact 보고를 출력한다. <code>null</code> 이면 1초 후 한 번 재시도하고, 그래도 없으면 <code>(pending)</code> 으로 찍고 PR URL 을 함께 낸다.</p><p>보고가 출력된 <strong>뒤에</strong> post-merge 검증 dispatch 블록이 실행된다 &mdash; 아래 "주의사항과 제약" 참조.</p><p><code>--no-post-verify</code> 를 주면 dispatch 대신 <code>post-merge verify skipped (caller owns verification)</code> 한 줄만 찍는다. <code>gh-pr:merge-train</code> 은 이 플래그를 넘기지 않으므로 <code>--auto</code>/<code>--finalize</code> 경로의 검증은 그대로다.</p></div></article>
       </div>
 
     </div>

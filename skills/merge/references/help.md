@@ -14,6 +14,7 @@
 |------|-------------|
 | `--auto` | Hand the PR to the base branch's **merge queue** instead of blocking until it merges (dEitY719/dotfiles#1707). With no queue active it falls back to the ordinary immediate merge, so the flag is safe everywhere. When the PR is queued rather than merged, the skill prints `[QUEUED]` and runs none of the post-merge steps — `gh-pr:merge-train`'s Step 0 sweep finalizes it later. |
 | `--finalize` | Run **only** the post-merge completion sequence on an already-`MERGED` PR (board sync, tab hint, ai-metrics, `review-passed` cleanup, post-merge verify) and print `[FINALIZED]`. Refuses any PR that is not `MERGED`. Mutually exclusive with `--auto`. |
+| `--no-post-verify` | Skip Step 5's post-merge verify dispatch even for a registered repo, and print `post-merge verify skipped (caller owns verification)` instead — for a caller that runs its own verification (e.g. `gh-flow:wave`'s coordinator runs `gh-verify:merged`). Combines with `--auto` / `--finalize`. Without it, behavior is unchanged. |
 
 ## Usage
 
@@ -23,6 +24,7 @@
 - `/gh-pr:merge 51 rebase upstream` — rebase-merge against `upstream` remote
 - `/gh-pr:merge 51 rebase origin --auto` — enqueue rather than wait (merge-queue bases)
 - `/gh-pr:merge 51 rebase origin --finalize` — post-merge housekeeping only, for a PR the queue already merged
+- `/gh-pr:merge 51 rebase origin --no-post-verify` — merge, but leave post-merge verification to the caller
 - `/gh-pr:merge -h` / `--help` / `help` — print this help
 
 ## Strategy guide
@@ -51,7 +53,8 @@ _Availability depends on repo settings → General → Pull Requests. If a strat
    `gh-verify:post-merge-verify`: closes the implementation herdr tab, rebases the main
    checkout, and opens a herdr session running that repo's `verify_skill`. An
    unregistered repo gets nothing at all, and every failure there is a `[WARN]` that
-   leaves this report untouched.
+   leaves this report untouched. `--no-post-verify` skips this step entirely and
+   prints `post-merge verify skipped (caller owns verification)`.
 
 ## What the skill will NOT do
 

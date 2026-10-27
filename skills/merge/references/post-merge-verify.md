@@ -11,6 +11,28 @@ re-queries GitHub:
 | 3 | head ref | Step 2's `gh pr view` read `headRefName` |
 | 4 | base ref | ditto `baseRefName` — never a hardcoded `main` |
 | 5 | remote | the `[remote]` positional, default `origin` |
+| 6 | `--no-post-verify` | optional — only when Step 1 parsed that flag |
+
+## Caller opt-out: `--no-post-verify` (#90)
+
+A caller that verifies the merge itself — `gh-flow:wave`'s coordinator runs
+`gh-verify:merged` after its worker merges — must be able to say so, or the
+same PR is verified twice and the user gets a herdr tab nobody asked for.
+Removing the repo from `watched-repos.json` is not the answer: that also turns
+verification off for every merge outside the wave.
+
+With the flag, Step 5 sets `NO_PMV="--no-post-verify"`; the wrapper's first
+check sees it as argument 6, prints exactly
+`post-merge verify skipped (caller owns verification)` and exits 0 — no
+registry read, no herdr tab, no `pr-post-merge-verify/pr-<N>` directory. If the
+wrapper cannot be found (tier 5), Step 5 prints the same line instead of the
+registered-repo `[FAIL]`, since nothing was owed. Without the flag every path
+below is byte-identical to before.
+
+`gh-pr:merge-train` never passes it: its `--auto` merge and Step 0
+`--finalize` sweep rely on this gate firing at finalize time, and the flag
+combines with either without changing them. `tests/pmv-dispatch-resolves.sh`
+case 8b proves both directions by whether a planted dispatch body ran.
 
 ## Finding the wrapper (plugin-root tiers)
 
