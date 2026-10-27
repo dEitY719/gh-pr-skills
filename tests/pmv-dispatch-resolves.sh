@@ -142,7 +142,7 @@ case "$step5" in
 		printf 'FAIL  Step 5 exits nonzero after a completed merge:\n%s\n' "$step5"
 		fail=1 ;;
 esac
-printf '[{"repo":"o/r","verify_skill":"gh-verify:merged"}]\n' > "$TMP/watched.json"
+printf '[{"repo":"o/r","post_merge_verify":true,"post_merge_verify_skill":"gh-verify:merged"}]\n' > "$TMP/watched.json"
 
 #    Run the SNIPPET, not just the wrapper (PR #33 review, codex BLOCKER): the
 #    guard that decides whether the wrapper is reached at all lives in SKILL.md,
@@ -414,6 +414,64 @@ if hits=$(grep -rnF --exclude-dir=.git "$RETIRED" "$ROOT"); then
 	printf 'FAIL  the retired watch-list path is still named:\n%s\n' "$hits"
 	fail=1
 fi
+
+# 10. Registry schema (dEitY719/gh-verify-skills#93). `post_merge_verify` (bool,
+#     absent = false) is the switch, `post_merge_verify_skill` the skill (default
+#     gh-verify:merged). The retired `verify_skill` is a fallback with exactly one
+#     migration [WARN]. Judged on both readers: the wrapper's gate (planted
+#     dispatch echoes the VERIFY_SKILL it inherited) and the vendored fence's own
+#     registry read (sliced up to its herdr probe, so nothing touches herdr).
+mkdir -p "$TMP/root10/$(dirname "$VENDORED")"
+cat > "$TMP/root10/$VENDORED" <<'PLANT'
+```bash
+printf 'dispatch %s\n' "$VERIFY_SKILL"
+```
+PLANT
+F=$(printf '\140\140\140')
+awk -v f="$F" '$0 == f "bash" && !b { b = 1; next } /^command -v herdr/ && b { exit } b' \
+	"$ROOT/$VENDORED" > "$TMP/registry-read.sh"
+grep -q 'post_merge_verify' "$TMP/registry-read.sh" || {
+	printf 'FAIL  the vendored fence no longer reads post_merge_verify before its herdr probe\n'
+	fail=1
+}
+pmv10() { # pmv10 <entry-json> <expected wrapper output> <expected fence output>
+	printf '[{"repo":"o/r"%s}]\n' "$1" > "$TMP/w10.json"
+	out=$(env -u GH_VERIFY_ROOT CLAUDE_PLUGIN_ROOT="$TMP/root10" \
+		IW_WATCHED_REPOS="$TMP/w10.json" sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
+	[ "$out" = "$2" ] || {
+		printf 'FAIL  wrapper with entry {%s}: got [%s], want [%s]\n' "$1" "$out" "$2"
+		fail=1
+	}
+	out=$(TARGET_REPO=o/r IW_WATCHED_REPOS="$TMP/w10.json" \
+		sh -c '. "$1"; printf "skill=%s\n" "$VERIFY_SKILL"' _ "$TMP/registry-read.sh" 2>&1) || :
+	[ "$out" = "$3" ] || {
+		printf 'FAIL  vendored fence with entry {%s}: got [%s], want [%s]\n' "$1" "$out" "$3"
+		fail=1
+	}
+}
+pmv10 ',"post_merge_verify":true' 'dispatch gh-verify:merged' 'skill=gh-verify:merged'
+pmv10 ',"post_merge_verify":true,"post_merge_verify_skill":"gh-verify:live"' \
+	'dispatch gh-verify:live' 'skill=gh-verify:live'
+pmv10 ',"post_merge_verify":false,"post_merge_verify_skill":"gh-verify:live"' '' 'skill='
+pmv10 ',"post_merge_verify":false,"verify_skill":"gh-verify:merged"' '' 'skill='
+pmv10 ',"post_merge_verify_skill":"gh-verify:live"' '' 'skill='
+pmv10 '' '' 'skill='
+#     Legacy: both readers fall back and warn once each on their own...
+LEGACY=',"verify_skill":"gh-verify:live"'
+pmv10 "$LEGACY" "[WARN] gh-pr:merge: o/r uses the retired registry key verify_skill in $TMP/w10.json — dispatching it as post_merge_verify: true, post_merge_verify_skill: \"gh-verify:live\". Migrate the entry (avatar-watched-repos) (dEitY719/gh-verify-skills#93).
+dispatch gh-verify:live" \
+	'[WARN] gh-verify:post-merge-verify: o/r uses the retired registry key verify_skill — read as post_merge_verify: true, post_merge_verify_skill: "gh-verify:live". Migrate the entry (avatar-watched-repos) (#93).
+skill=gh-verify:live'
+#     ...and chained (wrapper -> real vendored dispatch) the merge prints exactly
+#     ONE [WARN]. PATH holds no herdr, so the real dispatch stops at its probe.
+mkdir -p "$TMP/bin10"
+for t in sh jq awk mktemp rm; do ln -s "$(command -v "$t")" "$TMP/bin10/$t"; done
+out=$(env -u GH_VERIFY_ROOT PATH="$TMP/bin10" CLAUDE_PLUGIN_ROOT="$ROOT" \
+	IW_WATCHED_REPOS="$TMP/w10.json" sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
+[ "$(printf '%s\n' "$out" | grep -c '^\[WARN\]')" -eq 1 ] && [ "$(printf '%s\n' "$out" | wc -l)" -eq 1 ] || {
+	printf 'FAIL  a legacy entry through the real dispatch did not print exactly one [WARN]:\n%s\n' "$out"
+	fail=1
+}
 
 if [ "$fail" -eq 0 ]; then
 	printf 'ok    vendored dispatch carries the harness-skills#36/#37 convention and names its source commit\n'
