@@ -86,7 +86,8 @@ byte-identical to how merges behaved before dEitY719/dotfiles#1511.
 Schema (dEitY719/gh-verify-skills#93): `post_merge_verify: true` is the switch,
 `post_merge_verify_skill` picks the skill (default `gh-verify:merged`). An entry
 with no `post_merge_verify` but the retired `verify_skill` still dispatches that
-value, with one migration `[WARN]`.
+value, with one migration `[WARN]` — printed by the dispatch itself (on a box
+with `herdr`), never by this gate. Only the first entry for a repo counts.
 
 ## Failure modes (all soft — the report above always stands)
 
