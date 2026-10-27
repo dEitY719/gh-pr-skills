@@ -6,7 +6,8 @@
 # Contract (skills/merge/references/post-merge-verify.md):
 #   - always exits 0 — the merge already happened and nothing here may undo it
 #   - with a 6th argument `--no-post-verify`, one skip line and no dispatch: the
-#     caller owns verification (#90)
+#     caller owns verification (#90) — printed even for an unregistered repo;
+#     any other 6th argument is one [WARN], then the usual path
 #   - one [WARN] and no dispatch when an argument is blank, whitespace-only, or
 #     still an unsubstituted <placeholder>
 #   - complete silence when the repo is absent from the issue-watcher registry
@@ -18,10 +19,14 @@
 # --- 0. Caller opt-out (#90) -----------------------------------------------
 # gh-flow:wave's coordinator runs gh-verify:merged itself, so a dispatch here
 # would verify the same PR twice and open a tab nobody asked for.
-if [ "${6-}" = --no-post-verify ]; then
-    printf 'post-merge verify skipped (caller owns verification)\n'
-    exit 0
-fi
+case "${6-}" in
+    '') ;;
+    --no-post-verify)
+        printf 'post-merge verify skipped (caller owns verification)\n'
+        exit 0 ;;
+    # A typo'd opt-out must not be silent; dispatching stays the safe default.
+    *) printf '[WARN] gh-pr:merge: unrecognised 6th argument %s ignored (only --no-post-verify is accepted) — dispatching as usual.\n' "$6" ;;
+esac
 
 # --- 1. Validate the five inputs -------------------------------------------
 # A blank, whitespace-only or still-unsubstituted argument passes `[ -n ]` and

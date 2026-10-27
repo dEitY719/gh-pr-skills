@@ -26,10 +26,13 @@ check sees it as argument 6, prints exactly
 `post-merge verify skipped (caller owns verification)` and exits 0 — no
 registry read, no herdr tab, no `pr-post-merge-verify/pr-<N>` directory. If the
 wrapper cannot be found (tier 5), Step 5 prints the same line instead of the
-registered-repo `[FAIL]`, since nothing was owed. With `--auto` the flag only
-covers an immediate merge: a `[QUEUED]` PR runs no Step 5, and the later
-`gh-pr:merge-train` `--finalize` sweep does not carry the flag, so it verifies. Without the flag every path
-below is byte-identical to before.
+registered-repo `[FAIL]`, since nothing was owed. The skip line prints even
+for an unregistered repo — the one place the flag changes that repo's silence.
+Any other 6th argument (a typo such as `--no-post-verfy`) is one `[WARN]`
+followed by the usual dispatch. With `--auto` the flag only covers an
+immediate merge: a `[QUEUED]` PR runs no Step 5, and the later
+`gh-pr:merge-train` `--finalize` sweep does not carry the flag, so it
+verifies. Without the flag every path below is byte-identical to before.
 
 `gh-pr:merge-train` never passes it: its `--auto` merge and Step 0
 `--finalize` sweep rely on this gate firing at finalize time, and the flag

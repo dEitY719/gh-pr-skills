@@ -329,14 +329,16 @@ esac
 #     (gh-flow:wave's coordinator runs gh-verify:merged) passes --no-post-verify,
 #     and a REGISTERED repo whose dispatch would run must then dispatch nothing:
 #     judged by whether the planted dispatch body executed, never by a sleep.
-cat > "$TMP/root/$VENDORED" <<'PLANT'
+#     Own root, so no later case inherits this planted body.
+mkdir -p "$TMP/root8b/$(dirname "$VENDORED")"
+cat > "$TMP/root8b/$VENDORED" <<'PLANT'
 ```bash
 printf 'planted dispatch ran\n'
 ```
 PLANT
 SKIPPED='post-merge verify skipped (caller owns verification)'
 pmv8b() { # pmv8b <script> [args] -- registered repo, working planted dispatch
-	env -u GH_VERIFY_ROOT CLAUDE_PLUGIN_ROOT="$TMP/root" \
+	env -u GH_VERIFY_ROOT CLAUDE_PLUGIN_ROOT="$TMP/root8b" \
 		IW_WATCHED_REPOS="$TMP/watched.json" sh "$@" 2>&1 || :
 }
 out=$(pmv8b "$DISPATCH" 42 o/r head base origin --no-post-verify)
@@ -350,6 +352,12 @@ out=$(pmv8b "$DISPATCH" 42 o/r head base origin)
 	printf 'FAIL  without --no-post-verify the dispatch no longer ran: %s\n' "$out"
 	fail=1
 }
+#     A mistyped opt-out must not be silent: it warns, then dispatches as usual.
+out=$(pmv8b "$DISPATCH" 42 o/r head base origin --no-post-verfy)
+case "$out" in
+	'[WARN]'*'--no-post-verfy'*'planted dispatch ran') ;;
+	*) printf 'FAIL  an unrecognised 6th argument was not warned about: %s\n' "$out"; fail=1 ;;
+esac
 #     Step 5's snippet carries the flag to the wrapper, and with no wrapper at
 #     all it still reports the skip instead of the broken-install [FAIL].
 sed 's|^NO_PMV=""|NO_PMV="--no-post-verify"|' "$TMP/step5.sh" > "$TMP/step5-skip.sh"
