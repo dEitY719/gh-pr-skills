@@ -1,12 +1,9 @@
 <!-- VENDORED — do not edit here. -->
 <!-- SSOT: dEitY719/gh-verify-skills skills/post-merge-verify/references/dispatch.sh.md -->
-<!-- Source commit: 5fe2524797d54dcb589d7ff4bf3154b8d89f2caf (2026-10-26) -->
-<!-- Synced 2026-10-26 — no sync script covers this tree; re-copy from the SSOT at the -->
+<!-- Source commit: 974bfc34dabb47c2421ca591f6d4c999877e125c (2026-10-27) -->
+<!-- Synced 2026-10-27 — no sync script covers this tree; re-copy from the SSOT at the -->
 <!-- commit above, then update BOTH lines. tests/pmv-dispatch-resolves.sh asserts the -->
 <!-- copy still carries the plugin-root convention, which is what caught the last drift. -->
-<!-- LOCAL DELTA (dEitY719/gh-verify-skills#93): the registry read in the first fence was -->
-<!-- edited here ahead of the SSOT (post_merge_verify / post_merge_verify_skill + legacy -->
-<!-- verify_skill fallback, PMV_LEGACY_WARNED). Re-copy once the SSOT lands the same change. -->
 <!-- Read by skills/merge/SKILL.md Step 5 when no live gh-verify is on the box. -->
 <!-- The FIRST bash fence below is the executable dispatch; keep it first. -->
 
@@ -58,6 +55,9 @@ repos.
 # --- 0. F-1 gate. Unregistered repo => do nothing at all, no output. -------
 WATCHED_FILE="${IW_WATCHED_REPOS:-${HOME}/.avatars/issue-watcher/watched-repos.json}" # untracked, array-schema, shared with avatar_issue_watcher.sh (dEitY719/dotfiles#1555)
 VERIFY_SKILL=""
+# Which registry key VERIFY_SKILL came from: post_merge_verify_skill (current
+# schema, gh-verify-skills#93) or verify_skill (legacy fallback, one [WARN]).
+PMV_SKILL_KEY="post_merge_verify_skill"
 # An unbound registry key is a broken caller, not an opt-out: `select(.repo ==
 # "")` matches nothing, so the outcome table would read it as "unwatched repo"
 # and disable verification for every repo without a word (#33).
@@ -67,35 +67,41 @@ if [ -z "${TARGET_REPO:-}" ]; then
 # Silent, never a WARN: an absent tool is not a broken SSOT, and gh-pr:merge's
 # gate (which carries the same condition) must print nothing either way.
 elif command -v jq >/dev/null 2>&1 && [ -r "$WATCHED_FILE" ]; then
-    # Schema (#93): `post_merge_verify` (JSON bool, absent = false) is the
-    # switch, `post_merge_verify_skill` the skill (default gh-verify:merged).
-    # `has()`, not `//`: `false // x` reads an explicit false as missing. The
-    # retired `verify_skill` is honoured only when the new switch is absent,
-    # tagged `legacy ` for the migration [WARN] below. Drop it after migration.
-    if ! VERIFY_SKILL=$(jq -r --arg r "$TARGET_REPO" \
-        '(if type == "array" then . else (.repos // []) end) | .[] | select(.repo == $r)
-         | if has("post_merge_verify") then
-               (if .post_merge_verify == true then (.post_merge_verify_skill // "gh-verify:merged") else empty end)
-           elif (.verify_skill // "") != "" then "legacy " + (.verify_skill | tostring)
-           else empty end' "$WATCHED_FILE" 2>/dev/null); then
+    # One "<key>\t<skill>" row, from the first matching entry (a duplicate repo
+    # entry is ignored rather than mixed in). post_merge_verify must be JSON
+    # true (absent/false = off); post_merge_verify_skill defaults to
+    # gh-verify:merged. Only an entry with no post_merge_verify key at all falls
+    # back to the legacy verify_skill. @tsv escapes tabs inside values, so the
+    # first tab is always the separator.
+    if ! PMV_ROW=$(jq -r --arg r "$TARGET_REPO" '
+        first((if type == "array" then . else (.repos // []) end) | .[] | select(.repo == $r))
+        | if has("post_merge_verify") then
+              select(.post_merge_verify == true)
+              | ["post_merge_verify_skill",
+                 (.post_merge_verify_skill | if . == null or . == "" then "gh-verify:merged" elif type == "string" then . else tojson end)]
+          else
+              select((.verify_skill // "") != "") | ["verify_skill", (.verify_skill | if type == "string" then . else tojson end)]
+          end
+        | @tsv' "$WATCHED_FILE" 2>/dev/null); then
         # The file exists but is not JSON: a broken SSOT, not an opt-out.
         printf '[WARN] gh-verify:post-merge-verify: %s is not valid JSON — post-merge verification skipped.\n' \
             "$WATCHED_FILE"
-        VERIFY_SKILL=""
+        PMV_ROW=""
+    fi
+    if [ -n "$PMV_ROW" ]; then
+        PMV_TAB=$(printf '\t') # spelled out: a literal tab here would not survive an editor
+        PMV_SKILL_KEY=${PMV_ROW%%"$PMV_TAB"*}
+        VERIFY_SKILL=${PMV_ROW#*"$PMV_TAB"}
     fi
 fi
 [ -n "$VERIFY_SKILL" ] || return 0 2>/dev/null || exit 0
-case "$VERIFY_SKILL" in
-legacy\ *)
-    VERIFY_SKILL=${VERIFY_SKILL#legacy }
-    # gh-pr:merge's gate reads the same entry and sets PMV_LEGACY_WARNED when it
-    # has already said this — one migration [WARN] per merge, not two.
-    [ -n "${PMV_LEGACY_WARNED:-}" ] ||
-        printf '[WARN] gh-verify:post-merge-verify: %s uses the retired registry key verify_skill — read as post_merge_verify: true, post_merge_verify_skill: "%s". Migrate the entry (avatar-watched-repos) (#93).\n' \
-            "$TARGET_REPO" "$VERIFY_SKILL"
-    ;;
-esac
 command -v herdr >/dev/null 2>&1 || return 0 2>/dev/null || exit 0
+# Legacy schema: still honoured until every registry is migrated, but say so
+# once — after the herdr probe, so a machine without herdr stays silent (AC-5).
+if [ "$PMV_SKILL_KEY" = "verify_skill" ]; then
+    printf '[WARN] gh-verify:post-merge-verify: %s uses the legacy "verify_skill" key — migrate it to "post_merge_verify": true + "post_merge_verify_skill" (gh-verify-skills#93); until then any "post_merge_verify_skill" on it is ignored.\n' \
+        "$TARGET_REPO"
+fi
 # The registry value is typed into a session started with
 # `--dangerously-skip-permissions`, so it is an input to a prompt, not a label.
 # Allowlist it here — after the herdr probe (a machine that cannot run the
@@ -104,8 +110,8 @@ command -v herdr >/dev/null 2>&1 || return 0 2>/dev/null || exit 0
 case "$VERIFY_SKILL" in
 gh-verify:merged | gh-verify:live) ;;
 *)
-    printf '[WARN] gh-verify:post-merge-verify: post_merge_verify_skill "%s" for %s is not one of gh-verify:merged, gh-verify:live — verification skipped.\n' \
-        "$VERIFY_SKILL" "$TARGET_REPO"
+    printf '[WARN] gh-verify:post-merge-verify: %s "%s" for %s is not one of gh-verify:merged, gh-verify:live — verification skipped.\n' \
+        "$PMV_SKILL_KEY" "$VERIFY_SKILL" "$TARGET_REPO"
     return 0 2>/dev/null || exit 0
     ;;
 esac

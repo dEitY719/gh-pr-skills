@@ -418,9 +418,10 @@ fi
 # 10. Registry schema (dEitY719/gh-verify-skills#93). `post_merge_verify` (bool,
 #     absent = false) is the switch, `post_merge_verify_skill` the skill (default
 #     gh-verify:merged). The retired `verify_skill` is a fallback with exactly one
-#     migration [WARN]. Judged on both readers: the wrapper's gate (planted
-#     dispatch echoes the VERIFY_SKILL it inherited) and the vendored fence's own
-#     registry read (sliced up to its herdr probe, so nothing touches herdr).
+#     migration [WARN], printed by the SSOT dispatch only — the wrapper's gate
+#     stays silent. Judged on both readers: the wrapper's gate (planted dispatch
+#     echoes the VERIFY_SKILL it inherited) and the vendored fence's own registry
+#     read (sliced up to its herdr probe, so nothing touches herdr).
 mkdir -p "$TMP/root10/$(dirname "$VENDORED")"
 cat > "$TMP/root10/$VENDORED" <<'PLANT'
 ```bash
@@ -456,20 +457,33 @@ pmv10 ',"post_merge_verify":false,"post_merge_verify_skill":"gh-verify:live"' ''
 pmv10 ',"post_merge_verify":false,"verify_skill":"gh-verify:merged"' '' 'skill='
 pmv10 ',"post_merge_verify_skill":"gh-verify:live"' '' 'skill='
 pmv10 '' '' 'skill='
-#     Legacy: both readers fall back and warn once each on their own...
+#     Legacy: both readers fall back; the wrapper's gate says nothing itself...
 LEGACY=',"verify_skill":"gh-verify:live"'
-pmv10 "$LEGACY" "[WARN] gh-pr:merge: o/r uses the retired registry key verify_skill in $TMP/w10.json — dispatching it as post_merge_verify: true, post_merge_verify_skill: \"gh-verify:live\". Migrate the entry (avatar-watched-repos) (dEitY719/gh-verify-skills#93).
-dispatch gh-verify:live" \
-	'[WARN] gh-verify:post-merge-verify: o/r uses the retired registry key verify_skill — read as post_merge_verify: true, post_merge_verify_skill: "gh-verify:live". Migrate the entry (avatar-watched-repos) (#93).
-skill=gh-verify:live'
-#     ...and chained (wrapper -> real vendored dispatch) the merge prints exactly
-#     ONE [WARN]. PATH holds no herdr, so the real dispatch stops at its probe.
-mkdir -p "$TMP/bin10"
+pmv10 "$LEGACY" 'dispatch gh-verify:live' 'skill=gh-verify:live'
+#     ...so chained (wrapper -> real vendored dispatch) the merge prints exactly
+#     ONE legacy-key [WARN], the dispatch's. A herdr stub gets it past its probe;
+#     with no shell-common reachable it then stops at its tier-5 [WARN] before
+#     any side effect (GH_VERIFY_ROOT tier, no CLAUDE_PLUGIN_ROOT).
+mkdir -p "$TMP/bin10" "$TMP/gv10/skills/post-merge-verify/references"
 for t in sh jq awk mktemp rm; do ln -s "$(command -v "$t")" "$TMP/bin10/$t"; done
-out=$(env -u GH_VERIFY_ROOT PATH="$TMP/bin10" CLAUDE_PLUGIN_ROOT="$ROOT" \
-	IW_WATCHED_REPOS="$TMP/w10.json" sh "$DISPATCH" 42 o/r head base origin 2>&1) || :
-[ "$(printf '%s\n' "$out" | grep -c '^\[WARN\]')" -eq 1 ] && [ "$(printf '%s\n' "$out" | wc -l)" -eq 1 ] || {
-	printf 'FAIL  a legacy entry through the real dispatch did not print exactly one [WARN]:\n%s\n' "$out"
+cp "$ROOT/$VENDORED" "$TMP/gv10/skills/post-merge-verify/references/dispatch.sh.md"
+pmv10chain() { # pmv10chain <PATH> -> output of the chained run
+	env -u CLAUDE_PLUGIN_ROOT PATH="$1" GH_VERIFY_ROOT="$TMP/gv10" \
+		DOTFILES_ROOT="$TMP/no-dotfiles" IW_WATCHED_REPOS="$TMP/w10.json" \
+		sh "$DISPATCH" 42 o/r head base origin 2>&1 || :
+}
+out=$(pmv10chain "$TMP/bin10")
+[ -z "$out" ] || {
+	printf 'FAIL  a legacy entry on a box without herdr was not silent:\n%s\n' "$out"
+	fail=1
+}
+printf '#!/bin/sh\nexit 0\n' > "$TMP/bin10/herdr"
+chmod +x "$TMP/bin10/herdr"
+out=$(pmv10chain "$TMP/bin10")
+[ "$(printf '%s\n' "$out" | grep -c '^\[WARN\].*verify_skill')" -eq 1 ] &&
+	printf '%s\n' "$out" | grep -q '^\[WARN\] gh-verify:post-merge-verify: o/r uses the legacy "verify_skill" key' &&
+	! printf '%s\n' "$out" | grep -q 'gh-pr:merge' || {
+	printf 'FAIL  a legacy entry through the real dispatch did not print exactly one legacy [WARN] (the dispatch'"'"'s):\n%s\n' "$out"
 	fail=1
 }
 

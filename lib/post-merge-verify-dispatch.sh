@@ -79,32 +79,27 @@ REMOTE=$5
 #
 # Schema (dEitY719/gh-verify-skills#93): `post_merge_verify` (JSON bool, absent
 # = false) is the switch, `post_merge_verify_skill` picks the skill (default
-# gh-verify:merged). `has()`, not `//`: `false // x` would read an explicit
-# false as missing. An entry with no `post_merge_verify` but the retired
-# `verify_skill` still dispatches that value — tagged `legacy ` so the one
-# migration [WARN] below can fire. Remove the fallback once every registry is
-# migrated (follow-up of #93).
+# gh-verify:merged). The same `first(...)` reading as the SSOT dispatch: only
+# the first matching entry counts, and an entry with no `post_merge_verify` key
+# at all falls back to the retired `verify_skill`. This is a gate only — the
+# sourced dispatch re-reads the entry itself and is the ONE place that prints
+# the legacy-key migration [WARN], so a legacy entry warns once per merge.
+# A GH_VERIFY_ROOT checkout older than gh-verify-skills#94 just dispatches or
+# no-ops silently; it never double-warns.
 WATCHED_FILE="${IW_WATCHED_REPOS:-${HOME}/.avatars/issue-watcher/watched-repos.json}"
 VERIFY_SKILL=""
 if command -v jq >/dev/null 2>&1 && [ -r "$WATCHED_FILE" ]; then
-    VERIFY_SKILL=$(jq -r --arg r "$TARGET_REPO" \
-        '(if type == "array" then . else (.repos // []) end) | .[] | select(.repo == $r)
-         | if has("post_merge_verify") then
-               (if .post_merge_verify == true then (.post_merge_verify_skill // "gh-verify:merged") else empty end)
-           elif (.verify_skill // "") != "" then "legacy " + (.verify_skill | tostring)
-           else empty end' \
+    VERIFY_SKILL=$(jq -r --arg r "$TARGET_REPO" '
+        first((if type == "array" then . else (.repos // []) end) | .[] | select(.repo == $r))
+        | if has("post_merge_verify") then
+              select(.post_merge_verify == true)
+              | (.post_merge_verify_skill | if . == null or . == "" then "gh-verify:merged" else tostring end)
+          else
+              select((.verify_skill // "") != "") | (.verify_skill | tostring)
+          end' \
         "$WATCHED_FILE" 2>/dev/null)
 fi
 [ -n "$VERIFY_SKILL" ] || exit 0
-case "$VERIFY_SKILL" in
-legacy\ *)
-    VERIFY_SKILL=${VERIFY_SKILL#legacy }
-    printf '[WARN] gh-pr:merge: %s uses the retired registry key verify_skill in %s — dispatching it as post_merge_verify: true, post_merge_verify_skill: "%s". Migrate the entry (avatar-watched-repos) (dEitY719/gh-verify-skills#93).\n' \
-        "$TARGET_REPO" "$WATCHED_FILE" "$VERIFY_SKILL"
-    # The sourced dispatch reads the same entry; this keeps it to ONE [WARN].
-    # shellcheck disable=SC2034
-    PMV_LEGACY_WARNED=1 ;;
-esac
 
 # --- 3. Stage the dispatch from its SSOT and source it ---------------------
 # Two tiers as everywhere here: GH_VERIFY_ROOT's live gh-verify checkout, else
