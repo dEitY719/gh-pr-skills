@@ -14,7 +14,7 @@
 |------|-------------|
 | `--auto` | Hand the PR to the base branch's **merge queue** instead of blocking until it merges (dEitY719/dotfiles#1707). With no queue active it falls back to the ordinary immediate merge, so the flag is safe everywhere. When the PR is queued rather than merged, the skill prints `[QUEUED]` and runs none of the post-merge steps — `gh-pr:merge-train`'s Step 0 sweep finalizes it later. |
 | `--finalize` | Run **only** the post-merge completion sequence on an already-`MERGED` PR (board sync, tab hint, ai-metrics, `review-passed` cleanup, post-merge verify) and print `[FINALIZED]`. Refuses any PR that is not `MERGED`. Mutually exclusive with `--auto`. |
-| `--no-post-verify` | Skip Step 5's post-merge verify dispatch even for a registered repo, and print `post-merge verify skipped (caller owns verification)` instead — for a caller that runs its own verification (e.g. `gh-flow:wave`'s coordinator runs `gh-verify:merged`). Combines with `--auto` / `--finalize`. Without it, behavior is unchanged. |
+| `--no-post-verify` | Skip Step 5's post-merge verify dispatch even for a registered repo, and print `post-merge verify skipped (caller owns verification)` instead — for a caller that runs its own verification (e.g. `gh-flow:wave`'s coordinator runs `gh-verify:merged`). Combines with `--finalize`; with `--auto` it only covers an immediate merge (a queued PR is finalized later by `gh-pr:merge-train`, which still verifies). Without it, behavior is unchanged. |
 
 ## Usage
 
