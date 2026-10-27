@@ -11,3 +11,9 @@ below are relative to `skills/merge/`, the same way SKILL.md writes them.
 - `--auto` / `--finalize` — optional flags, any position after the positionals
   (dEitY719/dotfiles#1707). Semantics and the mutual-exclusion refusal:
   `references/merge-queue.md`.
+- `--no-post-verify` — optional flag, any position after the positionals (#90).
+  The caller owns post-merge verification (e.g. `gh-flow:wave`'s coordinator
+  runs `gh-verify:merged` itself): Step 5 dispatches nothing and prints
+  `post-merge verify skipped (caller owns verification)`. Combines with
+  `--auto` / `--finalize`; `gh-pr:merge-train` never passes it. Detail:
+  `references/post-merge-verify.md`.

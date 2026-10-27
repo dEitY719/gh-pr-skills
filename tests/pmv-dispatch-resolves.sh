@@ -325,6 +325,51 @@ case "$out" in
 		fail=1 ;;
 esac
 
+# 8b. The caller opt-out (#90). A caller that owns verification itself
+#     (gh-flow:wave's coordinator runs gh-verify:merged) passes --no-post-verify,
+#     and a REGISTERED repo whose dispatch would run must then dispatch nothing:
+#     judged by whether the planted dispatch body executed, never by a sleep.
+cat > "$TMP/root/$VENDORED" <<'PLANT'
+```bash
+printf 'planted dispatch ran\n'
+```
+PLANT
+SKIPPED='post-merge verify skipped (caller owns verification)'
+pmv8b() { # pmv8b <script> [args] -- registered repo, working planted dispatch
+	env -u GH_VERIFY_ROOT CLAUDE_PLUGIN_ROOT="$TMP/root" \
+		IW_WATCHED_REPOS="$TMP/watched.json" sh "$@" 2>&1 || :
+}
+out=$(pmv8b "$DISPATCH" 42 o/r head base origin --no-post-verify)
+[ "$out" = "$SKIPPED" ] || {
+	printf 'FAIL  --no-post-verify still dispatched (or did not report the skip): %s\n' "$out"
+	fail=1
+}
+#     Without the flag the same call is unchanged: the dispatch runs.
+out=$(pmv8b "$DISPATCH" 42 o/r head base origin)
+[ "$out" = 'planted dispatch ran' ] || {
+	printf 'FAIL  without --no-post-verify the dispatch no longer ran: %s\n' "$out"
+	fail=1
+}
+#     Step 5's snippet carries the flag to the wrapper, and with no wrapper at
+#     all it still reports the skip instead of the broken-install [FAIL].
+sed 's|^NO_PMV=""|NO_PMV="--no-post-verify"|' "$TMP/step5.sh" > "$TMP/step5-skip.sh"
+cmp -s "$TMP/step5.sh" "$TMP/step5-skip.sh" && {
+	printf 'FAIL  Step 5 has no NO_PMV="" line to carry --no-post-verify\n'
+	fail=1
+}
+out=$(env -u GH_VERIFY_ROOT CLAUDE_PLUGIN_ROOT="$TMP/planted" \
+	IW_WATCHED_REPOS="$TMP/watched.json" sh "$TMP/step5-skip.sh" 2>&1) || :
+[ "$out" = "dispatched 42 o/r head base origin --no-post-verify" ] || {
+	printf 'FAIL  Step 5 did not pass --no-post-verify to the wrapper: %s\n' "$out"
+	fail=1
+}
+out=$(env -u GH_VERIFY_ROOT -u CLAUDE_PLUGIN_ROOT \
+	IW_WATCHED_REPOS="$TMP/watched.json" sh "$TMP/step5-skip.sh" 2>&1) || :
+[ "$out" = "$SKIPPED" ] || {
+	printf 'FAIL  Step 5 with --no-post-verify and no plugin root did not report the skip: %s\n' "$out"
+	fail=1
+}
+
 # 9. The registry DEFAULT path (#88). Every case above injects IW_WATCHED_REPOS,
 #    so a stale default — dotfiles#2273 moved the watch list to
 #    ~/.avatars/issue-watcher/ — left every merge of a registered repo silently

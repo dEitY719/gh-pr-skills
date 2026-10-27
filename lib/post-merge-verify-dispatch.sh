@@ -1,10 +1,12 @@
 #!/bin/sh
 # gh-pr:merge Step 5 — post-merge verification gate and dispatch.
 #
-#   sh lib/post-merge-verify-dispatch.sh <pr> <owner/repo> <head> <base> <remote>
+#   sh lib/post-merge-verify-dispatch.sh <pr> <owner/repo> <head> <base> <remote> [--no-post-verify]
 #
 # Contract (skills/merge/references/post-merge-verify.md):
 #   - always exits 0 — the merge already happened and nothing here may undo it
+#   - with a 6th argument `--no-post-verify`, one skip line and no dispatch: the
+#     caller owns verification (#90)
 #   - one [WARN] and no dispatch when an argument is blank, whitespace-only, or
 #     still an unsubstituted <placeholder>
 #   - complete silence when the repo is absent from the issue-watcher registry
@@ -12,6 +14,14 @@
 #     will not source: that is a broken install, not an opt-out
 #
 # Regression guard: tests/pmv-dispatch-resolves.sh
+
+# --- 0. Caller opt-out (#90) -----------------------------------------------
+# gh-flow:wave's coordinator runs gh-verify:merged itself, so a dispatch here
+# would verify the same PR twice and open a tab nobody asked for.
+if [ "${6-}" = --no-post-verify ]; then
+    printf 'post-merge verify skipped (caller owns verification)\n'
+    exit 0
+fi
 
 # --- 1. Validate the five inputs -------------------------------------------
 # A blank, whitespace-only or still-unsubstituted argument passes `[ -n ]` and

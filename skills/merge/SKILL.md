@@ -65,17 +65,19 @@ soft-fail in one call that always exits 0 (`references/post-merge-housekeeping.m
 GH_HOST="$TARGET_HOST" gh pr view <N> --repo "$TARGET_REPO" --json mergeCommit -q .mergeCommit.oid
 ```
 
-Print **only** the compact report (format in `references/strategy-selection.md` → "Final report format");
-under `--finalize` its verdict line is `[FINALIZED] #<N>` instead of `[OK]`.
+Print **only** the compact report (`references/strategy-selection.md` → "Final report format"); `--finalize` prints `[FINALIZED] #<N>` for `[OK]`.
 
-**After** the report has printed, run the post-merge verification gate — a no-op outside the
-issue-watcher registry. Contract and every failure mode: `references/post-merge-verify.md`.
+**After** the report has printed, run the post-merge verification gate — a no-op outside the issue-watcher registry;
+with `--no-post-verify` set `NO_PMV="--no-post-verify"` and it dispatches nothing. Contract: `references/post-merge-verify.md`.
 
 ```bash
+NO_PMV=""                                                   # "--no-post-verify" when Step 1 parsed it
 if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
     [ -f "$CLAUDE_PLUGIN_ROOT/lib/post-merge-verify-dispatch.sh" ]; then             # proof
     sh "$CLAUDE_PLUGIN_ROOT/lib/post-merge-verify-dispatch.sh" \
-        <N> <owner/repo> <headRefName> <baseRefName> <remote>
+        <N> <owner/repo> <headRefName> <baseRefName> <remote> ${NO_PMV:+"$NO_PMV"}
+elif [ -n "$NO_PMV" ]; then
+    printf 'post-merge verify skipped (caller owns verification)\n'
 elif command -v jq >/dev/null 2>&1 && jq -e --arg r <owner/repo> \
     '(if type == "array" then . else (.repos // []) end) | any(.repo == $r)' \
     "${IW_WATCHED_REPOS:-$HOME/.avatars/issue-watcher/watched-repos.json}" \
@@ -87,13 +89,11 @@ fi
 
 ## Constraints
 
-- Never ask for confirmation — running the skill is the confirmation.
-- Never merge an un-approved PR; redirect to `gh-pr:merge-emergency`. Never bypass CI.
+- Never ask for confirmation — running the skill is the confirmation. Never merge an un-approved PR; redirect to `gh-pr:merge-emergency`. Never bypass CI.
 - Never swap strategy if the chosen one fails. Always `--delete-branch`.
 - Never run Step 4/5 for a PR that is not `MERGED`: a `[QUEUED]` PR keeps `review-passed` for the sweep.
 
 ## Related Skills
 
-`gh-pr:approve` produces the approval this skill gates on · `gh-pr:merge-emergency` is the admin-override
-path · `gh-verify:post-merge-verify` owns the dispatch Step 5 stages, and stays a manual entry point
-(`/gh-verify:post-merge-verify <N>`) · `gh-pr:merge-train` is the only caller of `--auto` / `--finalize`.
+`gh-pr:approve` produces the approval this skill gates on · `gh-pr:merge-emergency` is the admin-override path · `gh-verify:post-merge-verify`
+owns the dispatch Step 5 stages, and stays a manual entry point (`/gh-verify:post-merge-verify <N>`) · `gh-pr:merge-train` is the only caller of `--auto` / `--finalize`.
