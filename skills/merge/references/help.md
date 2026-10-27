@@ -51,7 +51,10 @@ _Availability depends on repo settings → General → Pull Requests. If a strat
 7. Fetches the merge SHA and prints a compact report.
 8. For repos registered in the untracked watched-repos registry only (dEitY719/dotfiles#1511, dEitY719/dotfiles#1555), hands off to
    `gh-verify:post-merge-verify`: closes the implementation herdr tab, rebases the main
-   checkout, and opens a herdr session running that repo's `verify_skill`. An
+   checkout, and opens a herdr session running that repo's `post_merge_verify_skill`
+   (default `gh-verify:merged`) — only when its entry sets `post_merge_verify: true`.
+   An entry still on the retired `verify_skill` key is read as `true` + that skill,
+   with one migration `[WARN]` (dEitY719/gh-verify-skills#93). An
    unregistered repo gets nothing at all, and every failure there is a `[WARN]` that
    leaves this report untouched. `--no-post-verify` skips this step entirely and
    prints `post-merge verify skipped (caller owns verification)`.

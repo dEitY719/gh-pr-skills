@@ -302,7 +302,8 @@ the difference between a five-minute bisect and an afternoon.
 
 ```json
 [{"repo": "dEitY719/dotfiles", "path": "/home/bwyoon/dotfiles",
-  "host": "github.com", "verify_skill": "gh-verify:merged"}]
+  "host": "github.com", "post_merge_verify": true,
+  "post_merge_verify_skill": "gh-verify:merged"}]
 ```
 
 So the dispatch does fire here, and `gh-verify:merged` re-runs the repo's
