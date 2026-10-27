@@ -79,9 +79,14 @@ cases 6c/6d cover both directions.
 The script is a **no-op for any repo missing** from
 `${IW_WATCHED_REPOS:-${HOME}/.avatars/issue-watcher/watched-repos.json}`
 — the untracked registry `avatar_issue_watcher.sh` also reads (dEitY719/dotfiles#1555).
-No registry, no `jq`, or an unlisted repo: no output, no dispatch, and no
-`[WARN]` either. That path is byte-identical to how merges behaved before
-dEitY719/dotfiles#1511.
+No registry, no `jq`, an unlisted repo, or an entry whose `post_merge_verify`
+is false/absent: no output, no dispatch, and no `[WARN]` either. That path is
+byte-identical to how merges behaved before dEitY719/dotfiles#1511.
+
+Schema (dEitY719/gh-verify-skills#93): `post_merge_verify: true` is the switch,
+`post_merge_verify_skill` picks the skill (default `gh-verify:merged`). An entry
+with no `post_merge_verify` but the retired `verify_skill` still dispatches that
+value, with one migration `[WARN]`.
 
 ## Failure modes (all soft — the report above always stands)
 
