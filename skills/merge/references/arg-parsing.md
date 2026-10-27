@@ -12,6 +12,8 @@ below are relative to `skills/merge/`, the same way SKILL.md writes them.
   (dEitY719/dotfiles#1707). Semantics and the mutual-exclusion refusal:
   `references/merge-queue.md`.
 - `--no-post-verify` — optional flag, any position after the positionals (#90).
+  Record it here; Step 5's block then needs its `NO_PMV=""` line set to
+  `NO_PMV="--no-post-verify"` — that line is the only thing that carries it.
   The caller owns post-merge verification (e.g. `gh-flow:wave`'s coordinator
   runs `gh-verify:merged` itself): Step 5 dispatches nothing and prints
   `post-merge verify skipped (caller owns verification)`. Combines with
