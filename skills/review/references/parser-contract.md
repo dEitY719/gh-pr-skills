@@ -103,3 +103,18 @@ is fetched from, or the comment posted to, a repo nobody asked for.
 `shell-common/functions/gh_pr_review.sh` inherit the same host; the
 reference files still spell the prefix out so every example is
 copy-paste safe.
+
+## Engine compatibility
+
+After sourcing `gh_pr_review.sh`, in each shell that uses an engine helper,
+bridge an older live dotfiles checkout to the current helper names. Keep the
+selected `SHELL_COMMON` for the whole call; never mix modules from two roots.
+The wrappers are only defined when the new helper is absent:
+
+```sh
+command -v _ai_cli_run >/dev/null 2>&1 || _ai_cli_run() { _gh_pr_review_run_ai "$@"; }
+command -v _ai_cli_mktemp_prompt >/dev/null 2>&1 || _ai_cli_mktemp_prompt() { _gh_pr_review_mktemp_prompt "$@"; }
+command -v _ai_cli_estimate_tokens >/dev/null 2>&1 || _ai_cli_estimate_tokens() { _gh_pr_review_estimate_tokens "$@"; }
+command -v _ai_cli_argv_prompt_or_fail >/dev/null 2>&1 || _ai_cli_argv_prompt_or_fail() { _gh_pr_review_argv_prompt_or_fail "$@"; }
+command -v _ai_cli_opencode_model >/dev/null 2>&1 || _ai_cli_opencode_model() { _gh_pr_review_opencode_model "$@"; }
+```

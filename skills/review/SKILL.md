@@ -36,7 +36,8 @@ output it verbatim, then stop. No API calls.
 
 Delegate to `gh_pr_review_parse` (`functions/gh_pr_review.sh` — the dotfiles `shell-common` checkout takes
 precedence, the vendored `lib/vendor/shell-common/` copy is the fallback; order in `references/parser-contract.md`).
-Argument shape + KR aliases + exit codes: `references/parser-contract.md` — it also covers `START_TS`,
+Apply the engine compatibility block in `references/parser-contract.md` after sourcing in each shell.
+Argument shape + KR aliases + exit codes: the same reference also covers `START_TS`,
 `PR_NUMBER`, and binding `TARGET_REPO` + `TARGET_HOST` from one remote URL. Every `gh` call below then runs as
 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`; `--repo` alone carries no host (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
