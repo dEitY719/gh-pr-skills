@@ -39,8 +39,8 @@ The shared review material has this shape:
 ```
 
 `PROMPT_FILE` is created via
-`_gh_pr_review_mktemp_prompt <ai> <PR#>` (SSOT in
-`shell-common/functions/gh_pr_review.sh`), which expands to
+`_ai_cli_mktemp_prompt <ai> <PR#>` (SSOT in
+`shell-common/lib/ai_cli_run.sh`, loaded by `gh_pr_review.sh`), which expands to
 `mktemp "/tmp/gh-pr-review-prompt.<ai>.<PR#>.XXXXXX"` — the same
 `<ai>`-discriminated template the stderr file uses. The `<ai>` + PR
 discriminators are mandatory, not cosmetic: `gh-verify:review-all` runs the
@@ -87,7 +87,7 @@ Like `hermes -z` below, this carries the `MAX_ARG_STRLEN` (131072-byte)
 argv-limit guard: a prompt of 131072 bytes or more is refused up front
 rather than blowing up as a bare "Argument list too long" exec failure.
 Both CLIs share the same guard implementation
-(`_gh_pr_review_argv_prompt_or_fail` in `gh_pr_review.sh`).
+(`_ai_cli_argv_prompt_or_fail` in `ai_cli_run.sh`).
 
 Stderr policy is identical to codex: non-zero exit → noise-filtered
 summary + full stderr tail + persistent stderr log on disk. The stderr
@@ -164,7 +164,7 @@ omit `--user` and let the current shell's `CLAUDE_CONFIG_DIR` win.
 ## `--ai opencode`
 
 ```sh
-_OPENCODE_MODEL=$(_gh_pr_review_opencode_model)
+_OPENCODE_MODEL=$(_ai_cli_opencode_model)
 [ -n "$_OPENCODE_MODEL" ] || {
     echo "[WARN] --ai opencode skipped: DOTFILES_OPENCODE_REVIEW_MODEL is not set (env or shell-common/env/internal.local.sh)" >&2
     exit 1
@@ -194,7 +194,7 @@ relying on the ambient 2-minute default: a short timeout kills the run
 mid-flight and leaves truncated/garbage stdout (typically a one-line plan
 fragment such as "먼저 관련 파일을 확인하겠습니다"), which must never be
 posted as a completed review. Two enforcement layers now back that up
-(issue dEitY719/dotfiles#1506): `_gh_pr_review_run_ai` wraps this invocation in `timeout`
+(issue dEitY719/dotfiles#1506): `_ai_cli_run` wraps this invocation in `timeout`
 (540s default, `GH_PR_REVIEW_SLOW_CLI_TIMEOUT_SEC` overrides) so a hang
 becomes a clean exit 124, which the existing non-zero gate in
 `gh_pr_review` already turns into a skipped Step 6; and the calling Bash
@@ -233,10 +233,10 @@ above (shared internal backend), and is bound by the same two enforcement
 layers described there (issue dEitY719/dotfiles#1506): the internal `timeout` wrap and the
 caller's own ≥ `600000` ms Bash-tool timeout.
 
-## Step 5 dispatch procedure (`_gh_pr_review_run_ai`)
+## Step 5 dispatch procedure (`_ai_cli_run`)
 
-Step 5 of the skill delegates to `_gh_pr_review_run_ai` in
-`shell-common/functions/gh_pr_review.sh`. The function pipes
+Step 5 of the skill delegates to `_ai_cli_run` in
+`shell-common/lib/ai_cli_run.sh`, loaded by `gh_pr_review.sh`. The function pipes
 `PROMPT_FILE` into the chosen CLI with the exact invocation shape
 documented above (`codex exec --color=never`, `agy --print`, `claude -p`,
 `opencode run ... --model "$DOTFILES_OPENCODE_REVIEW_MODEL" --dir ... --file`, or

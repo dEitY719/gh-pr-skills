@@ -16,5 +16,5 @@ reviewing an empty diff (dEitY719/dotfiles#1616). Otherwise decide by diff size
 `(prompt + diff)` to `PROMPT_FILE`.
 
 Never hardcode or reuse a `PROMPT_FILE`; derive it from
-`_gh_pr_review_mktemp_prompt "$ai" "$PR_NUMBER"` and do the write plus Step 5
+`_ai_cli_mktemp_prompt "$ai" "$PR_NUMBER"` and do the write plus Step 5
 dispatch in the same Bash tool call. Then `rm -f "$PROMPT_FILE"`.

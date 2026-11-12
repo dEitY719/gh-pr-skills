@@ -98,7 +98,7 @@ helpers in `shell-common/functions/gh_pr_review.sh`:
      already has the AI output on their terminal.
 
 Token, human-h, and elapsed-minute inputs are computed by
-`_gh_pr_review_estimate_tokens` and `_gh_pr_review_human_h` (per-preset
+`_ai_cli_estimate_tokens` and `_gh_pr_review_human_h` (per-preset
 baseline from "Human time baseline" / "Token estimation" below). The
 skill does not duplicate those formulas — read the shell function for
 the authoritative arithmetic.
@@ -175,7 +175,7 @@ are calibration starting points, not gospel — tighten when
 
 ## Token estimation
 
-`_gh_pr_review_estimate_tokens` (`shell-common/functions/gh_pr_review.sh`)
+`_ai_cli_estimate_tokens` (`shell-common/lib/ai_cli_run.sh`)
 takes a byte count and applies the pure arithmetic — divide by 4, round to
 the nearest 500, floor 1000:
 
@@ -188,8 +188,8 @@ tokens=$(((tokens + 250) / 500 * 500))
 The byte count itself is measured right after Step 3+4 builds the prompt,
 not re-read at Step 6 comment-post time — the issue dEitY719/dotfiles#1474 mitigation (the
 file-vanishing root cause itself is still open; only the measurement timing
-was fixed). Read the comment above `_gh_pr_review_estimate_tokens` and its
-caller in `gh_pr_review.sh` for the full rationale and the exact `[WARN]`
+was fixed). Read the comment above `_ai_cli_estimate_tokens` and its
+caller in `gh_pr_review_comment.sh` for the full rationale and the exact `[WARN]`
 text; this doc only tracks the arithmetic shown above.
 
 The 4-bytes-per-token heuristic is conservative for English/Korean

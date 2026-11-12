@@ -62,7 +62,7 @@ the diff-size branch on the threshold in
 
 ## Step 5: Dispatch to External CLI
 
-Delegate to `_gh_pr_review_run_ai` (same file as Step 1). Invocation shapes, stdout
+Delegate to `_ai_cli_run` (same file as Step 1). Invocation shapes, stdout
 streaming, non-zero handling: `references/ai-cli-invocation.md` § "Step 5 dispatch procedure".
 
 For `--ai opencode` and `--ai hermes` only: set the Bash tool `timeout`
