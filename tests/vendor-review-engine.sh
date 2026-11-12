@@ -25,9 +25,9 @@ export CLAUDE_ENABLED_ACCOUNTS
 '
 printf 'ok    standalone review engine loads and executes a stub CLI lane\n'
 for symbol in _ai_cli_run _ai_cli_mktemp_prompt _ai_cli_estimate_tokens _ai_cli_argv_prompt_or_fail _ai_cli_opencode_model; do
-    rg -q "^${symbol}\\(\\)" "$SHELL_COMMON/lib/ai_cli_run.sh"
+    grep -q "^${symbol}\\(\\)" "$SHELL_COMMON/lib/ai_cli_run.sh"
 done
-if rg -n '_gh_pr_review_(run_ai|mktemp_prompt|estimate_tokens|argv_prompt_or_fail|opencode_model)' "$root/skills/review"; then
+if grep -En '_gh_pr_review_(run_ai|mktemp_prompt|estimate_tokens|argv_prompt_or_fail|opencode_model)' "$root/skills/review"; then
     printf '%s\n' 'review skill still names removed engine helpers' >&2
     exit 1
 fi
