@@ -189,7 +189,7 @@ The byte count itself is measured right after Step 3+4 builds the prompt,
 not re-read at Step 6 comment-post time — the issue dEitY719/dotfiles#1474 mitigation (the
 file-vanishing root cause itself is still open; only the measurement timing
 was fixed). Read the comment above `_ai_cli_estimate_tokens` and its
-caller in `gh_pr_review_comment.sh` for the full rationale and the exact `[WARN]`
+caller in `gh_pr_review_run.sh` for the full rationale and the exact `[WARN]`
 text; this doc only tracks the arithmetic shown above.
 
 The 4-bytes-per-token heuristic is conservative for English/Korean
